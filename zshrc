@@ -3,19 +3,27 @@ if [ -x /usr/libexec/path_helper ]; then
       eval `/usr/libexec/path_helper -s`
 fi
 
+# Maven 
+export M2_HOME=/usr/local/apache-maven/apache-maven-3.0.3
+export M2=$M2_HOME/bin
+# optional
+#export MAVEN_OPTS="-Xms256m -Xmx512m"
+
 # http://aws.amazon.com/developertools/2928
 export AWS_CREDENTIAL_FILE=~/aws-credential-file
 export AWS_HOME=/workspace/aws
-export AWS_EC2_HOME=$AWS_HOME/ec2-api-tools-1.5.0.0
+# Tools expect EC2_HOME
+export EC2_HOME=$AWS_HOME/ec2-api-tools-1.5.0.0
 export AWS_CF_HOME=$AWS_HOME/AWSCloudFormation-1.0.9
-export AWS_EC_HOME=$AWS_HOME/AmazonElastiCacheCli-1.5.000
+export AWS_ELASTICACHE_HOME=$AWS_HOME/AmazonElastiCacheCli-1.5.000
 export AWS_AS_HOME=$AWS_HOME/AutoScaling-1.0.39.0
 export AWS_CW_HOME=$AWS_HOME/CloudWatch-1.0.12.1
 export AWS_ELB_HOME=$AWS_HOME/ElasticLoadBalancing-1.0.15.1
 export AWS_IAM_HOME=$AWS_HOME/IAMCli-1.3.0
 export AWS_RDS_HOME=$AWS_HOME/RDSCli-1.4.007
 export AWS_EB_HOME=$AWS_HOME/elasticbeanstalk-cli
-export AWS_BINS=$AWS_EC2_HOME/bin:$AWS_EC2_HOME/bin:$AWS_CF_HOME/bin:$AWS_EC_HOME/bin:$AWS_AS_HOME/bin:$AWS_CW_HOME/bin:$AWS_ELB_HOME/bin:$AWS_IAM_HOME/bin:$AWS_RDS_HOME/bin:$AWS_EB_HOME/bin
+export AWS_MAP_REDUCE_HOME=$AWS_HOME/elastic-mapreduce-ruby
+export AWS_BINS=$EC2_HOME/bin:$AWS_CF_HOME/bin:$AWS_ELASTICACHE_HOME/bin:$AWS_AS_HOME/bin:$AWS_CW_HOME/bin:$AWS_ELB_HOME/bin:$AWS_IAM_HOME/bin:$AWS_RDS_HOME/bin:$AWS_EB_HOME/bin:$AWS_MAP_REDUCE_HOME
 
 export EC2_PRIVATE_KEY=~/.ec2/pk-VT7N5RIWQP4DQ7LXY7D2PBTSEOW23XOR.pem
 export EC2_CERT=~/.ec2/cert-VT7N5RIWQP4DQ7LXY7D2PBTSEOW23XOR.pem
@@ -35,7 +43,7 @@ export JAVA_HOME=/Library/Java/Home
 # export EC2_URL=https://<service_endpoint>
 #
 
-export PATH=/usr/local/bin:~/scala/bin:/usr/local/sbin:/usr/local/mysql/bin:/opt/local/bin:$PATH:/Library/PostgreSQL/9.0/bin:$ANT_HOME/bin:$AWS_BINS:$TIMKAY_AWS_HOME
+export PATH=/usr/local/bin:~/scala/bin:/usr/local/sbin:/usr/local/mysql/bin:/opt/local/bin:$PATH:/Library/PostgreSQL/9.0/bin:$ANT_HOME/bin:$AWS_BINS:$TIMKAY_AWS_HOME:$M2
 #     ~/bin                               \
 #     ~/usr/bin                           \
 #     /usr/local/bin                      \
@@ -77,6 +85,8 @@ alias ls='ls -G'
 alias l='ls'
 alias ll='ls -alh'
 
+# use pg to search for programs (poor mans pgrep)
+alias pg='ps auxwww | grep '
 
 # use vi on the commandline
 bindkey -v
@@ -198,5 +208,7 @@ twiki () {
 }
 
 alias cucumber='cucumber --require features --require lib'
+# ssh into a venice sandbox host Note: requires John's custom modifications the ebs scripts to suppress headers (the --no-header option is not standard)
+alias sshvsb='ssh -i ~/culver_keys.pem ec2-user@$(elastic-beanstalk-describe-environments -a venice-sandbox --no-header | cut -f 7 -d "|" | xargs -I {} elastic-beanstalk-describe-environment-resources -E {} --no-header | head -n1 | cut -f 3 -d "|" | xargs -I {} ec2-describe-instances -F "instance-id={}" | grep INSTANCE | cut -f 4 )' 
 
 source ~/.zshrc.cmdprompt
