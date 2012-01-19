@@ -21,9 +21,10 @@ export AWS_CW_HOME=$AWS_HOME/CloudWatch-1.0.12.1
 export AWS_ELB_HOME=$AWS_HOME/ElasticLoadBalancing-1.0.15.1
 export AWS_IAM_HOME=$AWS_HOME/IAMCli-1.3.0
 export AWS_RDS_HOME=$AWS_HOME/RDSCli-1.4.007
+export AWS_SNS_HOME=$AWS_HOME/SimpleNotificationServiceCli-1.0.2.3
 export AWS_EB_HOME=$AWS_HOME/elasticbeanstalk-cli
 export AWS_MAP_REDUCE_HOME=$AWS_HOME/elastic-mapreduce-ruby
-export AWS_BINS=$EC2_HOME/bin:$AWS_CF_HOME/bin:$AWS_ELASTICACHE_HOME/bin:$AWS_AS_HOME/bin:$AWS_CW_HOME/bin:$AWS_ELB_HOME/bin:$AWS_IAM_HOME/bin:$AWS_RDS_HOME/bin:$AWS_EB_HOME/bin:$AWS_MAP_REDUCE_HOME
+export AWS_BINS=$EC2_HOME/bin:$AWS_CF_HOME/bin:$AWS_ELASTICACHE_HOME/bin:$AWS_AS_HOME/bin:$AWS_CW_HOME/bin:$AWS_ELB_HOME/bin:$AWS_IAM_HOME/bin:$AWS_RDS_HOME/bin:$AWS_EB_HOME/bin:$AWS_MAP_REDUCE_HOME:$AWS_SNS_HOME=$AWS_SNS_HOME/bin
 
 export EC2_PRIVATE_KEY=~/.ec2/pk-VT7N5RIWQP4DQ7LXY7D2PBTSEOW23XOR.pem
 export EC2_CERT=~/.ec2/cert-VT7N5RIWQP4DQ7LXY7D2PBTSEOW23XOR.pem
@@ -209,6 +210,6 @@ twiki () {
 
 alias cucumber='cucumber --require features --require lib'
 # ssh into a venice sandbox host Note: requires John's custom modifications the ebs scripts to suppress headers (the --no-header option is not standard)
-alias sshvsb='ssh -i ~/culver_keys.pem ec2-user@$(elastic-beanstalk-describe-environments -a venice-sandbox --no-header | cut -f 7 -d "|" | xargs -I {} elastic-beanstalk-describe-environment-resources -E {} --no-header | head -n1 | cut -f 3 -d "|" | xargs -I {} ec2-describe-instances -F "instance-id={}" | grep INSTANCE | cut -f 4 )' 
+alias sshvsb='ssh -i ~/culver_keys.pem ec2-user@$(elastic-beanstalk-describe-environments -a venice-sandbox --no-header | grep Green | cut -f 7 -d "|" | xargs -I {} elastic-beanstalk-describe-environment-resources -E {} --no-header | head -n1 | cut -f 3 -d "|" | xargs -I {} ec2-describe-instances -F "instance-id={}" | grep INSTANCE | cut -f 4 )' 
 
 source ~/.zshrc.cmdprompt
