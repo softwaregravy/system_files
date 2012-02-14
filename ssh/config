@@ -1,0 +1,10 @@
+ServerAliveCountMax 3
+ServerAliveInterval 10
+
+host *.amazonaws.com ssh.example.com
+  user ec2-user
+  StrictHostKeyChecking no 
+  UserKnownHostsFile /dev/null 
+  CheckHostIP no 
+  IdentityFile ~/culver_keys.pem
+
