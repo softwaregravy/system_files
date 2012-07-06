@@ -19,7 +19,7 @@ export AWS_ELASTICACHE_HOME=$AWS_HOME/AmazonElastiCacheCli-1.5.000
 export AWS_AS_HOME=$AWS_HOME/AutoScaling-1.0.39.0
 export AWS_CW_HOME=$AWS_HOME/CloudWatch-1.0.12.1
 export AWS_CLOUDWATCH_HOME=$AWS_CW_HOME
-export AWS_ELB_HOME=$AWS_HOME/ElasticLoadBalancing-1.0.15.1
+export AWS_ELB_HOME=$AWS_HOME/ElasticLoadBalancing-1.0.17.0
 export AWS_IAM_HOME=$AWS_HOME/IAMCli-1.3.0
 export AWS_RDS_HOME=$AWS_HOME/RDSCli-1.4.007
 export AWS_SNS_HOME=$AWS_HOME/SimpleNotificationServiceCli-1.0.2.3
@@ -45,7 +45,7 @@ export JAVA_HOME=/Library/Java/Home
 # export EC2_URL=https://<service_endpoint>
 #
 
-export PATH=/usr/local/bin:~/scala/bin:/usr/local/sbin:/usr/local/mysql/bin:/opt/local/bin:$PATH:/Library/PostgreSQL/9.0/bin:$ANT_HOME/bin:$AWS_BINS:$TIMKAY_AWS_HOME:$M2
+export PATH=/usr/local/bin:~/scala/bin:/usr/local/sbin:/usr/local/mysql/bin:/opt/local/bin:$PATH:/Library/PostgreSQL/9.0/bin:$ANT_HOME/bin:$AWS_BINS:$TIMKAY_AWS_HOME:$M2:/workspace/voltdb/bin
 #     ~/bin                               \
 #     ~/usr/bin                           \
 #     /usr/local/bin                      \
@@ -61,6 +61,9 @@ export PATH=/usr/local/bin:~/scala/bin:/usr/local/sbin:/usr/local/mysql/bin:/opt
 #     $PATH
 #   )
 
+# for running tomcat locally
+export CATALINA_OPTS="-Xms512M -Xmx1G"
+
 echo "path is now $PATH"
 autoload colors
 colors
@@ -75,8 +78,13 @@ export PAGER=less
 
 export LESS='-i' # case insensitive matching
 
+# env variable recognizable by .irbrc
+export RAILS_ENV="development"
+
 #make grep colorful, always
 alias grep='nocorrect grep --color=auto'
+#make top look for cpu-hogging processes
+alias top='top -o cpu'
 
 # make ls colorful
 # osx uses G for colors (I guess)
@@ -112,7 +120,7 @@ setopt INC_APPEND_HISTORY      # each zsh session appends to history file, allow
 HISTSIZE=20000
 SAVEHIST=15000
 HISTFILE=~/.history
-
+bindkey '^R' history-incremental-search-backward
 
 # The following lines were added by compinstall
 
@@ -213,9 +221,25 @@ timestamp() {
   date -j -f "%a %b %d %T %Z %Y" "`date`" "+%s"
 }
 
+# ssh into beanstalk
+sshb() {
+  ssh -i ~/culver_keys.pem ec2-user@$(elastic-beanstalk-describe-environments -a $1 --no-header | grep Green | cut -f 7 -d "|" | xargs -I {} elastic-beanstalk-describe-environment-resources -E {} --no-header | head -n1 | cut -f 3 -d "|" | xargs ec2-describe-instances | grep INSTANCE | cut -f 4 )
+}
+
+# ls aws beanstalk
+lsb() {
+  elastic-beanstalk-describe-environments -a $1 --no-header | grep Green | cut -f 7 -d "|" | xargs -I {} elastic-beanstalk-describe-environment-resources -E {} --no-header | head -n1 | cut -f 3 -d "|" | tr -d "," | xargs ec2-describe-instances | grep INSTANCE | cut -f 2,4,5
+}
+
 alias cucumber='cucumber --require features --require lib'
 # ssh into a venice sandbox host Note: requires John's custom modifications the ebs scripts to suppress headers (the --no-header option is not standard)
-alias sshvsb='ssh -i ~/culver_keys.pem ec2-user@$(elastic-beanstalk-describe-environments -a venice-sandbox --no-header | grep Green | cut -f 7 -d "|" | xargs -I {} elastic-beanstalk-describe-environment-resources -E {} --no-header | head -n1 | cut -f 3 -d "|" | xargs -I {} ec2-describe-instances -F "instance-id={}" | grep INSTANCE | cut -f 4 )' 
-alias sshvp='ssh -i ~/culver_keys.pem ec2-user@$(elastic-beanstalk-describe-environments -a venice-production --no-header | grep Green | cut -f 7 -d "|" | xargs -I {} elastic-beanstalk-describe-environment-resources -E {} --no-header | head -n1 | cut -f 3 -d "|" | xargs -I {} ec2-describe-instances -F "instance-id={}" | grep INSTANCE | cut -f 4 )' 
+alias sshvsb='ssh -i ~/culver_keys.pem ec2-user@$(elastic-beanstalk-describe-environments -a venice-sandbox --no-header | grep Green | cut -f 7 -d "|" | xargs -I {} elastic-beanstalk-describe-environment-resources -E {} --no-header | head -n1 | cut -f 3 -d "|" | tr "," "\n" | head -n1 | xargs ec2-describe-instances | grep INSTANCE | cut -f 4 )' 
+alias sshvt='ssh -i ~/culver_keys.pem ec2-user@$(elastic-beanstalk-describe-environments -a venice-test --no-header | grep Green | cut -f 7 -d "|" | xargs -I {} elastic-beanstalk-describe-environment-resources -E {} --no-header | head -n1 | cut -f 3 -d "|" | tr "," "\n" | head -n1 | xargs ec2-describe-instances | grep INSTANCE | cut -f 4 )' 
+alias sshvp='ssh -i ~/culver_keys.pem ec2-user@$(elastic-beanstalk-describe-environments -a venice-production --no-header | grep Green | cut -f 7 -d "|" | xargs -I {} elastic-beanstalk-describe-environment-resources -E {} --no-header | head -n1 | cut -f 3 -d "|" | tr "," "\n" | head -n1 | xargs ec2-describe-instances | grep INSTANCE | cut -f 4 )' 
+alias lsvsb='lsb venice-sandbox'
+alias lsvt='lsb venice-test'
+alias lsvp='lsb venice-production'
 
 source ~/.zshrc.cmdprompt
+
+PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting

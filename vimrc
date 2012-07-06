@@ -29,8 +29,8 @@
 
 set nocompatible
 let mapleader = ","
-imap jj <Esc> " Professor VIM says '87% of users prefer jj over esc', jj abrams disagrees
-
+" Professor VIM says '87% of users prefer jj over esc', jj abrams disagrees
+imap jj <Esc> 
 
 " Tabs ************************************************************************
 "set sta " a <Tab> in an indent inserts 'shiftwidth' spaces
@@ -142,6 +142,8 @@ set listchars=trail:.,tab:>-,eol:$
 set nolist
 :noremap <Leader>i :set list!<CR> " Toggle invisible chars
 
+" Line Numbers ***************************************************************
+map <Leader>s :set number!<CR>
 
 " Mouse ***********************************************************************
 "set mouse=a " Enable the mouse
@@ -280,7 +282,7 @@ map <Leader>rs :RS<CR>
 " |                               Startup                                     |
 " -----------------------------------------------------------------------------  
 " Open NERDTree on start
-autocmd VimEnter * exe 'NERDTree' | wincmd l 
+" autocmd VimEnter * exe 'NERDTree' | wincmd l 
 
 
 
