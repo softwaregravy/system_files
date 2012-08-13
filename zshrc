@@ -16,7 +16,7 @@ export AWS_HOME=/workspace/aws
 export EC2_HOME=$AWS_HOME/ec2-api-tools-1.5.0.0
 export AWS_CF_HOME=$AWS_HOME/AWSCloudFormation-1.0.9
 export AWS_ELASTICACHE_HOME=$AWS_HOME/AmazonElastiCacheCli-1.5.000
-export AWS_AS_HOME=$AWS_HOME/AutoScaling-1.0.39.0
+export AWS_AUTO_SCALING_HOME=$AWS_HOME/AutoScaling-1.0.39.0
 export AWS_CW_HOME=$AWS_HOME/CloudWatch-1.0.12.1
 export AWS_CLOUDWATCH_HOME=$AWS_CW_HOME
 export AWS_ELB_HOME=$AWS_HOME/ElasticLoadBalancing-1.0.17.0
@@ -25,7 +25,7 @@ export AWS_RDS_HOME=$AWS_HOME/RDSCli-1.4.007
 export AWS_SNS_HOME=$AWS_HOME/SimpleNotificationServiceCli-1.0.2.3
 export AWS_EB_HOME=$AWS_HOME/elasticbeanstalk-cli
 export AWS_MAP_REDUCE_HOME=$AWS_HOME/elastic-mapreduce-ruby
-export AWS_BINS=$EC2_HOME/bin:$AWS_CF_HOME/bin:$AWS_ELASTICACHE_HOME/bin:$AWS_AS_HOME/bin:$AWS_CW_HOME/bin:$AWS_ELB_HOME/bin:$AWS_IAM_HOME/bin:$AWS_RDS_HOME/bin:$AWS_EB_HOME/bin:$AWS_MAP_REDUCE_HOME:$AWS_SNS_HOME/bin
+export AWS_BINS=$EC2_HOME/bin:$AWS_CF_HOME/bin:$AWS_ELASTICACHE_HOME/bin:$AWS_AUTO_SCALING_HOME/bin:$AWS_CW_HOME/bin:$AWS_ELB_HOME/bin:$AWS_IAM_HOME/bin:$AWS_RDS_HOME/bin:$AWS_EB_HOME/bin:$AWS_MAP_REDUCE_HOME:$AWS_SNS_HOME/bin
 
 export EC2_PRIVATE_KEY=~/.ec2/pk-VT7N5RIWQP4DQ7LXY7D2PBTSEOW23XOR.pem
 export EC2_CERT=~/.ec2/cert-VT7N5RIWQP4DQ7LXY7D2PBTSEOW23XOR.pem
@@ -62,7 +62,7 @@ export PATH=/usr/local/bin:~/scala/bin:/usr/local/sbin:/usr/local/mysql/bin:/opt
 #   )
 
 # for running tomcat locally
-export CATALINA_OPTS="-Xms512M -Xmx1G"
+export CATALINA_OPTS="-Xms512M -Xmx3G"
 
 echo "path is now $PATH"
 autoload colors
@@ -239,6 +239,12 @@ alias sshvp='ssh -i ~/culver_keys.pem ec2-user@$(elastic-beanstalk-describe-envi
 alias lsvsb='lsb venice-sandbox'
 alias lsvt='lsb venice-test'
 alias lsvp='lsb venice-production'
+
+# Heroku 
+alias hls='heroku logs --tail --remote sandbox'
+alias hlp='heroku logs --tail --remote production'
+alias hcs='heroku run console --remote sandbox'
+alias hcp='heroku run console --remote production'
 
 source ~/.zshrc.cmdprompt
 
