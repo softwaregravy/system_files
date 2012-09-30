@@ -4,8 +4,9 @@ if [ -x /usr/libexec/path_helper ]; then
 fi
 
 # Maven 
-export M2_HOME=/usr/local/apache-maven/apache-maven-3.0.3
-export M2=$M2_HOME/bin
+export M2_HOME=/Applications/apache-maven-3.0.4
+export MVN_HOME=$M2_HOME
+export M3=$M2_HOME/bin
 # optional
 #export MAVEN_OPTS="-Xms256m -Xmx512m"
 
@@ -33,6 +34,9 @@ export TIMKAY_AWS_HOME=/workspace/aws/com.timkay
 
 export ANT_HOME=/Users/MacbookPro/libs/apache-ant-1.8.2
 export JAVA_HOME=/Library/Java/Home
+
+export HADOOP_HOME=/workspace/hadoop
+export HIVE_HOME=/workspace/hive
 #
 # $ ec2-describe-regions                                                                                                                                                                                                                  ──(Mon,Nov14)─┘
 # REGION eu-west-1 ec2.eu-west-1.amazonaws.com
@@ -45,7 +49,7 @@ export JAVA_HOME=/Library/Java/Home
 # export EC2_URL=https://<service_endpoint>
 #
 
-export PATH=/usr/local/bin:~/scala/bin:/usr/local/sbin:/usr/local/mysql/bin:/opt/local/bin:$PATH:/Library/PostgreSQL/9.0/bin:$ANT_HOME/bin:$AWS_BINS:$TIMKAY_AWS_HOME:$M2:/workspace/voltdb/bin
+export PATH=/usr/local/bin:~/scala/bin:/usr/local/sbin:/usr/local/mysql/bin:/opt/local/bin:$PATH:/Library/PostgreSQL/9.0/bin:$ANT_HOME/bin:$AWS_BINS:$TIMKAY_AWS_HOME:$M3:$HADOOP_HOME/bin:$HIVE_HOME/bin:~/bin
 #     ~/bin                               \
 #     ~/usr/bin                           \
 #     /usr/local/bin                      \
@@ -79,7 +83,8 @@ export PAGER=less
 export LESS='-i' # case insensitive matching
 
 # env variable recognizable by .irbrc
-export RAILS_ENV="development"
+# causes rspec to run in development
+#export RAILS_ENV="development"
 
 #make grep colorful, always
 alias grep='nocorrect grep --color=auto'
@@ -200,12 +205,9 @@ export LSCOLORS=exfxcxdxbxexexabagacad
 
 #rvm installation
 #http://rvm.beginrescueend.com/
-[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
+#[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
+source /usr/local/rvm/scripts/rvm
 rvm_project_rvmrc_default=1
-
-#Fink installation 
-#http://www.finkproject.org/download/srcdist.php 
-source /sw/bin/init.sh 
 
 export AUTOFEATURE=true 
 export RSPEC=true
@@ -246,6 +248,10 @@ alias hlp='heroku logs --tail --remote production'
 alias hcs='heroku run console --remote sandbox'
 alias hcp='heroku run console --remote production'
 
+alias cdtomcat='cd /usr/local/Cellar/tomcat/7.0.29/libexec/'
+
 source ~/.zshrc.cmdprompt
+
+export TERM='xterm-256color'
 
 PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
