@@ -24,7 +24,7 @@ export AWS_ELB_HOME=$AWS_HOME/ElasticLoadBalancing-1.0.17.0
 export AWS_IAM_HOME=$AWS_HOME/IAMCli-1.3.0
 export AWS_RDS_HOME=$AWS_HOME/RDSCli-1.4.007
 export AWS_SNS_HOME=$AWS_HOME/SimpleNotificationServiceCli-1.0.2.3
-export AWS_EB_HOME=$AWS_HOME/elasticbeanstalk-cli
+export AWS_EB_HOME=$AWS_HOME/AWS-ElasticBeanstalk-CLI-2.2/api
 export AWS_MAP_REDUCE_HOME=$AWS_HOME/elastic-mapreduce-ruby
 export AWS_BINS=$EC2_HOME/bin:$AWS_CF_HOME/bin:$AWS_ELASTICACHE_HOME/bin:$AWS_AUTO_SCALING_HOME/bin:$AWS_CW_HOME/bin:$AWS_ELB_HOME/bin:$AWS_IAM_HOME/bin:$AWS_RDS_HOME/bin:$AWS_EB_HOME/bin:$AWS_MAP_REDUCE_HOME:$AWS_SNS_HOME/bin
 
