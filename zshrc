@@ -37,6 +37,8 @@ export JAVA_HOME=/Library/Java/Home
 
 export HADOOP_HOME=/workspace/hadoop
 export HIVE_HOME=/workspace/hive
+
+export GIT_TIDBITS_LIB=/workspace/softwaregravy/tidbids/lib
 #
 # $ ec2-describe-regions                                                                                                                                                                                                                  ──(Mon,Nov14)─┘
 # REGION eu-west-1 ec2.eu-west-1.amazonaws.com
@@ -49,7 +51,7 @@ export HIVE_HOME=/workspace/hive
 # export EC2_URL=https://<service_endpoint>
 #
 
-export PATH=/usr/local/bin:~/scala/bin:/usr/local/sbin:/usr/local/mysql/bin:/opt/local/bin:$PATH:/Library/PostgreSQL/9.0/bin:$ANT_HOME/bin:$AWS_BINS:$TIMKAY_AWS_HOME:$M3:$HADOOP_HOME/bin:$HIVE_HOME/bin:~/bin
+export PATH=/usr/local/bin:~/scala/bin:/usr/local/sbin:/usr/local/mysql/bin:/opt/local/bin:$PATH:/Library/PostgreSQL/9.0/bin:$ANT_HOME/bin:$AWS_BINS:$TIMKAY_AWS_HOME:$M3:$HADOOP_HOME/bin:$HIVE_HOME/bin:~/bin:$GIT_TIDBITS_LIB
 #     ~/bin                               \
 #     ~/usr/bin                           \
 #     /usr/local/bin                      \
@@ -250,8 +252,21 @@ alias hcp='heroku run console --remote production'
 
 alias cdtomcat='cd /usr/local/Cellar/tomcat/7.0.29/libexec/'
 
+# postgres
+#alias pg_start="sudo su postgres -c -e '/opt/local/lib/postgresql90/bin/postgres -D /opt/local/var/db/postgresql90/defaultdb'"
+# nope, use http://postgresapp.com/ now
+alias reset_db='rake db:drop:all db:create db:migrate db:seed db:test:prepare'
+
+# processes 
+alias pgrep='ps auxwww | grep -i '
+
 source ~/.zshrc.cmdprompt
 
 export TERM='xterm-256color'
 
 PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
+
+### Added by the Heroku Toolbelt
+export PATH="/usr/local/heroku/bin:$PATH"
+
+PATH=$PATH:/usr/local/rvm/bin # Add RVM to PATH for scripting
