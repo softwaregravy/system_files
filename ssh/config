@@ -8,3 +8,13 @@ host *.amazonaws.com ssh.example.com
   CheckHostIP no 
   IdentityFile ~/culver_keys.pem
 
+
+Host heroku.personal
+  HostName heroku.com
+  IdentityFile "/Users/john/.ssh/identity.heroku.personal"
+  IdentitiesOnly yes
+
+Host heroku.work
+  HostName heroku.com
+  IdentityFile "/Users/john/.ssh/identity.heroku.work"
+  IdentitiesOnly yes

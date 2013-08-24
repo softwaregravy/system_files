@@ -50,27 +50,17 @@ export GIT_TIDBITS_LIB=/workspace/softwaregravy/tidbids/lib
 #
 # export EC2_URL=https://<service_endpoint>
 #
+#
 
-export PATH=/usr/local/bin:~/scala/bin:/usr/local/sbin:/usr/local/mysql/bin:/opt/local/bin:$PATH:/Library/PostgreSQL/9.0/bin:$ANT_HOME/bin:$AWS_BINS:$TIMKAY_AWS_HOME:$M3:$HADOOP_HOME/bin:$HIVE_HOME/bin:~/bin:$GIT_TIDBITS_LIB
-#     ~/bin                               \
-#     ~/usr/bin                           \
-#     /usr/local/bin                      \
-#     /usr/bin                            \
-#     /bin                                \
-#     /usr/sbin                           \
-#     /sbin                               \
-#     /usr/local/sbin                     \
-#     /usr/X11R6/bin                      \
-#     /usr/X11/bin                        \
-#     /usr/kerberos/bin                   \
-#     /opt/local/bin                      \
-#     $PATH
-#   )
+#echo "before that line we have: $PATH"
+export PATH=/usr/local/bin:/usr/local/sbin:/opt/local/bin:$PATH:$ANT_HOME/bin:$AWS_BINS:$TIMKAY_AWS_HOME:$M3:$HADOOP_HOME/bin:$HIVE_HOME/bin:~/bin:$GIT_TIDBITS_LIB
+#echo ""
+#echo "and now we have: $PATH"
+#echo ""
 
 # for running tomcat locally
 export CATALINA_OPTS="-Xms512M -Xmx3G"
 
-echo "path is now $PATH"
 autoload colors
 colors
 
@@ -260,11 +250,26 @@ alias reset_db='rake db:drop:all db:create db:migrate db:seed db:test:prepare'
 # processes 
 alias pgrep='ps auxwww | grep -i '
 
+# git 
+alias commit-count='expr `git rev-list HEAD --count` - `git rev-list origin/master --count`'
+
 source ~/.zshrc.cmdprompt
 
 export TERM='xterm-256color'
 
 PATH=$PATH:/usr/local/rvm/bin # Add RVM to PATH for scripting
 
+
+PATH=$PATH:/usr/local/rvm/bin # Add RVM to PATH for scripting
+
 ### Added by the Heroku Toolbelt
 export PATH="/usr/local/heroku/bin:$PATH"
+
+echo "path is now $PATH"
+
+# Faster specs!
+export RUBY_HEAP_MIN_SLOTS=2000000
+export RUBY_HEAP_SLOTS_INCREMENT=500000
+export RUBY_HEAP_SLOTS_GROWTH_FACTOR=1
+export RUBY_GC_MALLOC_LIMIT=70000000
+export RUBY_HEAP_FREE_MIN=100000

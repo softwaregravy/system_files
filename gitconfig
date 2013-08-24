@@ -85,3 +85,9 @@
   tool = vimdiff
 [push]
 	default = matching
+[heroku]
+	account = work
+[init]
+	templatedir = ~/.git_template
+[help]
+	autocorrect = 1
