@@ -21,9 +21,9 @@ echo "created symlink to gitconfig"
 ln -sf $currDir/gemrc ~/.gemrc
 echo "created symlink to gemrc"
 
-mv ~/.ssh ~/ssh_bk
-ln -sf $currDir/ssh ~/.ssh
-echo "Created symlink to ssh (existing contents of .ssh in ~/ssh_bk)"
+# mv ~/.ssh ~/ssh_bk
+# ln -sf $currDir/ssh ~/.ssh
+# echo "Created symlink to ssh (existing contents of .ssh in ~/ssh_bk)"
 
 # prepare the vimrc
 cp $directory/etc/vim/vimrc $currDir/vimrc 
