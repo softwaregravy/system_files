@@ -273,3 +273,7 @@ export RUBY_HEAP_SLOTS_INCREMENT=500000
 export RUBY_HEAP_SLOTS_GROWTH_FACTOR=1
 export RUBY_GC_MALLOC_LIMIT=70000000
 export RUBY_HEAP_FREE_MIN=100000
+
+# required for https://github.com/imathis/octopress/issues/144
+export LC_CTYPE=en_US.UTF-8
+export LANG=en_US.UTF-8

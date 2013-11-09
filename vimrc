@@ -223,7 +223,7 @@ let NERDCreateDefaultMappings=0 " I turn this off to make it simple
 :map <Leader>c :call NERDComment(0, "toggle")<CR><ESC>
 
 " NERTree
-let NERDTreeWinSize=50 " set default width of nerdtree
+let NERDTreeWinSize=40 " set default width of nerdtree
 
 " SnippetsEmu *****************************************************************
 "imap <unique> <C-j> <Plug>Jumper
