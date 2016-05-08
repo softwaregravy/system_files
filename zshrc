@@ -4,41 +4,41 @@ if [ -x /usr/libexec/path_helper ]; then
 fi
 
 # Maven 
-export M2_HOME=/Applications/apache-maven-3.0.4
-export MVN_HOME=$M2_HOME
-export M3=$M2_HOME/bin
+#export M2_HOME=/Applications/apache-maven-3.0.4
+#export MVN_HOME=$M2_HOME
+#export M3=$M2_HOME/bin
 # optional
 #export MAVEN_OPTS="-Xms256m -Xmx512m"
 
 # http://aws.amazon.com/developertools/2928
-export AWS_CREDENTIAL_FILE=~/aws-credential-file
-export AWS_HOME=/workspace/aws
+#export AWS_CREDENTIAL_FILE=~/aws-credential-file
+#export AWS_HOME=/workspace/aws
 # Tools expect EC2_HOME
-export EC2_HOME=$AWS_HOME/ec2-api-tools-1.5.0.0
-export AWS_CF_HOME=$AWS_HOME/AWSCloudFormation-1.0.9
-export AWS_ELASTICACHE_HOME=$AWS_HOME/AmazonElastiCacheCli-1.5.000
-export AWS_AUTO_SCALING_HOME=$AWS_HOME/AutoScaling-1.0.39.0
-export AWS_CW_HOME=$AWS_HOME/CloudWatch-1.0.12.1
-export AWS_CLOUDWATCH_HOME=$AWS_CW_HOME
-export AWS_ELB_HOME=$AWS_HOME/ElasticLoadBalancing-1.0.17.0
-export AWS_IAM_HOME=$AWS_HOME/IAMCli-1.3.0
-export AWS_RDS_HOME=$AWS_HOME/RDSCli-1.4.007
-export AWS_SNS_HOME=$AWS_HOME/SimpleNotificationServiceCli-1.0.2.3
-export AWS_EB_HOME=$AWS_HOME/AWS-ElasticBeanstalk-CLI-2.2/api
-export AWS_MAP_REDUCE_HOME=$AWS_HOME/elastic-mapreduce-ruby
-export AWS_BINS=$EC2_HOME/bin:$AWS_CF_HOME/bin:$AWS_ELASTICACHE_HOME/bin:$AWS_AUTO_SCALING_HOME/bin:$AWS_CW_HOME/bin:$AWS_ELB_HOME/bin:$AWS_IAM_HOME/bin:$AWS_RDS_HOME/bin:$AWS_EB_HOME/bin:$AWS_MAP_REDUCE_HOME:$AWS_SNS_HOME/bin
+#export EC2_HOME=$AWS_HOME/ec2-api-tools-1.5.0.0
+#export AWS_CF_HOME=$AWS_HOME/AWSCloudFormation-1.0.9
+#export AWS_ELASTICACHE_HOME=$AWS_HOME/AmazonElastiCacheCli-1.5.000
+#export AWS_AUTO_SCALING_HOME=$AWS_HOME/AutoScaling-1.0.39.0
+#export AWS_CW_HOME=$AWS_HOME/CloudWatch-1.0.12.1
+#export AWS_CLOUDWATCH_HOME=$AWS_CW_HOME
+#export AWS_ELB_HOME=$AWS_HOME/ElasticLoadBalancing-1.0.17.0
+#export AWS_IAM_HOME=$AWS_HOME/IAMCli-1.3.0
+#export AWS_RDS_HOME=$AWS_HOME/RDSCli-1.4.007
+#export AWS_SNS_HOME=$AWS_HOME/SimpleNotificationServiceCli-1.0.2.3
+#export AWS_EB_HOME=$AWS_HOME/AWS-ElasticBeanstalk-CLI-2.2/api
+#export AWS_MAP_REDUCE_HOME=$AWS_HOME/elastic-mapreduce-ruby
+#export AWS_BINS=$EC2_HOME/bin:$AWS_CF_HOME/bin:$AWS_ELASTICACHE_HOME/bin:$AWS_AUTO_SCALING_HOME/bin:$AWS_CW_HOME/bin:$AWS_ELB_HOME/bin:$AWS_IAM_HOME/bin:$AWS_RDS_HOME/bin:$AWS_EB_HOME/bin:$AWS_MAP_REDUCE_HOME:$AWS_SNS_HOME/bin
 
-export EC2_PRIVATE_KEY=~/.ec2/pk-VT7N5RIWQP4DQ7LXY7D2PBTSEOW23XOR.pem
-export EC2_CERT=~/.ec2/cert-VT7N5RIWQP4DQ7LXY7D2PBTSEOW23XOR.pem
-export TIMKAY_AWS_HOME=/workspace/aws/com.timkay
+#export EC2_PRIVATE_KEY=~/.ec2/pk-VT7N5RIWQP4DQ7LXY7D2PBTSEOW23XOR.pem
+#export EC2_CERT=~/.ec2/cert-VT7N5RIWQP4DQ7LXY7D2PBTSEOW23XOR.pem
+#export TIMKAY_AWS_HOME=/workspace/aws/com.timkay
 
-export ANT_HOME=/Users/MacbookPro/libs/apache-ant-1.8.2
-export JAVA_HOME=/Library/Java/Home
+#export ANT_HOME=/Users/MacbookPro/libs/apache-ant-1.8.2
+#export JAVA_HOME=/Library/Java/Home
 
-export HADOOP_HOME=/workspace/hadoop
-export HIVE_HOME=/workspace/hive
+#export HADOOP_HOME=/workspace/hadoop
+#export HIVE_HOME=/workspace/hive
 
-export GIT_TIDBITS_LIB=/workspace/softwaregravy/tidbids/lib
+#export GIT_TIDBITS_LIB=/workspace/softwaregravy/tidbids/lib
 #
 # $ ec2-describe-regions                                                                                                                                                                                                                  ──(Mon,Nov14)─┘
 # REGION eu-west-1 ec2.eu-west-1.amazonaws.com
@@ -53,13 +53,15 @@ export GIT_TIDBITS_LIB=/workspace/softwaregravy/tidbids/lib
 #
 
 #echo "before that line we have: $PATH"
-export PATH=/usr/local/bin:/usr/local/sbin:/opt/local/bin:$PATH:$ANT_HOME/bin:$AWS_BINS:$TIMKAY_AWS_HOME:$M3:$HADOOP_HOME/bin:$HIVE_HOME/bin:~/bin:$GIT_TIDBITS_LIB
+#export PATH=/usr/local/bin:/usr/local/sbin:/opt/local/bin:$PATH:$ANT_HOME/bin:$AWS_BINS:$TIMKAY_AWS_HOME:$M3:$HADOOP_HOME/bin:$HIVE_HOME/bin:~/bin:$GIT_TIDBITS_LIB
 #echo ""
 #echo "and now we have: $PATH"
 #echo ""
 
+#export PATH=$PATH:/Applications/Postgres.app/Contents/MacOS/bin
+
 # for running tomcat locally
-export CATALINA_OPTS="-Xms512M -Xmx3G"
+#export CATALINA_OPTS="-Xms512M -Xmx3G"
 
 autoload colors
 colors
@@ -197,8 +199,7 @@ export LSCOLORS=exfxcxdxbxexexabagacad
 
 #rvm installation
 #http://rvm.beginrescueend.com/
-#[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
-source /usr/local/rvm/scripts/rvm
+[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
 rvm_project_rvmrc_default=1
 
 export AUTOFEATURE=true 
@@ -216,59 +217,59 @@ timestamp() {
 }
 
 # ssh into beanstalk
-sshb() {
-  ssh -i ~/culver_keys.pem ec2-user@$(elastic-beanstalk-describe-environments -a $1 --no-header | grep Green | cut -f 7 -d "|" | xargs -I {} elastic-beanstalk-describe-environment-resources -E {} --no-header | head -n1 | cut -f 3 -d "|" | xargs ec2-describe-instances | grep INSTANCE | cut -f 4 )
-}
+#sshb() {
+  #ssh -i ~/culver_keys.pem ec2-user@$(elastic-beanstalk-describe-environments -a $1 --no-header | grep Green | cut -f 7 -d "|" | xargs -I {} elastic-beanstalk-describe-environment-resources -E {} --no-header | head -n1 | cut -f 3 -d "|" | xargs ec2-describe-instances | grep INSTANCE | cut -f 4 )
+#}
 
 # ls aws beanstalk
-lsb() {
-  elastic-beanstalk-describe-environments -a $1 --no-header | grep Green | cut -f 7 -d "|" | xargs -I {} elastic-beanstalk-describe-environment-resources -E {} --no-header | head -n1 | cut -f 3 -d "|" | tr -d "," | xargs ec2-describe-instances | grep INSTANCE | cut -f 2,4,5
-}
+#lsb() {
+  #elastic-beanstalk-describe-environments -a $1 --no-header | grep Green | cut -f 7 -d "|" | xargs -I {} elastic-beanstalk-describe-environment-resources -E {} --no-header | head -n1 | cut -f 3 -d "|" | tr -d "," | xargs ec2-describe-instances | grep INSTANCE | cut -f 2,4,5
+#}
 
-alias cucumber='cucumber --require features --require lib'
+#alias cucumber='cucumber --require features --require lib'
 # ssh into a venice sandbox host Note: requires John's custom modifications the ebs scripts to suppress headers (the --no-header option is not standard)
-alias sshvsb='ssh -i ~/culver_keys.pem ec2-user@$(elastic-beanstalk-describe-environments -a venice-sandbox --no-header | grep Green | cut -f 7 -d "|" | xargs -I {} elastic-beanstalk-describe-environment-resources -E {} --no-header | head -n1 | cut -f 3 -d "|" | tr "," "\n" | head -n1 | xargs ec2-describe-instances | grep INSTANCE | cut -f 4 )' 
-alias sshvt='ssh -i ~/culver_keys.pem ec2-user@$(elastic-beanstalk-describe-environments -a venice-test --no-header | grep Green | cut -f 7 -d "|" | xargs -I {} elastic-beanstalk-describe-environment-resources -E {} --no-header | head -n1 | cut -f 3 -d "|" | tr "," "\n" | head -n1 | xargs ec2-describe-instances | grep INSTANCE | cut -f 4 )' 
-alias sshvp='ssh -i ~/culver_keys.pem ec2-user@$(elastic-beanstalk-describe-environments -a venice-production --no-header | grep Green | cut -f 7 -d "|" | xargs -I {} elastic-beanstalk-describe-environment-resources -E {} --no-header | head -n1 | cut -f 3 -d "|" | tr "," "\n" | head -n1 | xargs ec2-describe-instances | grep INSTANCE | cut -f 4 )' 
-alias lsvsb='lsb venice-sandbox'
-alias lsvt='lsb venice-test'
-alias lsvp='lsb venice-production'
+#alias sshvsb='ssh -i ~/culver_keys.pem ec2-user@$(elastic-beanstalk-describe-environments -a venice-sandbox --no-header | grep Green | cut -f 7 -d "|" | xargs -I {} elastic-beanstalk-describe-environment-resources -E {} --no-header | head -n1 | cut -f 3 -d "|" | tr "," "\n" | head -n1 | xargs ec2-describe-instances | grep INSTANCE | cut -f 4 )' 
+#alias sshvt='ssh -i ~/culver_keys.pem ec2-user@$(elastic-beanstalk-describe-environments -a venice-test --no-header | grep Green | cut -f 7 -d "|" | xargs -I {} elastic-beanstalk-describe-environment-resources -E {} --no-header | head -n1 | cut -f 3 -d "|" | tr "," "\n" | head -n1 | xargs ec2-describe-instances | grep INSTANCE | cut -f 4 )' 
+#alias sshvp='ssh -i ~/culver_keys.pem ec2-user@$(elastic-beanstalk-describe-environments -a venice-production --no-header | grep Green | cut -f 7 -d "|" | xargs -I {} elastic-beanstalk-describe-environment-resources -E {} --no-header | head -n1 | cut -f 3 -d "|" | tr "," "\n" | head -n1 | xargs ec2-describe-instances | grep INSTANCE | cut -f 4 )' 
+#alias lsvsb='lsb venice-sandbox'
+#alias lsvt='lsb venice-test'
+#alias lsvp='lsb venice-production'
 
 # Heroku 
-alias hls='heroku logs --tail --remote sandbox'
-alias hlp='heroku logs --tail --remote production'
-alias hcs='heroku run console --remote sandbox'
-alias hcp='heroku run console --remote production'
+#alias hls='heroku logs --tail --remote sandbox'
+#alias hlp='heroku logs --tail --remote production'
+#alias hcs='heroku run console --remote sandbox'
+#alias hcp='heroku run console --remote production'
 
-alias cdtomcat='cd /usr/local/Cellar/tomcat/7.0.29/libexec/'
+#alias cdtomcat='cd /usr/local/Cellar/tomcat/7.0.29/libexec/'
 
 # postgres
 #alias pg_start="sudo su postgres -c -e '/opt/local/lib/postgresql90/bin/postgres -D /opt/local/var/db/postgresql90/defaultdb'"
 # nope, use http://postgresapp.com/ now
-alias reset_db='rake db:drop:all db:create db:migrate db:seed db:test:prepare'
+#alias reset_db='rake db:drop:all db:create db:migrate db:seed db:test:prepare'
 
 # processes 
 alias pgrep='ps auxwww | grep -i '
 
 # git 
 alias commit-count='expr `git rev-list HEAD --count` - `git rev-list origin/master --count`'
+# for git diff to work, see http://technotales.wordpress.com/2009/05/17/git-diff-with-vimdiff/
+
+function git_diff() {
+  git diff --no-ext-diff -w "$@" | vim -R -
+}
 
 source ~/.zshrc.cmdprompt
 
 export TERM='xterm-256color'
 
-PATH=$PATH:/usr/local/rvm/bin # Add RVM to PATH for scripting
-
-
-PATH=$PATH:/usr/local/rvm/bin # Add RVM to PATH for scripting
-
 ### Added by the Heroku Toolbelt
-export PATH="/usr/local/heroku/bin:$PATH"
+#export PATH="$PATH:/usr/local/heroku/bin"
 
 echo "path is now $PATH"
 
 # Faster specs!
-export RUBY_HEAP_MIN_SLOTS=2000000
+export RUBY_GC_HEAP_INIT_SLOTS=2000000
 export RUBY_HEAP_SLOTS_INCREMENT=500000
 export RUBY_HEAP_SLOTS_GROWTH_FACTOR=1
 export RUBY_GC_MALLOC_LIMIT=70000000
@@ -277,3 +278,11 @@ export RUBY_HEAP_FREE_MIN=100000
 # required for https://github.com/imathis/octopress/issues/144
 export LC_CTYPE=en_US.UTF-8
 export LANG=en_US.UTF-8
+
+# Support homebrew
+export PATH="/usr/local/sbin:$PATH"
+
+# rbenv support
+eval "$(rbenv init -)"
+
+export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting

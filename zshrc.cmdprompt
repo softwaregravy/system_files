@@ -27,6 +27,7 @@ function precmd {
     PR_GEMSET=''
   fi 
 
+  hash -rd
   local promptsize=${#${():---(${PR_GEMSET}${PR_BRANCH})---()--}} 
   local pwdsize=${#${(%):-%~}}
 

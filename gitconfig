@@ -76,13 +76,18 @@
 
   # Show files ignored by git:
   ign = ls-files -o -i --exclude-standard
+	d = difftool
 
 [core]
 	quotepath = false
-	excludesfile = /Users/MacbookPro/.gitignore
+	autocrlf = input
+	whitespace = cr-at-eol
 
 [diff]
-  tool = vimdiff
+	tool = vimdiff
+	external = /Users/johnhinnegan/.git_diff_wrapper
+[pager]
+  diff = 
 [push]
 	default = matching
 [heroku]
@@ -91,3 +96,7 @@
 	templatedir = ~/.git_template
 [help]
 	autocorrect = 1
+[difftool]
+	prompt = false
+[merge]
+	tool = vimdiff
