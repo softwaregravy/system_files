@@ -38,11 +38,13 @@ function precmd {
   fi
 
   # Get APM info
+  # To display battery power level and time remaining
   if which ibam > /dev/null; then
     PR_APM_RESULT=`ibam --percentbattery`
   elif which apm > /dev/null; then
     PR_APM_RESULT=`apm`
   elif which pmset > /dev/null; then
+    # This is OSX
     PR_APM_RESULT=`pmset -g batt` 
   fi
 }
@@ -136,7 +138,8 @@ setprompt () {
     PR_APM='$PR_RED${PR_APM_RESULT[(w)5,(w)6]/\% /%%}$PR_LIGHT_BLUE:'
     # try to movidy for OSX
   elif which pmset > /dev/null; then
-    PR_APM='$PR_RED${${PR_APM_RESULT[(f)2]}[(w)2]}%%(${${PR_APM_RESULT[(f)2]}[(w)4]})$PR_LIGHT_BLUE:'
+    # output is 49%(2:15)
+    PR_APM='$PR_RED${${PR_APM_RESULT[(f)2]}[(w)3]}%%(${${PR_APM_RESULT[(f)2]}[(w)5]})$PR_LIGHT_BLUE:'
   else
     PR_APM=''
   fi
