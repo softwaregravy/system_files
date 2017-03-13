@@ -139,7 +139,7 @@ setprompt () {
     # try to movidy for OSX
   elif which pmset > /dev/null; then
     # output is 49%(2:15)
-    PR_APM='$PR_RED${${PR_APM_RESULT[(f)2]}[(w)3]}%%(${${PR_APM_RESULT[(f)2]}[(w)5]})$PR_LIGHT_BLUE:'
+    PR_APM='$PR_RED${${PR_APM_RESULT[(f)2]}[(w)2]}%%(${${PR_APM_RESULT[(f)2]}[(w)4]})$PR_LIGHT_BLUE:'
   else
     PR_APM=''
   fi

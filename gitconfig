@@ -85,7 +85,7 @@
 
 [diff]
 	tool = vimdiff
-	external = /Users/johnhinnegan/.git_diff_wrapper
+  prompt = false
 [pager]
   diff = 
 [push]
