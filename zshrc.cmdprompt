@@ -21,11 +21,12 @@ function precmd {
     PR_BRANCH=''
   fi 
 
-  if which rvm > /dev/null; then 
-    PR_GEMSET=`rvm info 2> /dev/null | awk '{if (NF == 1 && /@/) print }'`
-  else 
-    PR_GEMSET=''
-  fi 
+
+  PR_GEMSET=`rvm info 2> /dev/null | awk '{if (NF == 1 && /@/) print }'`
+  # Augemented for Python, probably need a new variable name than PR_GEMSET
+  if [[ -z $PR_GEMSET ]]; then
+    PR_GEMSET=`pyenv shell 2> /dev/null`
+  fi
 
   hash -rd
   local promptsize=${#${():---(${PR_GEMSET}${PR_BRANCH})---()--}} 
