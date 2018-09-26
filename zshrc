@@ -4,8 +4,11 @@ if [ -x /usr/libexec/path_helper ]; then
 fi
 
 # Maven 
-#export M2_HOME=/Applications/apache-maven-3.0.4
-#export MVN_HOME=$M2_HOME
+export M2_HOME=/usr/local/Cellar/maven/3.5.4/libexec
+export M2=$M2_HOME/bin
+export PATH=$PATH:$M2
+#export M3_HOME=/Applications/apache-maven-3.0.4
+#export MVN_HOME=$M3_HOME
 #export M3=$M2_HOME/bin
 # optional
 #export MAVEN_OPTS="-Xms256m -Xmx512m"
@@ -34,7 +37,7 @@ fi
 
 #export ANT_HOME=/Users/MacbookPro/libs/apache-ant-1.8.2
 #export JAVA_HOME=/Library/Java/Home
-
+export JAVA_HOME=$(/usr/libexec/java_home)
 #export HADOOP_HOME=/workspace/hadoop
 #export HIVE_HOME=/workspace/hive
 
@@ -58,7 +61,6 @@ fi
 #echo "and now we have: $PATH"
 #echo ""
 
-#export PATH=$PATH:/Applications/Postgres.app/Contents/MacOS/bin
 
 # for running tomcat locally
 #export CATALINA_OPTS="-Xms512M -Xmx3G"
@@ -74,11 +76,15 @@ export EDITOR="$PREFERRED_EDITOR"
 export VISUAL="$EDITOR" # I guess some programs use this instead of EDITOR
 export PAGER=less
 
-export LESS='-i' # case insensitive matching
+export LESS='-i -R' # case insensitive matching and repaint color codes in rails console
 
 # env variable recognizable by .irbrc
 # causes rspec to run in development
 #export RAILS_ENV="development"
+
+# "python" is python 2 on the system
+# alias py to make using python3 easier
+alias py=python3
 
 #make grep colorful, always
 alias grep='nocorrect grep --color=auto'
@@ -109,7 +115,6 @@ setopt NO_BEEP            # hate the beep
 setopt AUTO_CD            # just type dir vs cd dir
 setopt PUSHD_IGNORE_DUPS  # only put unique directories on the pushd stack
 setopt RM_STAR_WAIT       # enforces a 10 second wait if you do a rm with a * in it
-
 
 # history options
 setopt EXTENDED_HISTORY        # saves beginning and ending timestamps to the history file
@@ -178,10 +183,8 @@ swap ()
   `mv /tmp/$1.tempswapfile $2`
 }
 
-
 # open firefox, not tied to current term
 alias ff='nohup firefox&'
-
 
 #################### coloring matters ########################
 # Color codes: 00;{30,31,32,33,34,35,36,37} and 01;{30,31,32,33,34,35,36,37}
@@ -196,10 +199,8 @@ export LSCOLORS=exfxcxdxbxexexabagacad
 #export MY_LS_COLORS="${MY_LS_COLORS:-LS_COLORS_BOLD}"
 #eval export LS_COLORS=\${$MY_LS_COLORS}
 
-
 #rvm installation
 #http://rvm.beginrescueend.com/
-[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
 rvm_project_rvmrc_default=1
 
 export AUTOFEATURE=true 
@@ -246,7 +247,7 @@ timestamp() {
 # postgres
 #alias pg_start="sudo su postgres -c -e '/opt/local/lib/postgresql90/bin/postgres -D /opt/local/var/db/postgresql90/defaultdb'"
 # nope, use http://postgresapp.com/ now
-#alias reset_db='rake db:drop:all db:create db:migrate db:seed db:test:prepare'
+alias reset_db='rake db:drop:all db:create db:migrate db:seed db:test:prepare'
 
 # processes 
 alias pgrep='ps auxwww | grep -i '
@@ -255,18 +256,12 @@ alias pgrep='ps auxwww | grep -i '
 alias commit-count='expr `git rev-list HEAD --count` - `git rev-list origin/master --count`'
 # for git diff to work, see http://technotales.wordpress.com/2009/05/17/git-diff-with-vimdiff/
 
-function git_diff() {
-  git diff --no-ext-diff -w "$@" | vim -R -
-}
-
 source ~/.zshrc.cmdprompt
 
 export TERM='xterm-256color'
 
 ### Added by the Heroku Toolbelt
 #export PATH="$PATH:/usr/local/heroku/bin"
-
-echo "path is now $PATH"
 
 # Faster specs!
 export RUBY_GC_HEAP_INIT_SLOTS=2000000
@@ -279,10 +274,65 @@ export RUBY_HEAP_FREE_MIN=100000
 export LC_CTYPE=en_US.UTF-8
 export LANG=en_US.UTF-8
 
-# Support homebrew
+# I use vimdiff
+# this gives access to original git diff if needed
+# https://technotales.wordpress.com/2009/05/17/git-diff-with-vimdiff/
+#function git_diff() {
+  #git diff --no-ext-diff -w "$@" | vim -R –
+#}
+
+# Need a gitingore file?
+git config --global alias.ignore '!gi() { curl -L -s https://www.gitignore.io/api/$@ ;}; gi'
+function gi() { curl -L -s "https://www.gitignore.io/api/\$@" ;}
+# use by gi linux,java
+# gi list
+# actionscript,ada,agda,android,appceleratortitanium,appcode,archives,
+# archlinuxpackages,autotools,bancha,basercms,bower,bricxcc,c,c++,cakephp,
+# cfwheels,chefcookbook,clojure,cloud9,cmake,codeigniter,codekit,commonlisp,
+# compass,composer,concrete5,coq,cvs,dart,darteditor,delphi,django,dotsettings,
+# dreamweaver,drupal,eagle,eclipse,elasticbeanstalk,elisp,elixir,emacs,ensime,
+# episerver,erlang,espresso,expressionengine,fancy,finale,flexbuilder,forcedotcom,
+# freepascal,fuelphp,gcov,go,gradle,grails,gwt,haskell,intellij,java,jboss,jekyll,
+# jetbrains,joe,joomla,justcode,jython,kate,kdevelop4,kohana,komodoedit,laravel,
+# latex,lazarus,leiningen,lemonstand,lilypond,linux,lithium,magento,matlab,maven,
+# mercurial,meteor,modelsim,monodevelop,nanoc,netbeans,node,notepadpp,objective-c,
+# ocaml,opa,opencart,openfoam,oracleforms,osx,perl,ph7cms,phpstorm,playframework,
+# plone,prestashop,processing,pycharm,python,qooxdoo,qt,quartus2,r,rails,redcar,
+# rhodesrhomobile,ros,ruby,rubymine,rubymotion,sass,sbt,scala,scrivener,sdcc,
+# seamgen,senchatouch,silverstripe,sketchup,stella,sublimetext,sugarcrm,svn,
+# symfony,symfony2,symphonycms,tags,target3001,tarmainstallmate,tasm,tex,textmate,
+# textpattern,turbogears2,typo3,unity,vagrant,vim,virtualenv,visualstudio,vvvv,
+# waf,wakanda,webmethods,webstorm,windows,wordpress,xamarinstudio,xcode,xilinxise,
+# yeoman,yii,zendframework
+
+source ~/.local_passwords
+# twilio valid number for testing https://www.twilio.com/docs/api/rest/test-credentials
+export TWILIO_FROM_NUMBER=+15005550006
+
+# homebrew support -- I might be ruining everything
 export PATH="/usr/local/sbin:$PATH"
 
-# rbenv support
-eval "$(rbenv init -)"
 
-export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
+# help from homebrew's zsh
+unalias run-help
+autoload run-help
+HELPDIR=/usr/local/share/zsh/help
+
+source ~/rackspace_credentials
+export PATH=$PATH:/Applications/Postgres.app/Contents/Versions/latest/bin
+
+# Open SSL
+export PATH="/usr/local/opt/openssl/bin:$PATH"
+
+# rbenv support
+#export PATH="$HOME/.rbenv/bin:$PATH"
+eval "$(rbenv init -)"
+# RVM Support
+#[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
+[[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm" 
+export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH (this is needed for scripting)
+
+export PYENV_VIRTUALENV_DISABLE_PROMPT=1 # Dont' touch my prompt
+eval "$(pyenv init -)" # Add pyenv for Python support
+eval "$(pyenv virtualenv-init -)" # and an env manager
+echo "path is now $PATH"
