@@ -60,8 +60,8 @@
 # -- END TIDBITS --
 
 [user]
-	name = 
-	email = 
+	name = John Hinnegan
+	email = github-commit@johnhinnegan.com
 [alias]
   st = status
   ci = commit
@@ -77,15 +77,18 @@
   # Show files ignored by git:
   ign = ls-files -o -i --exclude-standard
 	d = difftool
+	ignore = "!gi() { curl -L -s https://www.gitignore.io/api/$@ ;}; gi"
 
 [core]
 	quotepath = false
 	autocrlf = input
 	whitespace = cr-at-eol
+	pager = less -r
 
 [diff]
-	tool = vimdiff
-	external = /Users/johnhinnegan/.git_diff_wrapper
+  tool = mate
+  # tool = vimdiff
+  # external = /Users/johnhinnegan/.git_diff_wrapper
 [pager]
   diff = 
 [push]
@@ -100,3 +103,8 @@
 	prompt = false
 [merge]
 	tool = vimdiff
+[filter "lfs"]
+	required = true
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
