@@ -314,7 +314,7 @@ export PATH="/usr/local/sbin:$PATH"
 
 
 # help from homebrew's zsh
-unalias run-help
+unalias run-help 2> /dev/null
 autoload run-help
 HELPDIR=/usr/local/share/zsh/help
 

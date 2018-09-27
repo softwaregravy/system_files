@@ -146,13 +146,13 @@ setprompt () {
   fi
 
   if which git > /dev/null; then 
-    PR_BRANCH=`git branch | awk '{ if (NF == 2)  print $2 }'`
+    PR_BRANCH=`git branch 2> /dev/null | awk '{ if (NF == 3)  print $2 }'`
   else 
     PR_BRANCH=''
   fi 
 
   if which rvm > /dev/null; then 
-    PR_GEMSET=`rvm info | awk '{if (NF == 1 && /@/) print }'`
+    PR_GEMSET=`rvm info 2> /dev/null | awk '{if (NF == 1 && /@/) print }'`
   else 
     PR_GEMSET=''
   fi 
