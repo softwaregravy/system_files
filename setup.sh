@@ -1,5 +1,9 @@
 #!/bin/zsh
 
+echo "don't use this script! it's old and I'm not using it anymore"
+
+exit
+
 currDir=`pwd`
 echo "Present directory is $currDir"
 
