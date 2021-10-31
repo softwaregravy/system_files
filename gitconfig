@@ -61,7 +61,7 @@
 
 [user]
 	name = softwaregravy
-	email = 
+	email = 426690+softwaregravy@users.noreply.github.com
 [alias]
   st = status
   ci = commit
@@ -86,11 +86,11 @@
 	pager = less -r
 
 [diff]
-  tool = mate
+  tool = less -r
   # tool = vimdiff
   # external = /Users/johnhinnegan/.git_diff_wrapper
 [pager]
-  diff = 
+  diff = less -r
 [push]
 	default = matching
 [heroku]
@@ -108,3 +108,9 @@
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
+[color]
+  diff = auto
+  status = auto
+  branch = auto
+  interactive = auto
+  pager = true

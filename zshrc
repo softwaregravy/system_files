@@ -75,6 +75,7 @@ PREFERRED_EDITOR=vim
 export EDITOR="$PREFERRED_EDITOR"
 export VISUAL="$EDITOR" # I guess some programs use this instead of EDITOR
 export PAGER=less
+export GIT_PAGER=less
 
 export LESS='-i -R' # case insensitive matching and repaint color codes in rails console
 
@@ -102,6 +103,10 @@ alias ll='ls -alh'
 
 # use pg to search for programs (poor mans pgrep)
 alias pg='ps auxwww | grep '
+
+# esp idf (iot)
+# https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/index.html#get-started-get-esp-idf
+alias get_idf='. $HOME/esp/esp-idf/export.sh'
 
 # use vi on the commandline
 bindkey -v
@@ -145,8 +150,18 @@ zstyle ':completion:*:manuals' separate-sections true
 zstyle ':completion:*' max-errors 2
 zstyle :compinstall filename '/home/johnhin/.zshrc'
 
-autoload -Uz compinit
-compinit
+
+# homebrew autocompletion
+if type brew &>/dev/null; then
+  FPATH=$(brew --prefix)/share/zsh/site-functions:$FPATH
+
+  autoload -Uz compinit
+  compinit
+fi
+
+# In the homebrew section
+#autoload -Uz compinit
+#compinit
 # End of lines added by compinstall
 
 PS1="%{${fg[red]}%}%B%n@%m] %b%{${fg[default]}%}"
@@ -318,21 +333,34 @@ unalias run-help 2> /dev/null
 autoload run-help
 HELPDIR=/usr/local/share/zsh/help
 
-source ~/rackspace_credentials
+# source ~/rackspace_credentials
 export PATH=$PATH:/Applications/Postgres.app/Contents/Versions/latest/bin
 
 # Open SSL
 export PATH="/usr/local/opt/openssl/bin:$PATH"
 
+# IDF  https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/index.html#get-started-get-esp-idf
+export IDF_PATH="$HOME/workspace/esp/esp-idf"
+export PATH="$PATH:$IDF_PATH"
+alias get_idf='. $HOME/workspace/esp/esp-idf/export.sh'
+
 # rbenv support
 #export PATH="$HOME/.rbenv/bin:$PATH"
 eval "$(rbenv init -)"
-# RVM Support
-#[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
-[[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm" 
-export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH (this is needed for scripting)
 
 export PYENV_VIRTUALENV_DISABLE_PROMPT=1 # Dont' touch my prompt
 eval "$(pyenv init -)" # Add pyenv for Python support
 eval "$(pyenv virtualenv-init -)" # and an env manager
+# RVM Support
+#[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
+[[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm" 
+
+export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH (this is needed for scripting)
+
+
 echo "path is now $PATH"
+
+# heroku autocomplete setup
+HEROKU_AC_ZSH_SETUP_PATH=/Users/johnhinnegan/Library/Caches/heroku/autocomplete/zsh_setup && test -f $HEROKU_AC_ZSH_SETUP_PATH && source $HEROKU_AC_ZSH_SETUP_PATH;
+
+export PATH="$HOME/.poetry/bin:$PATH"

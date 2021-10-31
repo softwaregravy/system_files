@@ -26,6 +26,11 @@
 " | Put machine/user specific settings in ~/.vimrc.local                      |
 " -----------------------------------------------------------------------------  
 
+" -----------------------------------------------------------------------------  
+" |                               Pathogen                                    |
+" -----------------------------------------------------------------------------  
+execute pathogen#infect()
+
 
 set nocompatible
 let mapleader = ","
@@ -47,15 +52,16 @@ function! Tabstyle_tabs()
   autocmd User Rails set noexpandtab
 endfunction
 
-function! Tabstyle_spaces()
+" function! Tabstyle_spaces()
   " Use 2 spaces
   set softtabstop=2
   set shiftwidth=2
   set tabstop=2
   set expandtab
-endfunction
+" endfunction
 
-call Tabstyle_spaces()
+" why didn't this work?
+" call Tabstyle_spaces()
 
 
 " Indenting *******************************************************************
@@ -310,4 +316,16 @@ endif
 " play nice with rvm https://rvm.beginrescueend.com/integration/vim/
 set shell=/bin/sh
 
+" cause
 iabbrev busienss business
+iabbrev custmoer customer
+
+" yank to clipboard
+if has("clipboard")
+  set clipboard=unnamed " copy to the system clipboard
+
+  if has("unnamedplus") " X11 support
+    set clipboard+=unnamedplus
+  endif
+endif
+
