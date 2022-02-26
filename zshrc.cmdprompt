@@ -25,7 +25,11 @@ function precmd {
   PR_GEMSET=`rvm info 2> /dev/null | awk '{if (NF == 1 && /@/) print }'`
   # Augemented for Python, probably need a new variable name than PR_GEMSET
   if [[ -z $PR_GEMSET ]]; then
-    PR_GEMSET=`pyenv shell 2> /dev/null`
+    PYTHON_VERSION=`pyenv local 2> /dev/null`
+    PYTHON_VIRTUAL_ENV=`basename $VIRTUAL_ENV 2> /dev/null`
+    if [[ $PYTHON_VIRTUAL_ENV ]]; then
+      PR_GEMSET="python-$PYTHON_VERSION@$PYTHON_VIRTUAL_ENV:"
+    fi
   fi
 
   hash -rd
@@ -144,18 +148,6 @@ setprompt () {
   else
     PR_APM=''
   fi
-
-  if which git > /dev/null; then 
-    PR_BRANCH=`git branch 2> /dev/null | awk '{ if (NF == 3)  print $2 }'`
-  else 
-    PR_BRANCH=''
-  fi 
-
-  if which rvm > /dev/null; then 
-    PR_GEMSET=`rvm info 2> /dev/null | awk '{if (NF == 1 && /@/) print }'`
-  else 
-    PR_GEMSET=''
-  fi 
 
     PROMPT='$PR_SET_CHARSET$PR_STITLE${(e)PR_TITLEBAR}\
 $PR_CYAN$PR_SHIFT_IN$PR_ULCORNER$PR_BLUE$PR_HBAR$PR_SHIFT_OUT\

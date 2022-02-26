@@ -87,6 +87,9 @@ export LESS='-i -R' # case insensitive matching and repaint color codes in rails
 # alias py to make using python3 easier
 alias py=python3
 
+# saving me literally years of my life
+alias r=rails
+
 #make grep colorful, always
 alias grep='nocorrect grep --color=auto'
 #make top look for cpu-hogging processes
@@ -350,7 +353,14 @@ eval "$(rbenv init -)"
 
 export PYENV_VIRTUALENV_DISABLE_PROMPT=1 # Dont' touch my prompt
 eval "$(pyenv init -)" # Add pyenv for Python support
+export PATH=$(pyenv root)/shims:$PATH
 eval "$(pyenv virtualenv-init -)" # and an env manager
+export WORKON_HOME=$HOME/.virtualenvs
+mkdir -p $WORKON_HOME
+export PROJECT_HOME=$HOME/workspace
+# TODO can this update dynamically?
+echo "Sourcing virtualenvwrapper from python version 3.10.2"
+source ~/.pyenv/versions/3.10.2/bin/virtualenvwrapper.sh
 # RVM Support
 #[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm" 
