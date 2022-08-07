@@ -97,6 +97,7 @@
 	account = work
 [init]
 	templatedir = ~/.git_template
+	defaultBranch = main
 [help]
 	autocorrect = 1
 [difftool]
