@@ -92,6 +92,8 @@ alias r=rails
 
 #make grep colorful, always
 alias grep='nocorrect grep --color=auto'
+# grep useful for search in Raisl
+alias rgrep='nocorrect grep -inR --color=auto --exclude-dir={./app/assets/builds,./tmp,./log,./.git,./node_modules,./public,./coverage} --exclude="./.overmind.sock"'
 #make top look for cpu-hogging processes
 alias top='top -o cpu'
 
@@ -166,6 +168,9 @@ fi
 #autoload -Uz compinit
 #compinit
 # End of lines added by compinstall
+
+# linting
+alias cpplint='find . -iname \*.h -o -iname \*.cpp -o -iname \*.c -o -iname \*.ino | xargs clang-format -i'
 
 PS1="%{${fg[red]}%}%B%n@%m] %b%{${fg[default]}%}"
 RPROMPT="%{${fg[red]}%}%B%-%b%{${fg[default]}%}"
@@ -330,6 +335,11 @@ export TWILIO_FROM_NUMBER=+15005550006
 # homebrew support -- I might be ruining everything
 export PATH="/usr/local/sbin:$PATH"
 
+# https://docs.zephyrproject.org/latest/guides/env_vars.html#env-vars
+source ~/zephyrproject/zephyr/zephyr-env.sh
+#reference http://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/nrf/gs_installing.html
+source ~/.zephyrrc
+export ZEPHYR_TOOLCHAIN_VARIANT="zephyr"
 
 # help from homebrew's zsh
 unalias run-help 2> /dev/null
@@ -365,12 +375,21 @@ source ~/.pyenv/versions/3.10.2/bin/virtualenvwrapper.sh
 #[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm" 
 
+# RVM goes first on my path
 export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH (this is needed for scripting)
-
-
-echo "path is now $PATH"
 
 # heroku autocomplete setup
 HEROKU_AC_ZSH_SETUP_PATH=/Users/johnhinnegan/Library/Caches/heroku/autocomplete/zsh_setup && test -f $HEROKU_AC_ZSH_SETUP_PATH && source $HEROKU_AC_ZSH_SETUP_PATH;
 
 export PATH="$HOME/.poetry/bin:$PATH"
+
+# gn tool https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/nrf/gs_installing.html
+export PATH="$PATH:$HOME/gn"
+
+# gives access to things installed by VS Code. Like `code`
+# https://code.visualstudio.com/docs/setup/mac#_launching-from-the-command-line
+export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
+
+
+echo "path is now $PATH"
+
