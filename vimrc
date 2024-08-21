@@ -190,6 +190,9 @@ map <Leader>p <C-^> " Go to previous file
 " Ruby stuff ******************************************************************
 "compiler ruby         " Enable compiler support for ruby
 "map <F5> :!ruby %<CR>
+" source: https://github.com/standardrb/standard/wiki/IDE:-vim
+let g:ruby_indent_assignment_style = 'variable'
+let g:ruby_indent_hanging_elements = 0
 
 
 " Omni Completion *************************************************************
@@ -226,7 +229,9 @@ let NERDCreateDefaultMappings=0 " I turn this off to make it simple
 " Toggle commenting on 1 line or all selected lines. Wether to comment or not
 " is decided based on the first line; if it's not commented then all lines
 " will be commented
-:map <Leader>c :call NERDComment(0, "toggle")<CR><ESC>
+" :map <Leader>c :call NERDComment(0, "toggle")<CR><ESC>
+:map <Leader>c :call nerdcommenter#Comment(0, "toggle")<CR><ESC>
+" let g:NERDCreateDefaultMappings = 1
 
 " NERTree
 let NERDTreeWinSize=40 " set default width of nerdtree
@@ -329,3 +334,13 @@ if has("clipboard")
   endif
 endif
 
+" source: https://github.com/standardrb/standard/wiki/IDE:-vim
+" packadd vim-lsp
+" Use standard if available
+if executable('standardrb')
+  au User lsp_setup call lsp#register_server({
+        \ 'name': 'standardrb',
+        \ 'cmd': ['standardrb', '--lsp'],
+        \ 'allowlist': ['ruby'],
+        \ })
+endif
