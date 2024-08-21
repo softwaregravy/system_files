@@ -115,3 +115,7 @@
   branch = auto
   interactive = auto
   pager = true
+[pull]
+	rebase = false
+[fetch]
+	prune = true
