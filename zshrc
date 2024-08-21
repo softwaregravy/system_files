@@ -1,69 +1,6 @@
-
 if [ -x /usr/libexec/path_helper ]; then
       eval `/usr/libexec/path_helper -s`
 fi
-
-# Maven 
-export M2_HOME=/usr/local/Cellar/maven/3.5.4/libexec
-export M2=$M2_HOME/bin
-export PATH=$PATH:$M2
-#export M3_HOME=/Applications/apache-maven-3.0.4
-#export MVN_HOME=$M3_HOME
-#export M3=$M2_HOME/bin
-# optional
-#export MAVEN_OPTS="-Xms256m -Xmx512m"
-
-# http://aws.amazon.com/developertools/2928
-#export AWS_CREDENTIAL_FILE=~/aws-credential-file
-#export AWS_HOME=/workspace/aws
-# Tools expect EC2_HOME
-#export EC2_HOME=$AWS_HOME/ec2-api-tools-1.5.0.0
-#export AWS_CF_HOME=$AWS_HOME/AWSCloudFormation-1.0.9
-#export AWS_ELASTICACHE_HOME=$AWS_HOME/AmazonElastiCacheCli-1.5.000
-#export AWS_AUTO_SCALING_HOME=$AWS_HOME/AutoScaling-1.0.39.0
-#export AWS_CW_HOME=$AWS_HOME/CloudWatch-1.0.12.1
-#export AWS_CLOUDWATCH_HOME=$AWS_CW_HOME
-#export AWS_ELB_HOME=$AWS_HOME/ElasticLoadBalancing-1.0.17.0
-#export AWS_IAM_HOME=$AWS_HOME/IAMCli-1.3.0
-#export AWS_RDS_HOME=$AWS_HOME/RDSCli-1.4.007
-#export AWS_SNS_HOME=$AWS_HOME/SimpleNotificationServiceCli-1.0.2.3
-#export AWS_EB_HOME=$AWS_HOME/AWS-ElasticBeanstalk-CLI-2.2/api
-#export AWS_MAP_REDUCE_HOME=$AWS_HOME/elastic-mapreduce-ruby
-#export AWS_BINS=$EC2_HOME/bin:$AWS_CF_HOME/bin:$AWS_ELASTICACHE_HOME/bin:$AWS_AUTO_SCALING_HOME/bin:$AWS_CW_HOME/bin:$AWS_ELB_HOME/bin:$AWS_IAM_HOME/bin:$AWS_RDS_HOME/bin:$AWS_EB_HOME/bin:$AWS_MAP_REDUCE_HOME:$AWS_SNS_HOME/bin
-
-#export EC2_PRIVATE_KEY=~/.ec2/pk-VT7N5RIWQP4DQ7LXY7D2PBTSEOW23XOR.pem
-#export EC2_CERT=~/.ec2/cert-VT7N5RIWQP4DQ7LXY7D2PBTSEOW23XOR.pem
-#export TIMKAY_AWS_HOME=/workspace/aws/com.timkay
-
-#export ANT_HOME=/Users/MacbookPro/libs/apache-ant-1.8.2
-#export JAVA_HOME=/Library/Java/Home
-export JAVA_HOME=$(/usr/libexec/java_home)
-#export HADOOP_HOME=/workspace/hadoop
-#export HIVE_HOME=/workspace/hive
-
-#export GIT_TIDBITS_LIB=/workspace/softwaregravy/tidbids/lib
-#
-# $ ec2-describe-regions                                                                                                                                                                                                                  ──(Mon,Nov14)─┘
-# REGION eu-west-1 ec2.eu-west-1.amazonaws.com
-# REGION us-east-1 ec2.us-east-1.amazonaws.com
-# REGION ap-northeast-1  ec2.ap-northeast-1.amazonaws.com
-# REGION us-west-2 ec2.us-west-2.amazonaws.com
-# REGION us-west-1 ec2.us-west-1.amazonaws.com
-# REGION ap-southeast-1  ec2.ap-southeast-1.amazonaws.com
-#
-# export EC2_URL=https://<service_endpoint>
-#
-#
-
-#echo "before that line we have: $PATH"
-#export PATH=/usr/local/bin:/usr/local/sbin:/opt/local/bin:$PATH:$ANT_HOME/bin:$AWS_BINS:$TIMKAY_AWS_HOME:$M3:$HADOOP_HOME/bin:$HIVE_HOME/bin:~/bin:$GIT_TIDBITS_LIB
-#echo ""
-#echo "and now we have: $PATH"
-#echo ""
-
-
-# for running tomcat locally
-#export CATALINA_OPTS="-Xms512M -Xmx3G"
 
 autoload colors
 colors
@@ -79,13 +16,13 @@ export GIT_PAGER=less
 
 export LESS='-i -R' # case insensitive matching and repaint color codes in rails console
 
-# env variable recognizable by .irbrc
-# causes rspec to run in development
-#export RAILS_ENV="development"
-
 # "python" is python 2 on the system
+# Yay! new OS X have no python 2
+# ... now things fail
 # alias py to make using python3 easier
 alias py=python3
+alias python=python3
+alias pip=pip3
 
 # saving me literally years of my life
 alias r=rails
@@ -93,7 +30,7 @@ alias r=rails
 #make grep colorful, always
 alias grep='nocorrect grep --color=auto'
 # grep useful for search in Raisl
-alias rgrep='nocorrect grep -inR --color=auto --exclude-dir={./app/assets/builds,./tmp,./log,./.git,./node_modules,./public,./coverage} --exclude="./.overmind.sock"'
+alias rgrep='nocorrect grep -inR --color=auto --exclude-dir={./app/assets,./tmp,./log,./.git,./node_modules,./public,./coverage} --exclude="./.overmind.sock"'
 #make top look for cpu-hogging processes
 alias top='top -o cpu'
 
@@ -111,6 +48,9 @@ alias pg='ps auxwww | grep '
 
 # esp idf (iot)
 # https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/index.html#get-started-get-esp-idf
+export IDF_PATH=~/esp/esp-idf
+export MDF_PATH=~/esp/esp-mdf
+export PATH="$IDF_PATH/tools:$PATH"
 alias get_idf='. $HOME/esp/esp-idf/export.sh'
 
 # use vi on the commandline
@@ -158,16 +98,13 @@ zstyle :compinstall filename '/home/johnhin/.zshrc'
 
 # homebrew autocompletion
 if type brew &>/dev/null; then
-  FPATH=$(brew --prefix)/share/zsh/site-functions:$FPATH
+  # this is already done somewhere?
+  # fpath=$(brew --prefix)/share/zsh/site-functions $fpath
+  echo "fpath is $fpath"
 
   autoload -Uz compinit
   compinit
 fi
-
-# In the homebrew section
-#autoload -Uz compinit
-#compinit
-# End of lines added by compinstall
 
 # linting
 alias cpplint='find . -iname \*.h -o -iname \*.cpp -o -iname \*.c -o -iname \*.ino | xargs clang-format -i'
@@ -226,6 +163,10 @@ export LSCOLORS=exfxcxdxbxexexabagacad
 #http://rvm.beginrescueend.com/
 rvm_project_rvmrc_default=1
 
+# use virtualenv for python envs
+alias ae='deactivate &> /dev/null; source ./venv/bin/activate'
+alias de='deactivate'
+
 export AUTOFEATURE=true 
 export RSPEC=true
 
@@ -249,23 +190,6 @@ timestamp() {
 #lsb() {
   #elastic-beanstalk-describe-environments -a $1 --no-header | grep Green | cut -f 7 -d "|" | xargs -I {} elastic-beanstalk-describe-environment-resources -E {} --no-header | head -n1 | cut -f 3 -d "|" | tr -d "," | xargs ec2-describe-instances | grep INSTANCE | cut -f 2,4,5
 #}
-
-#alias cucumber='cucumber --require features --require lib'
-# ssh into a venice sandbox host Note: requires John's custom modifications the ebs scripts to suppress headers (the --no-header option is not standard)
-#alias sshvsb='ssh -i ~/culver_keys.pem ec2-user@$(elastic-beanstalk-describe-environments -a venice-sandbox --no-header | grep Green | cut -f 7 -d "|" | xargs -I {} elastic-beanstalk-describe-environment-resources -E {} --no-header | head -n1 | cut -f 3 -d "|" | tr "," "\n" | head -n1 | xargs ec2-describe-instances | grep INSTANCE | cut -f 4 )' 
-#alias sshvt='ssh -i ~/culver_keys.pem ec2-user@$(elastic-beanstalk-describe-environments -a venice-test --no-header | grep Green | cut -f 7 -d "|" | xargs -I {} elastic-beanstalk-describe-environment-resources -E {} --no-header | head -n1 | cut -f 3 -d "|" | tr "," "\n" | head -n1 | xargs ec2-describe-instances | grep INSTANCE | cut -f 4 )' 
-#alias sshvp='ssh -i ~/culver_keys.pem ec2-user@$(elastic-beanstalk-describe-environments -a venice-production --no-header | grep Green | cut -f 7 -d "|" | xargs -I {} elastic-beanstalk-describe-environment-resources -E {} --no-header | head -n1 | cut -f 3 -d "|" | tr "," "\n" | head -n1 | xargs ec2-describe-instances | grep INSTANCE | cut -f 4 )' 
-#alias lsvsb='lsb venice-sandbox'
-#alias lsvt='lsb venice-test'
-#alias lsvp='lsb venice-production'
-
-# Heroku 
-#alias hls='heroku logs --tail --remote sandbox'
-#alias hlp='heroku logs --tail --remote production'
-#alias hcs='heroku run console --remote sandbox'
-#alias hcp='heroku run console --remote production'
-
-#alias cdtomcat='cd /usr/local/Cellar/tomcat/7.0.29/libexec/'
 
 # postgres
 #alias pg_start="sudo su postgres -c -e '/opt/local/lib/postgresql90/bin/postgres -D /opt/local/var/db/postgresql90/defaultdb'"
@@ -334,12 +258,7 @@ export TWILIO_FROM_NUMBER=+15005550006
 
 # homebrew support -- I might be ruining everything
 export PATH="/usr/local/sbin:$PATH"
-
-# https://docs.zephyrproject.org/latest/guides/env_vars.html#env-vars
-source ~/zephyrproject/zephyr/zephyr-env.sh
-#reference http://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/nrf/gs_installing.html
-source ~/.zephyrrc
-export ZEPHYR_TOOLCHAIN_VARIANT="zephyr"
+export PATH="/opt/homebrew/bin:$PATH"
 
 # help from homebrew's zsh
 unalias run-help 2> /dev/null
@@ -349,28 +268,10 @@ HELPDIR=/usr/local/share/zsh/help
 # source ~/rackspace_credentials
 export PATH=$PATH:/Applications/Postgres.app/Contents/Versions/latest/bin
 
-# Open SSL
-export PATH="/usr/local/opt/openssl/bin:$PATH"
-
-# IDF  https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/index.html#get-started-get-esp-idf
-export IDF_PATH="$HOME/workspace/esp/esp-idf"
-export PATH="$PATH:$IDF_PATH"
-alias get_idf='. $HOME/workspace/esp/esp-idf/export.sh'
-
 # rbenv support
 #export PATH="$HOME/.rbenv/bin:$PATH"
 eval "$(rbenv init -)"
 
-export PYENV_VIRTUALENV_DISABLE_PROMPT=1 # Dont' touch my prompt
-eval "$(pyenv init -)" # Add pyenv for Python support
-export PATH=$(pyenv root)/shims:$PATH
-eval "$(pyenv virtualenv-init -)" # and an env manager
-export WORKON_HOME=$HOME/.virtualenvs
-mkdir -p $WORKON_HOME
-export PROJECT_HOME=$HOME/workspace
-# TODO can this update dynamically?
-echo "Sourcing virtualenvwrapper from python version 3.10.2"
-source ~/.pyenv/versions/3.10.2/bin/virtualenvwrapper.sh
 # RVM Support
 #[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm" 
@@ -390,6 +291,34 @@ export PATH="$PATH:$HOME/gn"
 # https://code.visualstudio.com/docs/setup/mac#_launching-from-the-command-line
 export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
 
+# for python
+export PATH="/usr/local/opt/python/libexec/bin:$PATH"
 
 echo "path is now $PATH"
+
+
+# heroku autocomplete setup
+HEROKU_AC_ZSH_SETUP_PATH=/Users/johnhinnegan/Library/Caches/heroku/autocomplete/zsh_setup && test -f $HEROKU_AC_ZSH_SETUP_PATH && source $HEROKU_AC_ZSH_SETUP_PATH;
+
+# Created by `pipx` on 2023-12-06 22:48:08
+export PATH="$PATH:/Users/johnhinnegan/.local/bin"
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/opt/homebrew/Caskroom/miniconda/base/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/opt/homebrew/Caskroom/miniconda/base/etc/profile.d/conda.sh" ]; then
+        . "/opt/homebrew/Caskroom/miniconda/base/etc/profile.d/conda.sh"
+    else
+        export PATH="/opt/homebrew/Caskroom/miniconda/base/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+# <<< conda initialize <<<
 
