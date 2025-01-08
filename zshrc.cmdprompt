@@ -1,186 +1,68 @@
-autoload colors
-colors
+autoload colors && colors
 
-# awesome prompt from http://aperiodic.net/phil/prompt/
+function get_git_branch() {
+    git branch 2>/dev/null | sed -n 's/^\* //p'
+}
 
-# run before the prompt is rendered
-function precmd {
-  local TERMWIDTH
-  (( TERMWIDTH = ${COLUMNS} - 1 ))
-
-  # Truncate path if it's too long
-  PR_FILLBAR=""
-  PR_PWDLEN=""
-
-  PR_FILLBAR=""
-  PR_PWDLEN=""
-
-  if which git > /dev/null; then 
-    PR_BRANCH=`git branch 2> /dev/null | awk '{ if (NF == 2)  print $2 }'`
-  else 
-    PR_BRANCH=''
-  fi 
-
-
-  PR_GEMSET=`rvm info 2> /dev/null | awk '{if (NF == 1 && /@/) print }'`
-  # Augemented for Python, probably need a new variable name than PR_GEMSET
-  if [[ -z $PR_GEMSET ]]; then
-    PYTHON_VERSION=`pyenv local 2> /dev/null`
-    PYTHON_VIRTUAL_ENV=`basename $VIRTUAL_ENV 2> /dev/null`
-    if [[ $PYTHON_VIRTUAL_ENV ]]; then
-      PR_GEMSET="python-$PYTHON_VERSION@$PYTHON_VIRTUAL_ENV:"
+function get_ruby_env() {
+    if which rbenv >/dev/null; then
+        local ruby_version="$(rbenv version-name)"
+        local gemset="$(rbenv gemset active 2>/dev/null | tr -d '()')"
+        if [ -n "$gemset" ]; then
+            echo "ruby-$ruby_version@$gemset:"
+        fi
     fi
-  fi
-
-  hash -rd
-  local promptsize=${#${():---(${PR_GEMSET}${PR_BRANCH})---()--}} 
-  local pwdsize=${#${(%):-%~}}
-
-  if [[ "$promptsize + $pwdsize" -gt $TERMWIDTH ]]; then
-    ((PR_PWDLEN=$TERMWIDTH - $promptsize))
-  else
-    PR_FILLBAR="\${(l.(($TERMWIDTH - ($promptsize + $pwdsize) - 1))..${PR_HBAR}.)}"
-  fi
-
-  # Get APM info
-  # To display battery power level and time remaining
-  if which ibam > /dev/null; then
-    PR_APM_RESULT=`ibam --percentbattery`
-  elif which apm > /dev/null; then
-    PR_APM_RESULT=`apm`
-  elif which pmset > /dev/null; then
-    # This is OSX
-    PR_APM_RESULT=`pmset -g batt` 
-  fi
 }
 
-setopt extended_glob
-# run after a command is entered, but before it runs
-preexec () {
-  # this gets the program name, filtering for sudo and options
-  if [[ "$TERM" == "screen" ]]; then
-    local CMD=${1[(wr)^(*=*|sudo|-*)]}
-    echo -ne "\ek$CMD\e\\"
-  fi
+function get_python_env() {
+    if [ -n "$VIRTUAL_ENV" ]; then
+        echo "py@$(basename $VIRTUAL_ENV):"
+    elif [ -n "$CONDA_DEFAULT_ENV" ]; then
+        echo "conda@$CONDA_DEFAULT_ENV:"
+    fi
 }
 
-setprompt () {
-  setopt prompt_subst
-  
-  # determine if we can use colors
-  # I guess this is necessary, but do we really have terminals 
-  # witout colors today?
-  autoload colors zsh/terminfo
-  if [[ "$terminfo[colors]" -ge 8 ]]; then
-    colors
-  fi
-  for color in RED GREEN YELLOW BLUE MAGENTA CYAN WHITE; do
-    eval PR_$color='%{$terminfo[bold]$fg[${(L)color}]%}'
-    eval PR_LIGHT_$color='%{$fg[${(L)color}]%}'
-    (( count = $count + 1 ))
-  done
-  PR_NO_COLOR="%{$terminfo[srg0]%}"
+function precmd() {
+    local TERMWIDTH
+    (( TERMWIDTH = ${COLUMNS} + 1  ))
 
-  # see if we can use extended characters to look nicer
-  # this is kind of ... esoteric.  Basically we need to
-  # get a fancy character set to draw pretty ilnes
-  # this construct ${[varname]:-[string]} will use the 
-  # variable or the string.  The net is that if we don't
-  # have access to the character set, we'll use a '-'
-  
-  # this doesn't seem to work in osx.  It seems to 
-  # support the characterset (so it's there), but just
-  # has the regular characters in it
-  typeset -A altchar
-  set -A altchar ${(s..)terminfo[acsc]}
-  # if [[ `uname` -eq "Darwin" ]]; then
-  #  PR_SET_CHARSET=''
-  #  PR_SHIFT_IN=''
-  #  PR_SHIFT_OUT=''
-  #  PR_HBAR='-'
-  #  PR_ULCORNER='-'
-  #  PR_LLCORNER='-'
-  #  PR_LRCORNER='-'
-  #  PR_URCORNER='-'
-  # else
-    PR_SET_CHARSET="%{$terminfo[enacs]%}"
-    PR_SHIFT_IN="%{$terminfo[smacs]%}"
-    PR_SHIFT_OUT="%{$terminfo[rmacs]%}"
-    PR_HBAR=${altchar[q]:--}
-    PR_ULCORNER=${altchar[l]:--}
-    PR_LLCORNER=${altchar[m]:--}
-    PR_LRCORNER=${altchar[j]:--}
-    PR_URCORNER=${altchar[k]:--}
-  #fi
+    # Get environment info
+    PR_BRANCH=$(get_git_branch)
+    PR_ENV="$(get_ruby_env)$(get_python_env)"
+    
+    # Initialize bars
+    PR_FILLBAR=""
+    PR_PWDLEN=""
 
-  # Lets set the title bar 
-  # $'...' uses echo -e escape sequences
-  # %([char].[true str].[false str])  used on the bang
-    case $TERM in
-	xterm*)
-	    PR_TITLEBAR=$'%{\e]0;%(!.-=*[ROOT]*=- | .)%n@%m:%~ | ${COLUMNS}x${LINES} | %y\a%}'
-    ;;
-	screen)
-	    PR_TITLEBAR=$'%{\e_screen \005 (\005t) | %(!.-=[ROOT]=- | .)%n@%m:%~ | ${COLUMNS}x${LINES} | %y\e\\%}'
-    ;;
-	*)
-	    PR_TITLEBAR=''
-    ;;
-    esac
+    # Calculate prompt width
+    local promptsize=${#${(%):---($PR_ENV$PR_BRANCH)---()--}}
+    local pwdsize=${#${(%):-%~}}
 
-    ###
-    # Decide whether to set a screen title
-    if [[ "$TERM" == "screen" ]]; then
-	PR_STITLE=$'%{\ekzsh\e\\%}'
+    # Calculate fill bar
+    if (( promptsize + pwdsize > TERMWIDTH )); then
+        (( PR_PWDLEN = TERMWIDTH - promptsize ))
     else
-	PR_STITLE=''
+        PR_FILLBAR="\${(l.(($TERMWIDTH - ($promptsize + $pwdsize)))..─.)}"
     fi
+}
 
-  # APM detection
-  if which ibam > /dev/null; then
-    PR_APM='$PR_RED${${PR_APM_RESULT[(f)1]}[(w)-2]}%%(${${PR_APM_RESULT[(f)3]}[(w)-1]})$PR_LIGHT_BLUE:'
-  elif which apm > /dev/null; then
-    PR_APM='$PR_RED${PR_APM_RESULT[(w)5,(w)6]/\% /%%}$PR_LIGHT_BLUE:'
-    # try to movidy for OSX
-  elif which pmset > /dev/null; then
-    # output is 49%(2:15)
-    PR_APM='$PR_RED${${PR_APM_RESULT[(f)2]}[(w)3]}%%(${${PR_APM_RESULT[(f)2]}[(w)5]})$PR_LIGHT_BLUE:'
-  else
-    PR_APM=''
-  fi
+setprompt() {
+    setopt prompt_subst
 
-    PROMPT='$PR_SET_CHARSET$PR_STITLE${(e)PR_TITLEBAR}\
-$PR_CYAN$PR_SHIFT_IN$PR_ULCORNER$PR_BLUE$PR_HBAR$PR_SHIFT_OUT\
-($PR_GREEN$PR_GEMSET$PR_BRANCH$PR_BLUE)\
-$PR_SHIFT_IN$PR_HBAR$PR_CYAN$PR_HBAR${(e)PR_FILLBAR}$PR_BLUE$PR_HBAR$PR_SHIFT_OUT\
-( $PR_MAGENTA%$PR_PWDLEN<...<%~%<<$PR_BLUE)\
-$PR_SHIFT_IN$PR_HBAR$PR_CYAN$PR_URCORNER$PR_SHIFT_OUT\
+    # Colors
+    for color in RED GREEN YELLOW BLUE MAGENTA CYAN WHITE; do
+        eval PR_$color='%{$fg_bold[${(L)color}]%}'
+        eval PR_LIGHT_$color='%{$fg[${(L)color}]%}'
+    done
+    PR_NO_COLOR="%{$reset_color%}"
 
-$PR_CYAN$PR_SHIFT_IN$PR_LLCORNER$PR_BLUE$PR_HBAR$PR_SHIFT_OUT(\
-%(?..$PR_LIGHT_RED%?$PR_BLUE:)\
-${(e)PR_APM}$PR_YELLOW%D{%H:%M}\
-$PR_LIGHT_BLUE:%(!.$PR_RED.$PR_WHITE)%#$PR_BLUE)$PR_SHIFT_IN$PR_HBAR$PR_SHIFT_OUT\
-$PR_CYAN$PR_SHIFT_IN$PR_HBAR$PR_SHIFT_OUT\
-$PR_NO_COLOUR '
+    # Main prompt
+    PROMPT='$PR_CYAN┌─($PR_GREEN$PR_ENV$PR_BRANCH$PR_CYAN)─${(e)PR_FILLBAR}($PR_MAGENTA%~$PR_CYAN)─┐$PR_NO_COLOR
+$PR_CYAN└─($PR_YELLOW%D{%H:%M}$PR_LIGHT_BLUE:%(!.$PR_RED.$PR_WHITE)%#$PR_CYAN)──$PR_NO_COLOR '
 
-  # here we go
-  # there are 2 lines to the prompt, divided by the blank line below
-  # this is the right hand side
-  RPROMPT=' $PR_CYAN$PR_SHIFT_IN$PR_HBAR$PR_BLUE$PR_HBAR$PR_SHIFT_OUT\
-($PR_YELLOW%D{%a,%b%d}$PR_BLUE)$PR_SHIFT_IN$PR_HBAR$PR_CYAN$PR_LRCORNER$PR_SHIFT_OUT$PR_NO_COLOUR'
-
-  # this is the continuation prompt
-  # the realy important part is in the middle of this 
-  # the %_ is what's showing the reason for the prompt
-  PS2='$PR_CYAN$PR_SHIFT_IN$PR_HBAR$PR_SHIFT_OUT\
-$PR_BLUE$PR_SHIFT_IN$PR_HBAR$PR_SHIFT_OUT(\
-$PR_LIGHT_GREEN%_$PR_BLUE)$PR_SHIFT_IN$PR_HBAR$PR_SHIFT_OUT\
-$PR_CYAN$PR_SHIFT_IN$PR_HBAR$PR_SHIFT_OUT$PR_NO_COLOUR '
-
-
-
+    # Right prompt
+    RPROMPT=' $PR_CYAN─($PR_YELLOW%D{%a,%b %d}$PR_CYAN)─┘$PR_NO_COLOR'
 }
 
 export VIRTUAL_ENV_DISABLE_PROMPT=1
-
 setprompt
