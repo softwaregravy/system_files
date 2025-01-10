@@ -15,7 +15,8 @@ endif
 " -----------------------------------------------------------------------------  
 call plug#begin()
 " File Explorer
-Plug 'preservim/nerdtree'
+Plug 'nvim-tree/nvim-tree.lua'
+Plug 'nvim-tree/nvim-web-devicons'  " Optional, for file icons
 Plug 'preservim/nerdcommenter'
 
 " Ruby/Rails
@@ -125,17 +126,61 @@ set si  " Smart indent
 " -----------------------------------------------------------------------------  
 " |                               Plugin Settings                              | 
 " -----------------------------------------------------------------------------  
-" NERDTree Configuration
-let NERDTreeHijackNetrw=1  " Use NERDTree for directory browsing
-let NERDTreeMouseMode=1    " Single click for directory operations
-let NERDTreeWinSize=40     " Set sidebar width
-:noremap <Leader>n :NERDTreeToggle<CR>
+" nvim-tree Configuration
+lua << EOF
+-- disable netrw at the very start of your init.lua (strongly advised)
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+
+require("nvim-tree").setup({
+  view = {
+    width = 40,  -- Same width as your previous NERDTree
+  },
+  actions = {
+    open_file = {
+      quit_on_open = false,
+    },
+  },
+  renderer = {
+    icons = {
+      show = {
+        file = true,
+        folder = true,
+        folder_arrow = true,
+        git = true,
+      },
+    },
+  },
+    filters = {
+    dotfiles = true,  -- Hide dotfiles by default
+  },
+ on_attach = function(bufnr)
+    local api = require('nvim-tree.api')
+
+    -- Default mappings
+    api.config.mappings.default_on_attach(bufnr)
+    vim.keymap.set('n', 's', api.node.open.vertical, { buffer = bufnr })
+    vim.keymap.set('n', 'i', api.node.open.horizontal, { buffer = bufnr })
+    vim.keymap.set('n', '?', api.tree.toggle_help, { buffer = bufnr })
+  end,
+
+})
+-- Auto open nvim-tree when opening a file or directory
+vim.api.nvim_create_autocmd("VimEnter", {
+  callback = function()
+    require("nvim-tree.api").tree.toggle(false, true)
+  end,
+})
+EOF
+nnoremap <Leader>n :NvimTreeToggle<CR>
+
 
 " NERDCommenter Configuration
 let NERDCreateDefaultMappings=0  " Disable default mappings
 :map <Leader>c :call nerdcommenter#Comment(0, "toggle")<CR><ESC>
 
 " Telescope Mappings
+"
 nnoremap <Leader>f <cmd>Telescope find_files<cr>
 nnoremap <Leader>b <cmd>Telescope buffers<cr>
 nnoremap <Leader>g <cmd>Telescope live_grep<cr>
@@ -145,6 +190,7 @@ nnoremap <Leader>h <cmd>Telescope help_tags<cr>
 " |                               LSP Configuration                            |
 " -----------------------------------------------------------------------------  
 " Ruby LSP Setup
+"
 if executable('solargraph')
     lua << EOF
     require'lspconfig'.solargraph.setup{
@@ -160,13 +206,20 @@ endif
 " -----------------------------------------------------------------------------  
 " |                               File Type Settings                           |
 " -----------------------------------------------------------------------------  
+"
 filetype plugin indent on
 
+" for vimrc files
+"
+autocmd BufRead,BufNewFile .vimrc,vimrc,init.vim set filetype=vim
+
 " Ruby Indentation Settings
+"
 let g:ruby_indent_assignment_style = 'variable'
 let g:ruby_indent_hanging_elements = 0
 
 " Language-Specific Completion
+"
 autocmd FileType html :set omnifunc=htmlcomplete#CompleteTags
 autocmd FileType python set omnifunc=pythoncomplete#Complete
 autocmd FileType javascript set omnifunc=javascriptcomplete#CompleteJS
@@ -200,7 +253,7 @@ iabbrev custmoer customer
 " |                               Theme Settings                               |
 " -----------------------------------------------------------------------------  
 set background=dark
-syntax enable
+syntax on
 colorscheme ir_black
 
 " -----------------------------------------------------------------------------  
