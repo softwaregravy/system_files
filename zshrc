@@ -1,11 +1,3 @@
-# Completion System Setup
-autoload -Uz compinit
-if [ $(date +'%j') != $(stat -f '%Sm' -t '%j' ~/.zcompdump) ]; then
-  compinit
-else
-  compinit -C
-fi
-
 # Environment Variables
 export EDITOR="vim"
 export VISUAL="$EDITOR"
@@ -34,16 +26,6 @@ autoload colors && colors
 bindkey -v
 KEYTIMEOUT=1
 bindkey '^R' history-incremental-search-backward
-
-# Completion System
-zstyle ':completion:*' completer _complete _approximate _expand
-zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
-zstyle ':completion:*:default' list-prompt '%S%M matches%s'
-zstyle ':completion:*:default' menu 'select=0'
-zstyle ':completion:*' file-sort modification reverse
-zstyle ':completion:*' list-colors "=(#b) #([0-9]#)*=36=31"
-zstyle ':completion:*:manuals' separate-sections true
-zstyle ':completion:*' max-errors 2
 
 # Lazy load node version manager
 export NVM_LAZY_LOAD=true
@@ -134,3 +116,48 @@ source $HOME/.zshrc.cmdprompt
 
 # Git Configuration
 git config --global alias.ignore '!gi() { curl -L -s https://www.gitignore.io/api/$@ ;}; gi'
+
+
+# ZSH Plugin and completion setup
+if type brew &>/dev/null; then
+    # Initialize completion system first
+    FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
+    
+    autoload -Uz compinit
+    if [ $(date +'%j') != $(stat -f '%Sm' -t '%j' ~/.zcompdump) ]; then
+        compinit
+    else
+        compinit -C
+    fi
+
+    # Basic completion settings
+    zstyle ':completion:*' completer _complete _approximate _expand
+    zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
+    zstyle ':completion:*:default' list-prompt '%S%M matches%s'
+    zstyle ':completion:*:default' menu 'select=0'
+    zstyle ':completion:*' file-sort modification reverse
+    zstyle ':completion:*' list-colors "=(#b) #([0-9]#)*=36=31"
+    zstyle ':completion:*:manuals' separate-sections true
+    zstyle ':completion:*' max-errors 2
+
+    # Check for autosuggestions (load first)
+    if ! brew list zsh-autosuggestions &>/dev/null; then
+        echo "zsh-autosuggestions not installed. To install:"
+        echo "  brew install zsh-autosuggestions"
+    else
+        source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+        export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=60'
+    fi
+
+    # Check for syntax highlighting (must be last)
+    if ! brew list zsh-syntax-highlighting &>/dev/null; then
+        echo "zsh-syntax-highlighting not installed. To install:"
+        echo "  brew install zsh-syntax-highlighting"
+    else
+        source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+    fi
+else
+    echo "Homebrew not installed. To install ZSH plugins:"
+    echo "1. Install homebrew from https://brew.sh/"
+    echo "2. Then run: brew install zsh-autosuggestions zsh-syntax-highlighting"
+fi
