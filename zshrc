@@ -1,5 +1,5 @@
 # Environment Variables
-export EDITOR="vim"
+export EDITOR="nvim"
 export VISUAL="$EDITOR"
 export PAGER=less
 export GIT_PAGER=less
@@ -63,6 +63,9 @@ alias cpplint='find . -iname \*.h -o -iname \*.cpp -o -iname \*.c -o -iname \*.i
 alias reset_db='rake db:drop:all db:create db:migrate db:seed db:test:prepare'
 alias ae='deactivate &> /dev/null; source ./venv/bin/activate'
 alias de='deactivate'
+alias vi='nvim'
+alias ogvim='\vim'
+
 
 # Utility Functions
 u() {
