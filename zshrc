@@ -120,6 +120,14 @@ source $HOME/.zshrc.cmdprompt
 # Git Configuration
 git config --global alias.ignore '!gi() { curl -L -s https://www.gitignore.io/api/$@ ;}; gi'
 
+# for installing Rubies on OSX
+if ! brew list openssl@3 &>/dev/null; then
+  echo "openssl@3 not found. Please install it first:"
+  echo "brew install openssl@3"
+else
+  export RUBY_CONFIGURE_OPTS="--with-openssl-dir=$(brew --prefix openssl@3)"
+fi
+
 
 # ZSH Plugin and completion setup
 if type brew &>/dev/null; then
