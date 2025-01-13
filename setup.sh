@@ -25,7 +25,7 @@ create_symlink() {
             echo "Warning: $target points to $current_source instead of $source"
             echo -n "Update symlink? (y/n) "
             REPLY="n"
-            read -r REPLY || true
+            read -r REPLY </dev/tty || true
             if [ "$REPLY" = "y" ] || [ "$REPLY" = "Y" ]; then
                 ln -sf "$source" "$target"
                 echo "Updated symlink: $target -> $source"
@@ -35,7 +35,7 @@ create_symlink() {
         echo "Warning: $target exists but is not a symlink"
         echo -n "Replace with symlink? (y/n) "
         REPLY="n"
-        read -r REPLY || true
+        read -r REPLY </dev/tty || true
         if [ "$REPLY" = "y" ] || [ "$REPLY" = "Y" ]; then
             mv "$target" "${target}.backup"
             ln -s "$source" "$target"
