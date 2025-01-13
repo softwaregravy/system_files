@@ -23,13 +23,11 @@
 " |   :call Tabstyle_tabs = set tab to real tabs                              |
 " |   :call Tabstyle_spaces = set tab to 2 spaces                             |
 " |                                                                           |
-" | Put machine/user specific settings in ~/.vimrc.local                      |
 " -----------------------------------------------------------------------------  
 
 " -----------------------------------------------------------------------------  
 " |                               Pathogen                                    |
 " -----------------------------------------------------------------------------  
-execute pathogen#infect()
 
 
 set nocompatible
@@ -221,6 +219,7 @@ imap aa @
 :noremap <Leader>n :NERDTreeToggle<CR>
 let NERDTreeHijackNetrw=1 " User instead of Netrw when doing an edit /foobar
 let NERDTreeMouseMode=1 " Single click for everything
+let NERDTreeWinSize=40 " set default width of nerdtree
 
 
 " NERD Commenter **************************************************************
@@ -232,42 +231,6 @@ let NERDCreateDefaultMappings=0 " I turn this off to make it simple
 " :map <Leader>c :call NERDComment(0, "toggle")<CR><ESC>
 :map <Leader>c :call nerdcommenter#Comment(0, "toggle")<CR><ESC>
 " let g:NERDCreateDefaultMappings = 1
-
-" NERTree
-let NERDTreeWinSize=40 " set default width of nerdtree
-
-" SnippetsEmu *****************************************************************
-"imap <unique> <C-j> <Plug>Jumper
-"let g:snip_start_tag = "_\."
-"let g:snip_end_tag = "\._"
-"let g:snip_elem_delim = ":"
-"let g:snip_set_textmate_cp = '1'  " Tab to expand snippets, not automatically.
-
-
-" CommandT ********************************************************
-  " To compile:
-  " cd ~/cl/etc/vim/ruby/command-t
-  " ruby extconf.rb
-  " make
-let g:CommandTMatchWindowAtTop = 1
-map <Leader>f :CommandT<CR>
-
-
-" fuzzyfinder ********************************************************
-" I'm using CommandT for main searching, but it doesn't do buffers, so I'm
-" using FuzzyFinder for that
-map <Leader>b :FufBuffer<CR>
-"let g:fuzzy_ignore = '.o;.obj;.bak;.exe;.pyc;.pyo;.DS_Store;.db'
-
-
-" autocomplpop ***************************************************************
-" complete option
-"set complete=.,w,b,u,t,k
-"let g:AutoComplPop_CompleteOption = '.,w,b,u,t,k'
-"set complete=.
-let g:AutoComplPop_IgnoreCaseOption = 0
-let g:AutoComplPop_BehaviorKeywordLength = 2
-
 
 " railsvim ***************************************************************
 map <Leader>ra :AS<CR>
@@ -319,7 +282,8 @@ endif
 "autocmd User ~/git/some_folder/* call Tabstyle_spaces() | let g:force_xhtml=1
 
 " play nice with rvm https://rvm.beginrescueend.com/integration/vim/
-set shell=/bin/sh
+" removing as we are not using rvm anymore
+" set shell=/bin/sh
 
 " cause
 iabbrev busienss business

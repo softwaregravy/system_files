@@ -1,5 +1,5 @@
 # Environment Variables
-export EDITOR="nvim"
+export EDITOR="vim"
 export VISUAL="$EDITOR"
 export PAGER=less
 export GIT_PAGER=less
@@ -63,8 +63,7 @@ alias cpplint='find . -iname \*.h -o -iname \*.cpp -o -iname \*.c -o -iname \*.i
 alias reset_db='rake db:drop:all db:create db:migrate db:seed db:test:prepare'
 alias ae='deactivate &> /dev/null; source ./venv/bin/activate'
 alias de='deactivate'
-alias vi='nvim'
-alias ogvim='\vim'
+alias vi='vim'
 
 
 # Utility Functions
@@ -127,6 +126,17 @@ if ! brew list openssl@3 &>/dev/null; then
 else
   export RUBY_CONFIGURE_OPTS="--with-openssl-dir=$(brew --prefix openssl@3)"
 fi
+
+# Used by screenrc
+export TERM="xterm-256color"
+
+# Screen title setting for terminal
+preexec () {
+    if [[ "$TERM" == "screen" ]]; then
+        local CMD=${1[(wr)^(*=*|sudo|-*)]}
+        echo -ne "\ek$CMD\e\\"
+    fi
+}
 
 
 # ZSH Plugin and completion setup

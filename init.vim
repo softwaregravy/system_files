@@ -255,6 +255,7 @@ iabbrev custmoer customer
 set background=dark
 syntax on
 colorscheme ir_black
+set termguicolors
 
 " -----------------------------------------------------------------------------  
 " |                               Local Settings                               |

@@ -1,6 +1,3 @@
-## gyaresu's .screenrc 2008-03-25
-# http://delicious.com/search?p=screenrc
-
 # Don't display the copyright page
 startup_message off
 
@@ -14,3 +11,4 @@ defscrollback 10000
 # all you see is the other terminals history.
 # termcapinfo xterm|xterms|xs|rxvt ti@:te@
 
+term screen-256color
