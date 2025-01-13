@@ -54,8 +54,8 @@ if ! xcode-select -p &>/dev/null; then
 fi
 
 # Create workspaces directory
-echo "Setting up workspaces directory..."
-WORKSPACE_DIR="$HOME/workspaces"
+echo "Setting up workspace directory..."
+WORKSPACE_DIR="$HOME/workspace"
 mkdir -p "$WORKSPACE_DIR"
 
 # Clone or update system files
