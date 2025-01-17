@@ -110,10 +110,11 @@ timestamp() {
 typeset -U path
 path=(
   /opt/homebrew/bin
-  /usr/local/sbin
-  /usr/local/bin
+  $HOME/.rbenv/shims
   $HOME/.poetry/bin
   $HOME/.local/bin
+  /usr/local/sbin
+  /usr/local/bin
   /Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin
   /Applications/Postgres.app/Contents/Versions/latest/bin
   $path
