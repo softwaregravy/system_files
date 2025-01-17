@@ -133,6 +133,9 @@ VIM_PACKAGES=(
     "https://github.com/preservim/nerdcommenter.git"
     "https://github.com/tpope/vim-rails.git"
     "https://github.com/tpope/vim-markdown.git"
+    "https://github.com/pangloss/vim-javascript.git"
+    "https://github.com/leafgarland/typescript-vim.git"
+    "https://github.com/MaxMEllon/vim-jsx-pretty.git"
     # Add more packages here 
 )
 
