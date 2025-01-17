@@ -27,14 +27,10 @@ bindkey -v
 KEYTIMEOUT=1
 bindkey '^R' history-incremental-search-backward
 
-# Lazy load node version manager
-export NVM_LAZY_LOAD=true
-export NVM_DIR="$HOME/.nvm"
-nvm() {
-  unset -f nvm
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-  nvm "$@"
-}
+# Javascript support
+#
+# Fast Version Manager
+eval "$(fnm env --use-on-cd)"
 
 # Lazy load conda
 conda() {
@@ -64,6 +60,7 @@ alias reset_db='rake db:drop:all db:create db:migrate db:seed db:test:prepare'
 alias ae='deactivate &> /dev/null; source ./venv/bin/activate'
 alias de='deactivate'
 alias vi='vim'
+alias p='pnpm'
 
 
 # Utility Functions

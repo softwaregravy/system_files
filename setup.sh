@@ -108,6 +108,40 @@ for link in "${LINKS[@]}"; do
     create_symlink "$(realpath "$source")" "$target"
 done
 
+# Setup Vim packages
+echo "Setting up Vim packages..."
+VIM_PACKAGES=(
+    "https://github.com/preservim/nerdtree.git"
+    "https://github.com/preservim/nerdcommenter.git"
+    "https://github.com/tpope/vim-rails.git"
+    # Add more packages here 
+)
+
+setup_vim_package() {
+    local repo_url=$1
+    local package_name=$(basename "$repo_url" .git)
+    local package_dir="$HOME/.vim/pack/vendor/start/$package_name"
+
+    if [ ! -d "$package_dir" ]; then
+        echo "Installing Vim package: $package_name..."
+        mkdir -p "$package_dir"
+        git clone "$repo_url" "$package_dir"
+    else
+        echo "Updating Vim package: $package_name..."
+        (cd "$package_dir" && git pull)
+    fi
+
+    vim -u NONE -c "helptags $package_dir/doc" -c q
+}
+
+# Ensure Vim package directories exist
+mkdir -p "$HOME/.vim/pack/vendor/start"
+
+# Install or update each package
+for package in "${VIM_PACKAGES[@]}"; do
+    setup_vim_package "$package"
+done
+
 # Setup GitHub SSH keys if they don't exist
 SSH_DIR="$HOME/.ssh"
 if [ ! -f "$SSH_DIR/id_ed25519" ]; then

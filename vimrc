@@ -25,11 +25,6 @@
 " |                                                                           |
 " -----------------------------------------------------------------------------  
 
-" -----------------------------------------------------------------------------  
-" |                               Pathogen                                    |
-" -----------------------------------------------------------------------------  
-
-
 set nocompatible
 let mapleader = ","
 " Professor VIM says '87% of users prefer jj over esc', jj abrams disagrees
@@ -44,10 +39,6 @@ function! Tabstyle_tabs()
   set shiftwidth=4
   set tabstop=4
   set noexpandtab
-  autocmd User Rails set softtabstop=4
-  autocmd User Rails set shiftwidth=4
-  autocmd User Rails set tabstop=4
-  autocmd User Rails set noexpandtab
 endfunction
 
 " function! Tabstyle_spaces()
@@ -232,7 +223,7 @@ let NERDCreateDefaultMappings=0 " I turn this off to make it simple
 :map <Leader>c :call nerdcommenter#Comment(0, "toggle")<CR><ESC>
 " let g:NERDCreateDefaultMappings = 1
 
-" railsvim ***************************************************************
+" rails-vim ***************************************************************
 map <Leader>ra :AS<CR>
 map <Leader>rs :RS<CR>
 
