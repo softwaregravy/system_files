@@ -179,4 +179,16 @@ else
     echo "GitHub SSH keys already exist"
 fi
 
+# Create symbolic links for global Git hooks
+echo "Setting up global Git hooks..."
+GLOBAL_GIT_HOOKS_DIR="$HOME/.git-hooks"
+mkdir -p "$GLOBAL_GIT_HOOKS_DIR"
+
+# Add prepare-commit-msg hook
+create_symlink "$SYSTEM_FILES_DIR/git_hooks/prepare-commit-msg" "$GLOBAL_GIT_HOOKS_DIR/prepare-commit-msg"
+chmod +x "$GLOBAL_GIT_HOOKS_DIR/prepare-commit-msg"
+
+# Configure Git to use global hooks
+git config --global core.hooksPath "$GLOBAL_GIT_HOOKS_DIR"
+
 echo "Setup complete!"
