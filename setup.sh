@@ -55,16 +55,34 @@ if ! xcode-select -p &>/dev/null; then
     exit 1
 fi
 
-# Create workspaces directory
+# Create directories
 echo "Setting up workspace directory..."
 WORKSPACE_DIR="$HOME/workspace"
 mkdir -p "$WORKSPACE_DIR"
+
+# Create and secure .keys directory
+echo "Setting up .keys directory..."
+KEYS_DIR="$HOME/.keys"
+mkdir -p "$KEYS_DIR"
+chmod 700 "$KEYS_DIR"
+
+# Create template for OpenAI keys if it doesn't exist
+OPENAI_KEYS_FILE="$KEYS_DIR/openai"
+if [ ! -f "$OPENAI_KEYS_FILE" ]; then
+    cat > "$OPENAI_KEYS_FILE" << 'EOF'
+# OpenAI API Configuration
+export OPENAI_API_KEY="your_key_here"
+export OPENAI_ORG_ID="optional_org_id_here"  # if you have one
+EOF
+    chmod 600 "$OPENAI_KEYS_FILE"
+    echo "Created OpenAI keys template at $OPENAI_KEYS_FILE"
+fi
 
 # Clone or update system files
 SYSTEM_FILES_DIR="$WORKSPACE_DIR/system_files"
 if [ ! -d "$SYSTEM_FILES_DIR" ]; then
     echo "Cloning system files repository..."
-    git clone https://github.com/softwaregravy/system_files.git "$SYSTEM_FILES_DIR"
+    git clone git@github.com:softwaregravy/system_files.git "$SYSTEM_FILES_DIR"
 else
     echo "Updating system files repository..."
     (cd "$SYSTEM_FILES_DIR" && git pull)

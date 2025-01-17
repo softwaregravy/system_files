@@ -8,6 +8,15 @@ export TERM='xterm-256color'
 export LC_CTYPE=en_US.UTF-8
 export LANG=en_US.UTF-8
 
+# Load service keys
+if [ -d "$HOME/.keys" ]; then
+  for f in $HOME/.keys/*; do
+    if [ -f "$f" ]; then
+      source "$f"
+    fi
+  done
+fi
+
 # History Configuration
 HISTSIZE=20000
 SAVEHIST=15000
