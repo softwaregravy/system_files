@@ -132,6 +132,7 @@ VIM_PACKAGES=(
     "https://github.com/preservim/nerdtree.git"
     "https://github.com/preservim/nerdcommenter.git"
     "https://github.com/tpope/vim-rails.git"
+    "https://github.com/tpope/vim-markdown.git"
     # Add more packages here 
 )
 

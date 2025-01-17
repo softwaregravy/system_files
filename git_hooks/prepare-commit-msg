@@ -23,7 +23,9 @@ messages=$(jq -n --arg diff "$git_diff_output_limited" '[
   {"role": "system", "content": "You are an AI assistant that helps generate git commit messages based on code changes."},
   {"role": "user", "content": ("Suggest an informative commit message by summarizing code changes from the shared command output. 
     The commit message should follow the conventional commit format and provide meaningful context for future readers.
-    Be concise. Use bullet pooints
+    Be concise. 
+    Use bullet pooints.
+    Repond in plaintext with no markup.
     \n\nChanges:\n" + $diff)}
 ]')
 
@@ -34,7 +36,7 @@ response=$(curl -s -X POST https://api.openai.com/v1/chat/completions \
   -d "$(jq -n \
         --argjson messages "$messages" \
         '{
-          model: "gpt-4",
+          model: "gpt-4o-mini",
           messages: $messages,
           temperature: 0.5,
           max_tokens: 5000
