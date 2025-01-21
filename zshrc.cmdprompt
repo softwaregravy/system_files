@@ -5,11 +5,26 @@ function get_git_branch() {
 }
 
 function get_ruby_env() {
-    if which rbenv >/dev/null; then
-        local ruby_version="$(rbenv version-name)"
+    # Try RVM first
+    if which rvm-prompt >/dev/null 2>&1; then
+
+      local ruby_info=$(rvm current 2>/dev/null)
+        if [ -n "$ruby_info" ]; then
+            echo "$ruby_info:"
+            return
+        fi
+    fi
+
+    # Try rbenv if RVM not found or not active
+    if which rbenv >/dev/null 2>&1; then
+        local ruby_version="$(rbenv version-name 2>/dev/null)"
         local gemset="$(rbenv gemset active 2>/dev/null | tr -d '()')"
-        if [ -n "$gemset" ]; then
-            echo "ruby-$ruby_version@$gemset:"
+        if [ -n "$ruby_version" ]; then
+            if [ -n "$gemset" ]; then
+                echo "ruby-$ruby_version@$gemset:"
+            else
+                echo "ruby-$ruby_version:"
+            fi
         fi
     fi
 }

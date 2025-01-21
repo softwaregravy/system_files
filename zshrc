@@ -8,6 +8,9 @@ export TERM='xterm-256color'
 export LC_CTYPE=en_US.UTF-8
 export LANG=en_US.UTF-8
 
+# Preload RVM to make it available
+[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
+
 # Load service keys
 if [ -d "$HOME/.keys" ]; then
   for f in $HOME/.keys/*; do
@@ -49,8 +52,6 @@ conda() {
   conda "$@"
 }
 
-# Initialize rbenv
-eval "$(rbenv init -)"
 
 # Aliases
 alias py=python3
@@ -79,7 +80,9 @@ u() {
   cd $ud
 }
 
-chpwd() { ls }
+chpwd() { 
+  ls ;
+}
 
 bk() {
   if [ -f "$1" ]; then
@@ -110,7 +113,6 @@ timestamp() {
 typeset -U path
 path=(
   /opt/homebrew/bin
-  $HOME/.rbenv/shims
   $HOME/.poetry/bin
   $HOME/.local/bin
   /usr/local/sbin
@@ -196,5 +198,3 @@ else
     echo "2. Then run: brew install zsh-autosuggestions zsh-syntax-highlighting"
 fi
 
-# Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
-export PATH="$PATH:$HOME/.rvm/bin"
