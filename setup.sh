@@ -105,7 +105,6 @@ else
     echo "Warning: Brewfile not found in $SYSTEM_FILES_DIR"
 fi
 
-
 # Create symbolic links
 echo "Setting up symbolic links..."
 LINKS=(
