@@ -105,6 +105,18 @@ else
     echo "Warning: Brewfile not found in $SYSTEM_FILES_DIR"
 fi
 
+# Install or update RVM
+echo "Setting up RVM..."
+if ! command -v rvm &>/dev/null; then
+    echo "Installing RVM..."
+    # Install RVM - no need for explicit GPG handling on OS X
+    curl -sSL https://get.rvm.io | bash -s stable 
+    source "$HOME/.rvm/scripts/rvm"
+else
+    echo "Updating RVM..."
+    rvm get stable 
+fi
+
 # Create symbolic links
 echo "Setting up symbolic links..."
 LINKS=(
@@ -116,6 +128,7 @@ LINKS=(
     "$SYSTEM_FILES_DIR/inputrc:$HOME/.inputrc"
     "$SYSTEM_FILES_DIR/gemrc:$HOME/.gemrc"
     "$SYSTEM_FILES_DIR/gitconfig:$HOME/.gitconfig"
+    "$SYSTEM_FILES_DIR/rvmrc:$HOME/.rvmrc"
     "$SYSTEM_FILES_DIR/ir_black.vim:$HOME/.vim/colors/ir_black.vim"
 )
 

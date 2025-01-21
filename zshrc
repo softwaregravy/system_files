@@ -195,3 +195,6 @@ else
     echo "1. Install homebrew from https://brew.sh/"
     echo "2. Then run: brew install zsh-autosuggestions zsh-syntax-highlighting"
 fi
+
+# Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
+export PATH="$PATH:$HOME/.rvm/bin"

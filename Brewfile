@@ -42,8 +42,6 @@ brew "poetry"
 brew "pyenv"
 brew "pyenv-virtualenv"
 brew "qemu"
-brew "ruby-build"
-brew "rbenv"
 brew "redis", restart_service: true
 brew "smartmontools"
 brew "vips"

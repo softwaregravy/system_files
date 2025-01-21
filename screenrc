@@ -12,3 +12,6 @@ defscrollback 10000
 # termcapinfo xterm|xterms|xs|rxvt ti@:te@
 
 term screen-256color
+
+# Ensure RVM works properly by using a login shell
+shell -${SHELL}
