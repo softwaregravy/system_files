@@ -145,6 +145,12 @@ preexec () {
     fi
 }
 
+# Update Brewfile 
+update_brewfile() {
+    echo "Updating Brewfile..."
+    brew bundle dump --file="$SYSTEM_FILES_DIR/Brewfile" --force
+    echo "Brewfile updated at $SYSTEM_FILES_DIR/Brewfile"
+}
 
 # ZSH Plugin and completion setup
 if type brew &>/dev/null; then
