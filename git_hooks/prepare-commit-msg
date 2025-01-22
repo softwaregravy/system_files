@@ -21,10 +21,16 @@ git_diff_output_limited=$(echo "$git_diff_output" | head -n 1000)
 # Prepare the AI prompt for the chat model
 messages=$(jq -n --arg diff "$git_diff_output_limited" '[
   {"role": "system", "content": "You are an AI assistant that helps generate git commit messages based on code changes."},
-  {"role": "user", "content": ("Suggest an informative commit message by summarizing code changes from the shared command output. 
+  {"role": "user", "content": ("Suggest a short commit message by summarizing code changes from the shared command output. 
     The commit message should follow the conventional commit format and provide meaningful context for future readers.
-    Be concise. 
+    Be very concise. 
     Use bullet pooints.
+    Do not include descriptions for test and spec files unless most changes are to those files.
+    Do include descriptions for changes to shared files and commits.
+    Whitespace changes do not need mention unless all changes are whitespace.
+    Emphasize changes to changes that will impact a database datamodel or data stored in external systems like S3 or caching technologies.
+    Be very concise. 
+
     Repond in plaintext with no markup.
     \n\nChanges:\n" + $diff)}
 ]')
@@ -55,7 +61,3 @@ fi
 
 # Write the commit message to the commit message file
 echo "$commit_message" > "$COMMIT_MSG_FILE"
-
-# Also show the message in the terminal for visibility
-echo "🤖 Generated commit message:"
-echo "$commit_message"
