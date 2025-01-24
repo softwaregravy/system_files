@@ -195,6 +195,16 @@ else
     echo "GitHub SSH keys already exist"
 fi
 
+
+# Install yek if not present
+echo "Checking for yek..."
+if ! command -v yek &>/dev/null; then
+    echo "Installing yek..."
+    curl -fsSL https://bodo.run/yek.sh | bash
+else
+    echo "yek already installed"
+fi
+
 # Create symbolic links for global Git hooks
 echo "Setting up global Git hooks..."
 GLOBAL_GIT_HOOKS_DIR="$HOME/.git-hooks"
