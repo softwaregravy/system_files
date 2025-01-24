@@ -8,9 +8,6 @@ export TERM='xterm-256color'
 export LC_CTYPE=en_US.UTF-8
 export LANG=en_US.UTF-8
 
-# Preload RVM to make it available
-[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
-
 # Load service keys
 if [ -d "$HOME/.keys" ]; then
   for f in $HOME/.keys/*; do
@@ -121,6 +118,10 @@ path=(
   /Applications/Postgres.app/Contents/Versions/latest/bin
   $path
 )
+
+# Load RVM to make it available
+# Must come before the command prompt
+[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
 
 # Load theme configuration
 source $HOME/.zshrc.cmdprompt
