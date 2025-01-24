@@ -49,6 +49,20 @@ function precmd() {
   PR_BRANCH=$(get_git_branch)
   PR_ENV="$(get_ruby_env)$(get_python_env)"
 
+  # Get APM (Power Management) info and set format
+  if which ibam > /dev/null; then
+    PR_APM_RESULT=`ibam --percentbattery`
+    PR_APM='$PR_RED${${PR_APM_RESULT[(f)1]}[(w)-2]}%%(${${PR_APM_RESULT[(f)3]}[(w)-1]})$PR_LIGHT_BLUE:'
+  elif which apm > /dev/null; then
+    PR_APM_RESULT=`apm`
+    PR_APM='$PR_RED${PR_APM_RESULT[(w)5,(w)6]/\% /%%}$PR_LIGHT_BLUE:'
+  elif which pmset > /dev/null; then
+    PR_APM_RESULT=`pmset -g batt`
+    PR_APM='$PR_RED${${PR_APM_RESULT[(f)2]}[(w)3]}%%(${${PR_APM_RESULT[(f)2]}[(w)5]})$PR_LIGHT_BLUE:'
+  else
+    PR_APM=''
+  fi
+
   # Initialize bars
   PR_FILLBAR=""
   PR_PWDLEN=""
@@ -77,10 +91,10 @@ setprompt() {
 
   # Main prompt
   PROMPT='$PR_CYAN┌─($PR_GREEN$PR_ENV$PR_BRANCH$PR_CYAN)─${(e)PR_FILLBAR}($PR_MAGENTA%~$PR_CYAN)─┐$PR_NO_COLOR
-  $PR_CYAN└─($PR_YELLOW%D{%H:%M}$PR_LIGHT_BLUE:%(!.$PR_RED.$PR_WHITE)%#$PR_CYAN)──$PR_NO_COLOR '
+$PR_CYAN└─(${(e)PR_APM}$PR_YELLOW%D{%H:%M}$PR_LIGHT_BLUE:%(!.$PR_RED.$PR_WHITE)%#$PR_CYAN)──$PR_NO_COLOR '
 
   # Right prompt
-  RPROMPT=' $PR_CYAN─($PR_YELLOW%D{%a,%b %d}$PR_CYAN)─┘$PR_NO_COLOR'
+  RPROMPT=' $PR_CYAN─($PR_YELLOW%D{%a,%b %-d}$PR_CYAN)─┘$PR_NO_COLOR'
 }
 
 export VIRTUAL_ENV_DISABLE_PROMPT=1
