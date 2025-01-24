@@ -1,82 +1,86 @@
 autoload colors && colors
 
 function get_git_branch() {
-    git branch 2>/dev/null | sed -n 's/^\* //p'
+  git branch 2>/dev/null | sed -n 's/^\* //p'
 }
 
 function get_ruby_env() {
-    # Try RVM first
-    if which rvm-prompt >/dev/null 2>&1; then
+  # Try RVM first
+  if which rvm-prompt >/dev/null 2>&1; then
 
-      local ruby_info=$(rvm current 2>/dev/null)
-        if [ -n "$ruby_info" ]; then
-            echo "$ruby_info:"
-            return
-        fi
+    local ruby_info=$(rvm current 2>/dev/null)
+    if [ -n "$ruby_info" ]; then
+      echo "$ruby_info:"
+      return
     fi
+  fi
 
-    # Try rbenv if RVM not found or not active
-    if which rbenv >/dev/null 2>&1; then
-        local ruby_version="$(rbenv version-name 2>/dev/null)"
-        local gemset="$(rbenv gemset active 2>/dev/null | tr -d '()')"
-        if [ -n "$ruby_version" ]; then
-            if [ -n "$gemset" ]; then
-                echo "ruby-$ruby_version@$gemset:"
-            else
-                echo "ruby-$ruby_version:"
-            fi
-        fi
+  # Try rbenv if RVM not found or not active
+  if which rbenv >/dev/null 2>&1; then
+    local ruby_version="$(rbenv version-name 2>/dev/null)"
+    local gemset="$(rbenv gemset active 2>/dev/null | tr -d '()')"
+    if [ -n "$ruby_version" ]; then
+      if [ -n "$gemset" ]; then
+        echo "ruby-$ruby_version@$gemset:"
+      else
+        echo "ruby-$ruby_version:"
+      fi
     fi
+  fi
 }
 
 function get_python_env() {
-    if [ -n "$VIRTUAL_ENV" ]; then
-        echo "py@$(basename $VIRTUAL_ENV):"
-    elif [ -n "$CONDA_DEFAULT_ENV" ]; then
-        echo "conda@$CONDA_DEFAULT_ENV:"
-    fi
+  if [ -n "$VIRTUAL_ENV" ]; then
+    echo "py@$(basename $VIRTUAL_ENV):"
+  elif [ -n "$CONDA_DEFAULT_ENV" ]; then
+    echo "conda@$CONDA_DEFAULT_ENV:"
+  fi
 }
 
 function precmd() {
-    local TERMWIDTH
-    (( TERMWIDTH = ${COLUMNS} + 1  ))
+  # clear the hash variables
+  # This fixes the problem showing ~RVM_PROJECT_PATH in the pwd
+  hash -rd
 
-    # Get environment info
-    PR_BRANCH=$(get_git_branch)
-    PR_ENV="$(get_ruby_env)$(get_python_env)"
-    
-    # Initialize bars
-    PR_FILLBAR=""
-    PR_PWDLEN=""
+  local TERMWIDTH
+  (( TERMWIDTH = ${COLUMNS} + 1  ))
 
-    # Calculate prompt width
-    local promptsize=${#${(%):---($PR_ENV$PR_BRANCH)---()--}}
-    local pwdsize=${#${(%):-%~}}
+  # Get environment info
+  PR_BRANCH=$(get_git_branch)
+  PR_ENV="$(get_ruby_env)$(get_python_env)"
 
-    # Calculate fill bar
-    if (( promptsize + pwdsize > TERMWIDTH )); then
-        (( PR_PWDLEN = TERMWIDTH - promptsize ))
-    else
-        PR_FILLBAR="\${(l.(($TERMWIDTH - ($promptsize + $pwdsize)))..─.)}"
-    fi
+  # Initialize bars
+  PR_FILLBAR=""
+  PR_PWDLEN=""
+
+  # Calculate prompt width
+  local promptsize=${#${(%):---($PR_ENV$PR_BRANCH)---()--}}
+  local pwdsize=${#${(%):-%~}}
+
+  # Calculate fill bar
+  if (( promptsize + pwdsize > TERMWIDTH )); then
+    (( PR_PWDLEN = TERMWIDTH - promptsize ))
+  else
+    PR_FILLBAR="\${(l.(($TERMWIDTH - ($promptsize + $pwdsize)))..─.)}"
+  fi
 }
 
 setprompt() {
-    setopt prompt_subst
+  setopt prompt_subst
 
-    # Colors
-    for color in RED GREEN YELLOW BLUE MAGENTA CYAN WHITE; do
-        eval PR_$color='%{$fg_bold[${(L)color}]%}'
-        eval PR_LIGHT_$color='%{$fg[${(L)color}]%}'
-    done
-    PR_NO_COLOR="%{$reset_color%}"
+  # Colors
+  for color in RED GREEN YELLOW BLUE MAGENTA CYAN WHITE; do
+    eval PR_$color='%{$fg_bold[${(L)color}]%}'
+    eval PR_LIGHT_$color='%{$fg[${(L)color}]%}'
+  done
+  PR_NO_COLOR="%{$reset_color%}"
 
-    # Main prompt
-    PROMPT='$PR_CYAN┌─($PR_GREEN$PR_ENV$PR_BRANCH$PR_CYAN)─${(e)PR_FILLBAR}($PR_MAGENTA%~$PR_CYAN)─┐$PR_NO_COLOR
-$PR_CYAN└─($PR_YELLOW%D{%H:%M}$PR_LIGHT_BLUE:%(!.$PR_RED.$PR_WHITE)%#$PR_CYAN)──$PR_NO_COLOR '
+  # Main prompt
+  PROMPT='$PR_CYAN┌─($PR_GREEN$PR_ENV$PR_BRANCH$PR_CYAN)─${(e)PR_FILLBAR}($PR_MAGENTA%~$PR_CYAN)─┐$PR_NO_COLOR
+  $PR_CYAN└─($PR_YELLOW%D{%H:%M}$PR_LIGHT_BLUE:%(!.$PR_RED.$PR_WHITE)%#$PR_CYAN)──$PR_NO_COLOR '
 
-    # Right prompt
-    RPROMPT=' $PR_CYAN─($PR_YELLOW%D{%a,%b %d}$PR_CYAN)─┘$PR_NO_COLOR'
+  # Right prompt
+  RPROMPT=' $PR_CYAN─($PR_YELLOW%D{%a,%b %d}$PR_CYAN)─┘$PR_NO_COLOR'
 }
 
 export VIRTUAL_ENV_DISABLE_PROMPT=1
