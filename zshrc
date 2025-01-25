@@ -123,6 +123,15 @@ path=(
 # Must come before the command prompt
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
 
+# Fix the RVM issue during install
+rvm() {
+  if [[ $1 == "install" ]]; then
+    command rvm install $2 --with-openssl-dir=$(brew --prefix openssl@3)
+  else
+    command rvm "$@"
+  fi
+}
+
 # Load theme configuration
 source $HOME/.zshrc.cmdprompt
 
