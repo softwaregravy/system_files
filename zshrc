@@ -10,6 +10,7 @@ export LESS='-i -R'
 export TERM='xterm-256color'
 export LC_CTYPE=en_US.UTF-8
 export LANG=en_US.UTF-8
+export SYSTEM_FILES_DIR="$HOME/workspace/system_files"
 
 # Load service keys
 if [ -d "$HOME/.keys" ]; then
@@ -150,9 +151,6 @@ source $HOME/.zshrc.cmdprompt
 # Git Configuration
 git config --global alias.ignore '!gi() { curl -L -s https://www.gitignore.io/api/$@ ;}; gi'
 
-# Used by screenrc
-export TERM="xterm-256color"
-
 # Screen title setting for terminal
 preexec () {
     if [[ "$TERM" == "screen" ]]; then
@@ -165,46 +163,56 @@ preexec () {
 update_brewfile() {
     echo "Updating Brewfile..."
     brew bundle dump --file="$SYSTEM_FILES_DIR/Brewfile" --force
+    # Sort the Brewfile by type (tap, brew, cask, vscode) and then alphabetically
+    sed '/^$\|^#/d' "$SYSTEM_FILES_DIR/Brewfile" | sort -t '"' -k1,1 -k2,2 > "$SYSTEM_FILES_DIR/Brewfile.tmp"
+    mv "$SYSTEM_FILES_DIR/Brewfile.tmp" "$SYSTEM_FILES_DIR/Brewfile"
+
     echo "Brewfile updated at $SYSTEM_FILES_DIR/Brewfile"
 }
 
 # ZSH Plugin and completion setup
 if type brew &>/dev/null; then
     local brew_cache="$HOME/.zsh_brew_cache"
+    mkdir -p ~/.zsh/cache
+
     if [[ -f $brew_cache && $(stat -f %m $brew_cache) -gt $(( $(date +%s) - 86400 )) ]]; then
         source $brew_cache
     else
-        FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
+        FPATH="$(brew --prefix)/share/zsh-completions:$(brew --prefix)/share/zsh/site-functions:${FPATH}"
         autoload -Uz compinit && compinit
         compdump >| $brew_cache
     fi
 
     # Basic completion settings
-    zstyle ':completion:*' completer _complete _approximate _expand
-    zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
+    # Case-insensitive completion
+    zstyle ':completion:*' matcher-list 'm:{[:lower:][:upper:]}={[:upper:][:lower:]}' 'm:{[:lower:][:upper:]}={[:upper:][:lower:]} l:|=* r:|=*'
+
+    # Completion caching
+    zstyle ':completion:*' use-cache on
+    zstyle ':completion:*' cache-path ~/.zsh/cache
+
+    # Menu selection
+    zstyle ':completion:*' menu select
+    zstyle ':completion:*' group-name ''
+
     zstyle ':completion:*:default' list-prompt '%S%M matches%s'
-    zstyle ':completion:*:default' menu 'select=0'
     zstyle ':completion:*' file-sort modification reverse
     zstyle ':completion:*' list-colors "=(#b) #([0-9]#)*=36=31"
     zstyle ':completion:*:manuals' separate-sections true
     zstyle ':completion:*' max-errors 2
 
-    # Check for autosuggestions (load first)
-    if ! brew list zsh-autosuggestions &>/dev/null; then
-        echo "zsh-autosuggestions not installed. To install:"
-        echo "  brew install zsh-autosuggestions"
-    else
-        source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-        export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=60'
-    fi
 
-    # Check for syntax highlighting (must be last)
-    if ! brew list zsh-syntax-highlighting &>/dev/null; then
-        echo "zsh-syntax-highlighting not installed. To install:"
-        echo "  brew install zsh-syntax-highlighting"
-    else
-        source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-    fi
+   # Enhanced completion settings
+   zstyle ':completion:*' special-dirs true
+   zstyle ':completion:*' squeeze-slashes true
+   zstyle ':completion:*:descriptions' format '%U%B%d%b%u'
+   zstyle ':completion:*:warnings' format '%BSorry, no matches for: %d%b'
+   zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
+   zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
+   zstyle ':completion:*:*:git:*' user-commands ${${(M)${(k)commands}:#git-*}/git-/}
+
+   # fast-syntax-highlighting (must be last)
+   source $(brew --prefix)/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
 else
     echo "Homebrew not installed. To install ZSH plugins:"
     echo "1. Install homebrew from https://brew.sh/"
