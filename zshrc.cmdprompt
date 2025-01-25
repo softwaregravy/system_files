@@ -8,7 +8,7 @@ function get_ruby_env() {
   # Try RVM first
   if which rvm-prompt >/dev/null 2>&1; then
 
-    local ruby_info=$(rvm current 2>/dev/null)
+    local ruby_info=$(rvm-prompt 2>/dev/null)
     if [ -n "$ruby_info" ]; then
       echo "$ruby_info:"
       return

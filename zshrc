@@ -1,3 +1,6 @@
+# Profiling
+# zmodload zsh/zprof
+
 # Environment Variables
 export EDITOR="vim"
 export VISUAL="$EDITOR"
@@ -78,7 +81,11 @@ u() {
 }
 
 chpwd() { 
-  ls ;
+  ls 
+  # lazy load rvm as needed
+  if [[ -s ".ruby-version" && ! -v rvm ]]; then
+    [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
+  fi
 }
 
 bk() {
@@ -119,9 +126,14 @@ path=(
   $path
 )
 
-# Load RVM to make it available
-# Must come before the command prompt
-[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
+
+# for installing Rubies on OSX
+if ! brew list openssl@3 &>/dev/null; then
+  echo "openssl@3 not found. Please install it first:"
+  echo "brew install openssl@3"
+else
+  export RUBY_CONFIGURE_OPTS="--with-openssl-dir=$(brew --prefix openssl@3)"
+fi
 
 # Fix the RVM issue during install
 rvm() {
@@ -137,14 +149,6 @@ source $HOME/.zshrc.cmdprompt
 
 # Git Configuration
 git config --global alias.ignore '!gi() { curl -L -s https://www.gitignore.io/api/$@ ;}; gi'
-
-# for installing Rubies on OSX
-if ! brew list openssl@3 &>/dev/null; then
-  echo "openssl@3 not found. Please install it first:"
-  echo "brew install openssl@3"
-else
-  export RUBY_CONFIGURE_OPTS="--with-openssl-dir=$(brew --prefix openssl@3)"
-fi
 
 # Used by screenrc
 export TERM="xterm-256color"
@@ -166,14 +170,13 @@ update_brewfile() {
 
 # ZSH Plugin and completion setup
 if type brew &>/dev/null; then
-    # Initialize completion system first
-    FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
-    
-    autoload -Uz compinit
-    if [ $(date +'%j') != $(stat -f '%Sm' -t '%j' ~/.zcompdump) ]; then
-        compinit
+    local brew_cache="$HOME/.zsh_brew_cache"
+    if [[ -f $brew_cache && $(stat -f %m $brew_cache) -gt $(( $(date +%s) - 86400 )) ]]; then
+        source $brew_cache
     else
-        compinit -C
+        FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
+        autoload -Uz compinit && compinit
+        compdump >| $brew_cache
     fi
 
     # Basic completion settings
@@ -208,3 +211,5 @@ else
     echo "2. Then run: brew install zsh-autosuggestions zsh-syntax-highlighting"
 fi
 
+# Finish profiling
+# zprof
