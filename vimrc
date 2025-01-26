@@ -227,6 +227,12 @@ let NERDCreateDefaultMappings=0 " I turn this off to make it simple
 map <Leader>ra :AS<CR>
 map <Leader>rs :RS<CR>
 
+" AutoComplPop
+let g:AutoComplPop_IgnoreCaseOption = 0
+let g:AutoComplPop_BehaviorKeywordLength = 2
+set complete=.,w,b,u,t,k
+let g:AutoComplPop_CompleteOption = '.,w,b,u,t,k'
+inoremap <Tab> <C-n>
 
 " -----------------------------------------------------------------------------  
 " |                             OS Specific                                   |

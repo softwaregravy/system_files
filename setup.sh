@@ -143,11 +143,14 @@ echo "Setting up Vim packages..."
 VIM_PACKAGES=(
     "https://github.com/preservim/nerdtree.git"
     "https://github.com/preservim/nerdcommenter.git"
+    "https://github.com/vim-ruby/vim-ruby.git"
     "https://github.com/tpope/vim-rails.git"
     "https://github.com/tpope/vim-markdown.git"
     "https://github.com/pangloss/vim-javascript.git"
     "https://github.com/leafgarland/typescript-vim.git"
     "https://github.com/MaxMEllon/vim-jsx-pretty.git"
+    "https://github.com/vim-scripts/AutoComplPop.git"
+
     # Add more packages here 
 )
 
