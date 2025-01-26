@@ -136,15 +136,6 @@ else
   export RUBY_CONFIGURE_OPTS="--with-openssl-dir=$(brew --prefix openssl@3)"
 fi
 
-# Fix the RVM issue during install
-rvm() {
-  if [[ $1 == "install" ]]; then
-    command rvm install $2 --with-openssl-dir=$(brew --prefix openssl@3)
-  else
-    command rvm "$@"
-  fi
-}
-
 # Load theme configuration
 source $HOME/.zshrc.cmdprompt
 
@@ -172,44 +163,34 @@ update_brewfile() {
 
 # ZSH Plugin and completion setup
 if type brew &>/dev/null; then
-    local brew_cache="$HOME/.zsh_brew_cache"
-    mkdir -p ~/.zsh/cache
+  FPATH="$(brew --prefix)/share/zsh/site-functions:$FPATH"
+  autoload -Uz compinit && compinit
 
-    if [[ -f $brew_cache && $(stat -f %m $brew_cache) -gt $(( $(date +%s) - 86400 )) ]]; then
-        source $brew_cache
-    else
-        FPATH="$(brew --prefix)/share/zsh-completions:$(brew --prefix)/share/zsh/site-functions:${FPATH}"
-        autoload -Uz compinit && compinit
-        compdump >| $brew_cache
-    fi
+      # Git completion
+    zstyle ':completion:*:*:git-remote:*' group-order remote-groups aliases remote-tags remote-heads
+    zstyle ':completion:*:*:git-checkout:*' sort false
+    zstyle ':completion:*:*:git-switch:*' sort false
 
     # Basic completion settings
-    # Case-insensitive completion
-    zstyle ':completion:*' matcher-list 'm:{[:lower:][:upper:]}={[:upper:][:lower:]}' 'm:{[:lower:][:upper:]}={[:upper:][:lower:]} l:|=* r:|=*'
-
-    # Completion caching
-    zstyle ':completion:*' use-cache on
-    zstyle ':completion:*' cache-path ~/.zsh/cache
-
-    # Menu selection
+    zstyle ':completion:*' completer _complete _approximate _expand
     zstyle ':completion:*' menu select
-    zstyle ':completion:*' group-name ''
-
-    zstyle ':completion:*:default' list-prompt '%S%M matches%s'
-    zstyle ':completion:*' file-sort modification reverse
-    zstyle ':completion:*' list-colors "=(#b) #([0-9]#)*=36=31"
-    zstyle ':completion:*:manuals' separate-sections true
     zstyle ':completion:*' max-errors 2
 
+    ## Case-insensitive completion
+    zstyle ':completion:*' matcher-list 'm:{[:lower:][:upper:]}={[:upper:][:lower:]}' 'm:{[:lower:][:upper:]}={[:upper:][:lower:]} l:|=* r:|=*'
 
-   # Enhanced completion settings
+    #zstyle ':completion:*:default' list-prompt '%S%M matches%s'
+    #zstyle ':completion:*' file-sort modification reverse
+    zstyle ':completion:*' list-colors "=(#b) #([0-9]#)*=36=31"
+    #zstyle ':completion:*:manuals' separate-sections true
+
+
+   ## Enhanced completion settings
    zstyle ':completion:*' special-dirs true
    zstyle ':completion:*' squeeze-slashes true
    zstyle ':completion:*:descriptions' format '%U%B%d%b%u'
    zstyle ':completion:*:warnings' format '%BSorry, no matches for: %d%b'
    zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
-   zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
-   zstyle ':completion:*:*:git:*' user-commands ${${(M)${(k)commands}:#git-*}/git-/}
 
    # fast-syntax-highlighting (must be last)
    source $(brew --prefix)/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
