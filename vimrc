@@ -195,6 +195,17 @@ autocmd FileType c set omnifunc=ccomplete#Complete
 " May require ruby compiled in
 autocmd FileType ruby,eruby set omnifunc=rubycomplete#Complete 
 
+" ZSH file handling
+autocmd FileType zsh set expandtab
+autocmd FileType zsh set tabstop=2
+autocmd FileType zsh set softtabstop=2
+autocmd FileType zsh set shiftwidth=2
+autocmd FileType zsh set autoindent
+autocmd FileType zsh set formatoptions+=r
+autocmd FileType zsh set formatoptions+=o
+autocmd FileType zsh set formatoptions+=j
+autocmd FileType zsh set commentstring=#\ %s
+
 
 " Hard to type *****************************************************************
 imap uu _
