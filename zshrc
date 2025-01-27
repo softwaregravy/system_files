@@ -12,6 +12,12 @@ export LC_CTYPE=en_US.UTF-8
 export LANG=en_US.UTF-8
 export SYSTEM_FILES_DIR="$HOME/workspace/system_files"
 
+# Javascript support
+#
+# Fast Version Manager
+eval "$(fnm env --log-level quiet)"
+
+
 # Load service keys
 if [ -d "$HOME/.keys" ]; then
   for f in $HOME/.keys/*; do
@@ -39,11 +45,6 @@ autoload colors && colors
 bindkey -v
 KEYTIMEOUT=1
 bindkey '^R' history-incremental-search-backward
-
-# Javascript support
-#
-# Fast Version Manager
-eval "$(fnm env --use-on-cd)"
 
 # Lazy load conda
 conda() {
@@ -86,6 +87,25 @@ chpwd() {
   # lazy load rvm as needed
   if [[ -s ".ruby-version" && ! -v rvm ]]; then
     [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
+  fi
+
+  # Handle node version switching
+  local dir="$PWD"
+  local found=false
+  
+  # Search up through parent directories
+  while [[ "$dir" != "/" ]]; do
+    if [[ -f "$dir/.node-version" ]]; then
+      found=true
+      fnm use "$(cat "$dir/.node-version")"
+      break
+    fi
+    dir="$(dirname "$dir")"
+  done
+  
+  # If no .node-version found in path, unset node version
+  if [[ "$found" == "false" ]]; then
+    fnm use system
   fi
 }
 

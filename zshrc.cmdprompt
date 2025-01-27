@@ -4,10 +4,19 @@ function get_git_branch() {
   git branch 2>/dev/null | sed -n 's/^\* //p'
 }
 
+function get_node_env() {
+    if which fnm >/dev/null 2>&1; then
+      local node_version=$(fnm current 2>/dev/null)
+      if [ -n "$node_version" ] && [ "$node_version" != "none" ]  && [ "$node_version" != "system" ]; then
+        echo "node-${node_version#v}:"
+        return
+      fi
+    fi
+}
+
 function get_ruby_env() {
   # Try RVM first
   if which rvm-prompt >/dev/null 2>&1; then
-
     local ruby_info=$(rvm-prompt 2>/dev/null)
     if [ -n "$ruby_info" ]; then
       echo "$ruby_info:"
@@ -47,7 +56,7 @@ function precmd() {
 
   # Get environment info
   PR_BRANCH=$(get_git_branch)
-  PR_ENV="$(get_ruby_env)$(get_python_env)"
+  PR_ENV="$(get_ruby_env)$(get_python_env)$(get_node_env)"
 
   # Get APM (Power Management) info and set format
   if which ibam > /dev/null; then
