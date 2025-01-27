@@ -14,38 +14,38 @@ create_symlink() {
   local source=$1
   local target=$2
 
-    # Ensure target directory exists
-    mkdir -p "$(dirname "$target")"
+  # Ensure target directory exists
+  mkdir -p "$(dirname "$target")"
 
-    if [ -L "$target" ]; then
-      echo "Symlink already exists: $target"
-      # Verify it points to the correct location
-      current_source=$(readlink "$target")
-      if [ "$current_source" != "$source" ]; then
-        echo "Warning: $target points to $current_source instead of $source"
-        echo -n "Update symlink? (y/n) "
-        REPLY="n"
-        read -r REPLY </dev/tty || true
-        if [ "$REPLY" = "y" ] || [ "$REPLY" = "Y" ]; then
-          ln -sf "$source" "$target"
-          echo "Updated symlink: $target -> $source"
-        fi
-      fi
-    elif [ -e "$target" ]; then
-      echo "Warning: $target exists but is not a symlink"
-      echo -n "Replace with symlink? (y/n) "
+  if [ -L "$target" ]; then
+    echo "Symlink already exists: $target"
+    # Verify it points to the correct location
+    current_source=$(readlink "$target")
+    if [ "$current_source" != "$source" ]; then
+      echo "Warning: $target points to $current_source instead of $source"
+      echo -n "Update symlink? (y/n) "
       REPLY="n"
       read -r REPLY </dev/tty || true
       if [ "$REPLY" = "y" ] || [ "$REPLY" = "Y" ]; then
-        mv "$target" "${target}.backup"
-        ln -s "$source" "$target"
-        echo "Created symlink and backed up original: $target -> $source"
+        ln -sf "$source" "$target"
+        echo "Updated symlink: $target -> $source"
       fi
-    else
-      ln -s "$source" "$target"
-      echo "Created symlink: $target -> $source"
     fi
-  }
+  elif [ -e "$target" ]; then
+    echo "Warning: $target exists but is not a symlink"
+    echo -n "Replace with symlink? (y/n) "
+    REPLY="n"
+    read -r REPLY </dev/tty || true
+    if [ "$REPLY" = "y" ] || [ "$REPLY" = "Y" ]; then
+      mv "$target" "${target}.backup"
+      ln -s "$source" "$target"
+      echo "Created symlink and backed up original: $target -> $source"
+    fi
+  else
+    ln -s "$source" "$target"
+    echo "Created symlink: $target -> $source"
+  fi
+}
 
 # Check for XCode and Command Line Tools
 echo "Checking for XCode Command Line Tools..."
@@ -113,8 +113,9 @@ if ! command -v rvm &>/dev/null; then
   curl -sSL https://get.rvm.io | bash -s stable 
   source "$HOME/.rvm/scripts/rvm"
 else
-  echo "Updating RVM..."
-  rvm get stable 
+  echo "RVM already installed" 
+  # if you need to update
+  # rvm get stable 
 fi
 
 # Create symbolic links
