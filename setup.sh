@@ -112,6 +112,9 @@ if ! command -v rvm &>/dev/null; then
   # Install RVM - no need for explicit GPG handling on OS X
   curl -sSL https://get.rvm.io | bash -s stable 
   source "$HOME/.rvm/scripts/rvm"
+
+  echo "Removing default Ruby alias..."
+  rvm alias delete default
 else
   echo "RVM already installed" 
   # if you need to update
