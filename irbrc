@@ -2,6 +2,7 @@ IRB.conf[:USE_AUTOCOMPLETE] = false
 IRB.conf[:PAGER] = nil
 IRB.conf[:SAVE_HISTORY] = 10000
 IRB.conf[:HISTORY_FILE] = "#{ENV['HOME']}/.irb_history"
+IRB.conf[:AUTO_INDENT] = true
 
 if defined?(Rails)
   include Rails.application.routes.url_helpers
@@ -10,3 +11,8 @@ if defined?(Rails)
   end
 end
 
+begin
+  require 'amazing_print'
+  AmazingPrint.irb!
+rescue LoadError, NameError
+end
