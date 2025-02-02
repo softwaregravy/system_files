@@ -46,6 +46,10 @@ bindkey -v
 KEYTIMEOUT=1
 bindkey '^R' history-incremental-search-backward
 
+# Use pyenv for managing python dendencies
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"
+
 # Lazy load conda
 conda() {
   unset -f conda
