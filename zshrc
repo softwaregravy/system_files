@@ -11,12 +11,16 @@ export TERM='xterm-256color'
 export LC_CTYPE=en_US.UTF-8
 export LANG=en_US.UTF-8
 export SYSTEM_FILES_DIR="$HOME/workspace/system_files"
+export PYENV_ROOT="$HOME/.pyenv"
+
+# Use pyenv for managing python dendencies
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"
 
 # Javascript support
 #
 # Fast Version Manager
 eval "$(fnm env --log-level quiet)"
-
 
 # Load service keys
 if [ -d "$HOME/.keys" ]; then
@@ -46,10 +50,6 @@ bindkey -v
 KEYTIMEOUT=1
 bindkey '^R' history-incremental-search-backward
 
-# Use pyenv for managing python dendencies
-eval "$(pyenv init -)"
-eval "$(pyenv virtualenv-init -)"
-
 # Lazy load conda
 conda() {
   unset -f conda
@@ -61,7 +61,7 @@ conda() {
 
 # Aliases
 alias py=python3
-alias python=python3
+# alias python=python3
 alias pip=pip3
 alias r=rails
 alias grep='nocorrect grep --color=auto'
@@ -141,6 +141,7 @@ timestamp() {
 # Path Configuration (consolidated)
 typeset -U path
 path=(
+  $PYENV_ROOT/bin
   /opt/homebrew/bin
   $HOME/.poetry/bin
   $HOME/.local/bin

@@ -40,8 +40,11 @@ function get_ruby_env() {
 
 function get_python_env() {
   if [ -n "$VIRTUAL_ENV" ]; then
-    echo "py@$(basename $VIRTUAL_ENV):"
+    local env_name=$(basename "$VIRTUAL_ENV")
+    local python_version=$(python -V 2>&1 | cut -d' ' -f2)
+    echo "python-${python_version}@${env_name}:"
   elif [ -n "$CONDA_DEFAULT_ENV" ]; then
+    # TODO update once we use a conda env again
     echo "conda@$CONDA_DEFAULT_ENV:"
   fi
 }
