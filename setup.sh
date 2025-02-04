@@ -61,22 +61,27 @@ WORKSPACE_DIR="$HOME/workspace"
 mkdir -p "$WORKSPACE_DIR"
 
 # Create and secure .keys directory
+KEYS_TEMPLATE_DIR="$SYSTEM_FILES_DIR/keys"
+# make sure we have one locally so nothing else fails
+mkdir -p "$KEYS_TEMPLATE_DIR"
+
 echo "Setting up .keys directory..."
 KEYS_DIR="$HOME/.keys"
 mkdir -p "$KEYS_DIR"
 chmod 700 "$KEYS_DIR"
 
-# Create template for OpenAI keys if it doesn't exist
-OPENAI_KEYS_FILE="$KEYS_DIR/openai"
-if [ ! -f "$OPENAI_KEYS_FILE" ]; then
-  cat > "$OPENAI_KEYS_FILE" << 'EOF'
-# OpenAI API Configuration
-export OPENAI_API_KEY="your_key_here"
-export OPENAI_ORG_ID="optional_org_id_here"  # if you have one
-EOF
-chmod 600 "$OPENAI_KEYS_FILE"
-echo "Created OpenAI keys template at $OPENAI_KEYS_FILE"
-fi
+# Copy over files
+for template in "$KEYS_TEMPLATE_DIR"/*; do
+  if [ -f "$template" ]; then
+    filename=$(basename "$template")
+    target="$KEYS_DIR/$filename"
+    if [ ! -f "$target" ]; then
+      cp "$template" "$target"
+      chmod 600 "$target"
+      echo "Created key template at $target"
+    fi
+  fi
+done
 
 # Clone or update system files
 SYSTEM_FILES_DIR="$WORKSPACE_DIR/system_files"
@@ -135,6 +140,7 @@ LINKS=(
 "$SYSTEM_FILES_DIR/gitconfig:$HOME/.gitconfig"
 "$SYSTEM_FILES_DIR/rvmrc:$HOME/.rvmrc"
 "$SYSTEM_FILES_DIR/ir_black.vim:$HOME/.vim/colors/ir_black.vim"
+"$SYSTEM_FILES_DIR/ngrok.yml:$HOME/Library/Application Support/ngrok/ngrok.yml"
 )
 
 for link in "${LINKS[@]}"; do

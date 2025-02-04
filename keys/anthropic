@@ -1,0 +1,2 @@
+#Anthropic API Configuration
+export ANTHROPIC_API_KEY="your key here"

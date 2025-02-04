@@ -1,0 +1,16 @@
+version: "3"
+tunnels:
+    savegraph:
+        proto: http
+        addr: 3000
+        inspect: true
+        subdomain: savegraph
+    demeter:
+        proto: http
+        addr: 3000
+        inspect: true
+        subdomain: demeter
+agent:
+    connect_url: connect.us.ngrok-agent.com:444
+    console_ui: true
+    web_addr: localhost:4040

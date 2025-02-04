@@ -1,0 +1,3 @@
+# OpenAI API Configuration
+export OPENAI_API_KEY="your_key_here"
+export OPENAI_ORG_ID="optional_org_id_here"  # if you have one
