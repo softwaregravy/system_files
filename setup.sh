@@ -139,6 +139,7 @@ LINKS=(
 "$SYSTEM_FILES_DIR/gemrc:$HOME/.gemrc"
 "$SYSTEM_FILES_DIR/gitconfig:$HOME/.gitconfig"
 "$SYSTEM_FILES_DIR/rvmrc:$HOME/.rvmrc"
+"$SYSTEM_FILES_DIR/npmrc:$HOME/.npmrc"
 "$SYSTEM_FILES_DIR/ir_black.vim:$HOME/.vim/colors/ir_black.vim"
 "$SYSTEM_FILES_DIR/ngrok.yml:$HOME/Library/Application Support/ngrok/ngrok.yml"
 "$SYSTEM_FILES_DIR/vim/after/syntax/sh.vim:$HOME/.vim/after/syntax/sh.vim"
