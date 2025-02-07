@@ -194,6 +194,8 @@ autocmd FileType php set omnifunc=phpcomplete#CompletePHP
 autocmd FileType c set omnifunc=ccomplete#Complete
 " May require ruby compiled in
 autocmd FileType ruby,eruby set omnifunc=rubycomplete#Complete 
+" Note, this is matching the start of the filename, not the extension
+autocmd BufNewFile,BufRead .env* set filetype=sh
 
 " ZSH file handling
 autocmd FileType zsh set expandtab
