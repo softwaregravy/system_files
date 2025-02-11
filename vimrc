@@ -303,6 +303,13 @@ endif
 iabbrev busienss business
 iabbrev custmoer customer
 
+" -----------------------------------------------------------------------------
+" |                           Clipboard Mappings                               |
+" -----------------------------------------------------------------------------
+" Map yy and vv to show their copy destinations, vv copies to system clipboard
+nnoremap <expr> yy v:count ? v:count.'yy:echo "'.v:count.' lines copied to buffer"<CR>' : 'yy:echo "1 line copied to buffer"<CR>'
+nnoremap <expr> vv v:count ? "\<ESC>".v:count.'"+yy:echo "'.v:count.' lines copied to system clipboard"<CR>' : '"+yy:echo "1 line copied to system clipboard"<CR>'
+
 " yank to clipboard
 if has("clipboard")
   set clipboard=unnamed " copy to the system clipboard
