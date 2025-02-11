@@ -241,11 +241,15 @@ map <Leader>ra :AS<CR>
 map <Leader>rs :RS<CR>
 
 " AutoComplPop
+set completeopt=menu,longest,preview
 let g:AutoComplPop_IgnoreCaseOption = 0
 let g:AutoComplPop_BehaviorKeywordLength = 2
 set complete=.,w,b,u,t,k
 let g:AutoComplPop_CompleteOption = '.,w,b,u,t,k'
-inoremap <Tab> <C-n>
+" trying this behavior for a while
+inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
+inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+" inoremap <Tab> <C-n>
 
 " -----------------------------------------------------------------------------  
 " |                             OS Specific                                   |
