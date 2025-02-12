@@ -6,6 +6,19 @@ COMMIT_MSG_FILE=$1
 COMMIT_SOURCE=$2
 SHA1=$3
 
+# Read the current commit message
+current_message=$(cat "$COMMIT_MSG_FILE")
+
+# Skip if commit message already exists (from -m flag or amend)
+if [ "$COMMIT_SOURCE" = "message" ] || [ "$COMMIT_SOURCE" = "commit" ]; then
+    exit 0
+fi
+
+# Skip if the commit message is not empty (user edited previous attempt)
+if [ ! -z "$current_message" ] && [ "$current_message" != "$(grep -v '^#' "$COMMIT_MSG_FILE")" ]; then
+    exit 0
+fi
+
 # Get only the diff of what has already been staged
 git_diff_output=$(git diff --cached)
 
@@ -24,7 +37,7 @@ messages=$(jq -n --arg diff "$git_diff_output_limited" '[
   {"role": "user", "content": ("Suggest a short commit message by summarizing code changes from the shared command output. 
     The commit message should follow the conventional commit format and provide meaningful context for future readers.
     Be very concise. 
-    Use bullet pooints.
+    Use bullet points.
     Do not include descriptions for test and spec files unless most changes are to those files.
     Do include descriptions for changes to shared files and commits.
     Whitespace changes do not need mention unless all changes are whitespace.
