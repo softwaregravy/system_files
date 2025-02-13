@@ -1,13 +1,12 @@
 #!/bin/bash
 
-
 # Get the name of the file containing the commit message
 COMMIT_MSG_FILE=$1
 COMMIT_SOURCE=$2
 SHA1=$3
 
 # Read the current commit message
-current_message=$(cat "$COMMIT_MSG_FILE")
+current_message=$(grep -v '^#' "$COMMIT_MSG_FILE" | tr -d '[:space:]')
 
 # Skip if commit message already exists (from -m flag or amend)
 if [ "$COMMIT_SOURCE" = "message" ] || [ "$COMMIT_SOURCE" = "commit" ]; then
@@ -72,5 +71,14 @@ if [ -z "$commit_message" ] || [[ "$commit_message" == "null" ]]; then
   exit 1
 fi
 
-# Write the commit message to the commit message file
-echo "$commit_message" > "$COMMIT_MSG_FILE"
+# Save the original template
+template=$(cat "$COMMIT_MSG_FILE")
+
+# Write the AI-generated commit message followed by the template
+{
+  echo "# AI-suggested commit message (edit or delete):"
+  echo "$commit_message"
+  echo ""
+  echo "$template"
+} > "$COMMIT_MSG_FILE"
+
