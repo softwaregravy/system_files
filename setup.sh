@@ -211,7 +211,6 @@ if [ ! -f "$SSH_DIR/id_ed25519" ]; then
     echo "GitHub SSH keys already exist"
 fi
 
-
 # Install yek if not present
 echo "Checking for yek..."
 if ! command -v yek &>/dev/null; then
@@ -232,5 +231,13 @@ chmod +x "$GLOBAL_GIT_HOOKS_DIR/prepare-commit-msg"
 
 # Configure Git to use global hooks
 git config --global core.hooksPath "$GLOBAL_GIT_HOOKS_DIR"
+
+# Create program specific completions
+echo "Setting up bespoke commandline completions"
+if command -v ngrok &>/dev/null; then
+  echo "Setting up ngrok completions..."
+  ngrok completion > /opt/homebrew/share/zsh/site-functions/_ngrok
+  chmod 644 /opt/homebrew/share/zsh/site-functions/_ngrok
+fi
 
 echo "Setup complete!"
