@@ -26,6 +26,7 @@
 " -----------------------------------------------------------------------------  
 
 set nocompatible
+
 let mapleader = ","
 " Professor VIM says '87% of users prefer jj over esc', jj abrams disagrees
 imap jj <Esc> 
@@ -85,7 +86,8 @@ set smartcase " Ignore case when searching lowercase
 
 
 " Colors **********************************************************************
-"set t_Co=256 " 256 colors
+set t_Co=256
+set termguicolors
 set background=dark 
 syntax on " syntax highlighting
 colorscheme ir_black
@@ -329,3 +331,6 @@ if executable('standardrb')
         \ 'allowlist': ['ruby'],
         \ })
 endif
+
+autocmd VimEnter * echom "Current colorscheme: " . execute('colorscheme')
+
