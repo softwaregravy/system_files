@@ -1,5 +1,22 @@
-# Profiling
+# Profiling - Uncomment this section when profiling
 # zmodload zsh/zprof
+
+#typeset -F SECONDS
+#typeset -A _timing_starts
+
+#_start_timing() {
+  #echo "[timing] Starting $1..."
+  #_timing_starts[$1]=$SECONDS
+#}
+
+#_end_timing() {
+  #local end_time=$SECONDS
+  #local start_time=${_timing_starts[$1]}
+  #local init_time=${_timing_starts["ZSH Initialize"]}
+  #local section_elapsed=$(( end_time - start_time ))
+  #local total_elapsed=$(( end_time - init_time ))
+  #printf "[timing] %-20s %.1fs (total: %.1fs)\n" "$1:" $section_elapsed $total_elapsed
+#}
 
 # Environment Variables
 export EDITOR="vim"
@@ -190,12 +207,9 @@ update_brewfile() {
 if type brew &>/dev/null; then
   FPATH="$(brew --prefix)/share/zsh/site-functions:$FPATH"
 
-  # Initialize full completion system asynchronously
-  {
     # Compile new completion dump
     autoload -Uz compinit
     compinit -C
-  } &!
 
       # Git completion
     zstyle ':completion:*:*:git-remote:*' group-order remote-groups aliases remote-tags remote-heads
@@ -233,3 +247,4 @@ fi
 
 # Finish profiling
 # zprof
+
