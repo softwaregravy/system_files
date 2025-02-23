@@ -240,4 +240,18 @@ if command -v ngrok &>/dev/null; then
   chmod 644 /opt/homebrew/share/zsh/site-functions/_ngrok
 fi
 
+# Prcompile all copmletions
+echo "Pre-compiling zsh completions..."
+
+# Generate and compile completion dump using zsh
+zsh << 'EOF'
+COMPDUMP="${ZDOTDIR:-$HOME}/.zcompdump"
+FPATH="$(brew --prefix)/share/zsh/site-functions:$FPATH"
+autoload -Uz compinit
+compinit
+zcompile -M "$COMPDUMP"
+chmod 600 "$COMPDUMP"*
+EOF
+
+
 echo "Setup complete!"

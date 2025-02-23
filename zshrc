@@ -189,7 +189,13 @@ update_brewfile() {
 # ZSH Plugin and completion setup
 if type brew &>/dev/null; then
   FPATH="$(brew --prefix)/share/zsh/site-functions:$FPATH"
-  autoload -Uz compinit && compinit
+
+  # Initialize full completion system asynchronously
+  {
+    # Compile new completion dump
+    autoload -Uz compinit
+    compinit -C
+  } &!
 
       # Git completion
     zstyle ':completion:*:*:git-remote:*' group-order remote-groups aliases remote-tags remote-heads
@@ -218,7 +224,7 @@ if type brew &>/dev/null; then
    zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
 
    # fast-syntax-highlighting (must be last)
-   source $(brew --prefix)/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
+   source $(brew --prefix)/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh &!
 else
     echo "Homebrew not installed. To install ZSH plugins:"
     echo "1. Install homebrew from https://brew.sh/"
