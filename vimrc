@@ -309,7 +309,8 @@ iabbrev custmoer customer
 " |                           Clipboard Mappings                               |
 " -----------------------------------------------------------------------------
 " Map yy and vv to show their copy destinations, vv copies to system clipboard
-nnoremap <expr> yy v:count ? v:count.'yy:echo "'.v:count.' lines copied to buffer"<CR>' : 'yy:echo "1 line copied to buffer"<CR>'
+" nnoremap <expr> yy v:count ? v:count.'yy:echo "'.v:count.' lines copied to buffer"<CR>' : 'yy:echo "1 line copied to buffer"<CR>'
+nnoremap yy :<C-u>execute 'normal! '.v:count1.'yy' \| echon v:count1.' lines copied to buffer'<CR>
 nnoremap <expr> vv v:count ? "\<ESC>".v:count.'"+yy:echo "'.v:count.' lines copied to system clipboard"<CR>' : '"+yy:echo "1 line copied to system clipboard"<CR>'
 
 " yank to clipboard
