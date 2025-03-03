@@ -87,23 +87,13 @@ set smartcase " Ignore case when searching lowercase
 
 " Colors **********************************************************************
 set t_Co=256
-" Enable true color support
-if exists('+termguicolors')
-  " Fix for specific terminals
-  let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
-  let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
-  set termguicolors
-endif
+" Enable true color support - commented out due to screen compatibility issues
+"let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+"let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
 "set termguicolors
 set background=dark 
 syntax on " syntax highlighting
-try
-  colorscheme atomic
-catch /^Vim\%((\a\+)\)\=:E185/
-  colorscheme ir_black " Fall back to ir_black if atomic not found
-  echom "Atomic colorscheme not found, using ir_black instead"
-endtry
-AtomicOceanHC
+colorscheme ir_black
 
 
 " Status Line *****************************************************************

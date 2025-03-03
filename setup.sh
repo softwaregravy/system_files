@@ -164,7 +164,8 @@ VIM_PACKAGES=(
 "https://github.com/MaxMEllon/vim-jsx-pretty.git"
 "https://github.com/vim-scripts/AutoComplPop.git"
 "https://github.com/chrisbra/vim-zsh.git"
-"https://github.com/gerardbm/vim-atomic.git"
+# atmoic not in use due to screen compatibility issues
+# "https://github.com/gerardbm/vim-atomic.git"
 # Add more packages here 
 )
 
