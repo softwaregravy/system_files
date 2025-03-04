@@ -112,6 +112,24 @@ else
   echo "Warning: Brewfile not found in $SYSTEM_FILES_DIR"
 fi
 
+
+echo "Setting up pyenv global Python version..."
+if command -v pyenv &>/dev/null; then
+  if [ -z "$(pyenv versions --bare)" ]; then
+    echo "No Python versions installed. Installing latest Python 3..."
+    pyenv install 3 -s 
+    pyenv rehash
+  fi
+
+  highest_version=$(pyenv versions --bare | grep -v "/" | grep -e "^3\." | sort -V | tail -1)
+  if [ -n "$highest_version" ]; then
+    echo "Setting global Python version to $highest_version..."
+    pyenv global "$highest_version" || echo "Failed to set global Python version"
+  else
+    echo "No suitable Python versions found. Install one with: pyenv install <version>"
+  fi
+fi
+
 # Install or update RVM
 echo "Setting up RVM..."
 if ! command -v rvm &>/dev/null; then
@@ -166,8 +184,6 @@ VIM_PACKAGES=(
 "https://github.com/MaxMEllon/vim-jsx-pretty.git"
 "https://github.com/vim-scripts/AutoComplPop.git"
 "https://github.com/chrisbra/vim-zsh.git"
-# atmoic not in use due to screen compatibility issues
-# "https://github.com/gerardbm/vim-atomic.git"
 # Add more packages here 
 )
 
@@ -184,8 +200,6 @@ setup_vim_package() {
     echo "Updating Vim package: $package_name..."
     (cd "$package_dir" && git pull)
   fi
-
-  vim -u NONE -c "helptags $package_dir/doc" -c q
 }
 
 # Ensure Vim package directories exist
@@ -195,6 +209,9 @@ mkdir -p "$HOME/.vim/pack/vendor/start"
 for package in "${VIM_PACKAGES[@]}"; do
   setup_vim_package "$package"
 done
+
+echo "Generating helptags for all Vim packages..."
+vim -u NONE -c "silent! helptags ALL" -c q >/dev/null 2>&1
 
 # Setup GitHub SSH keys if they don't exist
 SSH_DIR="$HOME/.ssh"
