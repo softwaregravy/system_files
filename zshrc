@@ -203,6 +203,18 @@ update_brewfile() {
     echo "Brewfile updated at $SYSTEM_FILES_DIR/Brewfile"
 }
 
+check_brewfile_update() {
+  local brewfile="$SYSTEM_FILES_DIR/Brewfile"
+  local week_in_seconds=$((60*60*24*7))
+
+  # Check if file exists and is older than a week
+  if [[ -f "$brewfile" && $(($(date +%s) - $(stat -f %m "$brewfile"))) -gt $week_in_seconds ]]; then
+    echo "Brewfile hasn't been updated in over a week. Update it now with update_brewfile"
+  fi
+}
+
+check_brewfile_update
+
 # ZSH Plugin and completion setup
 if type brew &>/dev/null; then
   FPATH="$(brew --prefix)/share/zsh/site-functions:$FPATH"
