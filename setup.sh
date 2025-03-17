@@ -5,11 +5,6 @@ set -euo pipefail
 
 echo "Starting system setup..."
 
-# Helper functions
-check_command() {
-  command -v "$1" >/dev/null 2>&1 || { echo >&2 "Required command $1 not found. Aborting."; exit 1; }
-}
-
 create_symlink() {
   local source=$1
   local target=$2
