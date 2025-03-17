@@ -93,6 +93,8 @@ echo "Checking for Homebrew..."
 if ! command -v brew &>/dev/null; then
   echo "Installing Homebrew..."
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  # Add Homebrew to the PATH for the current script
+  eval "$(/opt/homebrew/bin/brew shellenv)"
 else
   echo "Homebrew already installed"
 fi
