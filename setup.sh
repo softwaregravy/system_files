@@ -60,6 +60,16 @@ echo "Setting up workspace directory..."
 WORKSPACE_DIR="$HOME/workspace"
 mkdir -p "$WORKSPACE_DIR"
 
+# Clone or update system files
+SYSTEM_FILES_DIR="$WORKSPACE_DIR/system_files"
+if [ ! -d "$SYSTEM_FILES_DIR" ]; then
+  echo "Cloning system files repository..."
+  git clone git@github.com:softwaregravy/system_files.git "$SYSTEM_FILES_DIR"
+else
+  echo "Updating system files repository..."
+  (cd "$SYSTEM_FILES_DIR" && git pull)
+fi
+
 # Create and secure .keys directory
 KEYS_TEMPLATE_DIR="$SYSTEM_FILES_DIR/keys"
 # make sure we have one locally so nothing else fails
@@ -82,16 +92,6 @@ for template in "$KEYS_TEMPLATE_DIR"/*; do
     fi
   fi
 done
-
-# Clone or update system files
-SYSTEM_FILES_DIR="$WORKSPACE_DIR/system_files"
-if [ ! -d "$SYSTEM_FILES_DIR" ]; then
-  echo "Cloning system files repository..."
-  git clone git@github.com:softwaregravy/system_files.git "$SYSTEM_FILES_DIR"
-else
-  echo "Updating system files repository..."
-  (cd "$SYSTEM_FILES_DIR" && git pull)
-fi
 
 # Check for Homebrew and install if not present
 echo "Checking for Homebrew..."
