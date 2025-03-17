@@ -59,7 +59,7 @@ mkdir -p "$WORKSPACE_DIR"
 SYSTEM_FILES_DIR="$WORKSPACE_DIR/system_files"
 if [ ! -d "$SYSTEM_FILES_DIR" ]; then
   echo "Cloning system files repository..."
-  git clone git@github.com:softwaregravy/system_files.git "$SYSTEM_FILES_DIR"
+  git clone https://github.com/softwaregravy/system_files.git "$SYSTEM_FILES_DIR"
 else
   echo "Updating system files repository..."
   (cd "$SYSTEM_FILES_DIR" && git pull)
