@@ -201,16 +201,15 @@ if [ ! -f "$SSH_DIR/id_ed25519" ]; then
   mkdir -p "$SSH_DIR"
   chmod 700 "$SSH_DIR"
   ssh-keygen -t ed25519 -C "$(git config --get user.email)" -f "$SSH_DIR/id_ed25519" -N ""
+  # Start ssh-agent and add key
+  eval "$(ssh-agent -s)"
+  ssh-add "$SSH_DIR/id_ed25519"
 
-    # Start ssh-agent and add key
-    eval "$(ssh-agent -s)"
-    ssh-add "$SSH_DIR/id_ed25519"
-
-    echo "New SSH key generated. Please add this public key to your GitHub account:"
-    cat "$SSH_DIR/id_ed25519.pub"
-    echo "Visit https://github.com/settings/ssh/new to add the key"
-  else
-    echo "GitHub SSH keys already exist"
+  echo "New SSH key generated. Please add this public key to your GitHub account:"
+  cat "$SSH_DIR/id_ed25519.pub"
+  echo "Visit https://github.com/settings/ssh/new to add the key"
+else
+  echo "GitHub SSH keys already exist"
 fi
 
 # Install yek if not present
@@ -242,7 +241,7 @@ if command -v ngrok &>/dev/null; then
   chmod 644 /opt/homebrew/share/zsh/site-functions/_ngrok
 fi
 
-# Prcompile all copmletions
+# Precompile all copmletions
 echo "Pre-compiling zsh completions..."
 
 # Generate and compile completion dump using zsh
