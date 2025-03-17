@@ -92,6 +92,11 @@ done
 echo "Checking for Homebrew..."
 if ! command -v brew &>/dev/null; then
   echo "Installing Homebrew..."
+  echo "Homebrew installation requires sudo access. You may be prompted for your password."
+  sudo -v
+  # Keep-alive: update existing sudo time stamp until the script has finished
+  while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+  
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   # Add Homebrew to the PATH for the current script
   eval "$(/opt/homebrew/bin/brew shellenv)"
