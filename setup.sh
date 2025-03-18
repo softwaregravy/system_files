@@ -140,7 +140,11 @@ if ! command -v rvm &>/dev/null; then
   
   # Install RVM
   curl -sSL https://get.rvm.io | bash -s stable 
+  # the following works around error:
+  # /Users/john/.rvm/scripts/functions/support: line 182: _system_name: unbound variable
+  set +u
   source "$HOME/.rvm/scripts/rvm"
+  set -u
 
   echo "Removing default Ruby alias..."
   rvm alias delete default
