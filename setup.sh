@@ -134,22 +134,26 @@ fi
 echo "Setting up RVM..."
 if ! command -v rvm &>/dev/null; then
   
-  echo "Importing GPG keys for RVM..."
+  echo "...Importing GPG keys for RVM"
   command curl -sSL https://rvm.io/mpapis.asc | gpg --import -
   command curl -sSL https://rvm.io/pkuczynski.asc | gpg --import -
   
   # Install RVM
-  curl -sSL https://get.rvm.io | bash -s stable 
   # the following works around error:
   # /Users/john/.rvm/scripts/functions/support: line 182: _system_name: unbound variable
-  set +u
-  source "$HOME/.rvm/scripts/rvm"
-  set -u
+  # I guess we just hope
 
-  echo "Removing default Ruby alias..."
+  set +u
+  echo "... Installing RVM"
+  curl -sSL https://get.rvm.io | bash -s stable 
+  
+  source "$HOME/.rvm/scripts/rvm"
+  
+  echo "...Removing default Ruby alias from RVM"
   rvm alias delete default
+  set -u
 else
-  echo "RVM already installed" 
+  echo "...RVM already installed" 
   # if you need to update
   # rvm get stable 
 fi
