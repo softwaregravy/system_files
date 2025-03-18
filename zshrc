@@ -30,6 +30,20 @@ export LANG=en_US.UTF-8
 export SYSTEM_FILES_DIR="$HOME/workspace/system_files"
 export PYENV_ROOT="$HOME/.pyenv"
 
+# Path Configuration (consolidated)
+typeset -U path
+path=(
+  $PYENV_ROOT/bin
+  /opt/homebrew/bin
+  $HOME/.poetry/bin
+  $HOME/.local/bin
+  /usr/local/sbin
+  /usr/local/bin
+  /Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin
+  /Applications/Postgres.app/Contents/Versions/latest/bin
+  $path
+)
+
 # Use pyenv for managing python dendencies
 eval "$(pyenv init -)"
 eval "$(pyenv virtualenv-init -)"
@@ -154,21 +168,6 @@ swap() {
 timestamp() {
   date -j -f "%a %b %d %T %Z %Y" "$(date)" "+%s"
 }
-
-# Path Configuration (consolidated)
-typeset -U path
-path=(
-  $PYENV_ROOT/bin
-  /opt/homebrew/bin
-  $HOME/.poetry/bin
-  $HOME/.local/bin
-  /usr/local/sbin
-  /usr/local/bin
-  /Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin
-  /Applications/Postgres.app/Contents/Versions/latest/bin
-  $path
-)
-
 
 # for installing Rubies on OSX
 if ! brew list openssl@3 &>/dev/null; then
