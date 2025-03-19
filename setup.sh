@@ -5,6 +5,7 @@ set -euo pipefail
 
 echo "Starting system setup..."
 
+
 create_symlink() {
   local source=$1
   local target=$2
@@ -123,8 +124,7 @@ fi
 # Install programs from Brewfile
 echo "Installing programs from Brewfile..."
 if [ -f "$SYSTEM_FILES_DIR/Brewfile" ]; then
-  sudo -v 
-  SUDO_ASKPASS=/usr/bin/osascript brew bundle --file="$SYSTEM_FILES_DIR/Brewfile"
+  brew bundle --file="$SYSTEM_FILES_DIR/Brewfile"
 else
   echo "Warning: Brewfile not found in $SYSTEM_FILES_DIR"
 fi
