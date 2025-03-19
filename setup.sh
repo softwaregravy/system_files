@@ -42,6 +42,22 @@ create_symlink() {
   fi
 }
 
+# Check if we're on Apple Silicon
+if [[ $(uname -m) == 'arm64' ]]; then
+  echo "Apple Silicon detected"
+  
+  # Check if Rosetta 2 is installed
+  echo "Checking for Rosetta 2..."
+  if ! pkgutil --pkg-info=com.apple.pkg.RosettaUpdateAuto > /dev/null 2>&1; then
+    echo "Rosetta 2 not installed. Installing now..."
+    echo "This requires sudo access. You may be prompted for your password."
+    sudo softwareupdate --install-rosetta --agree-to-license
+    echo "Rosetta 2 installation complete"
+  else
+    echo "Rosetta 2 already installed"
+  fi
+fi
+
 # Check for XCode and Command Line Tools
 echo "Checking for XCode Command Line Tools..."
 if ! xcode-select -p &>/dev/null; then
@@ -107,7 +123,8 @@ fi
 # Install programs from Brewfile
 echo "Installing programs from Brewfile..."
 if [ -f "$SYSTEM_FILES_DIR/Brewfile" ]; then
-  brew bundle --file="$SYSTEM_FILES_DIR/Brewfile"
+  sudo -v 
+  SUDO_ASKPASS=/usr/bin/osascript brew bundle --file="$SYSTEM_FILES_DIR/Brewfile"
 else
   echo "Warning: Brewfile not found in $SYSTEM_FILES_DIR"
 fi
