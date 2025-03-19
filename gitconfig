@@ -84,12 +84,12 @@
 	autocrlf = input
 	whitespace = cr-at-eol
 	pager = less -r
-	hooksPath = /Users/johnhinnegan/.git-hooks
+	hooksPath = ~/.git-hooks
 
 [diff]
   tool = less -r
   # tool = vimdiff
-  # external = /Users/johnhinnegan/.git_diff_wrapper
+  # external = ~/.git_diff_wrapper
 [pager]
   diff = less -r
 [push]
