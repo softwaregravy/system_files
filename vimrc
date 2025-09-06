@@ -338,3 +338,7 @@ endif
 
 autocmd VimEnter * echom "Current colorscheme: " . execute('colorscheme')
 
+" -----------------------------------------------------------------------------
+" |                           General Preferences                             |
+" -----------------------------------------------------------------------------
+set columns&
