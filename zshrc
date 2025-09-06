@@ -256,6 +256,15 @@ else
     echo "2. Then run: brew install zsh-autosuggestions zsh-syntax-highlighting"
 fi
 
+# pnpm
+export PNPM_HOME="/Users/john/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
+
 # Finish profiling
 # zprof
+
 
