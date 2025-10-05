@@ -108,6 +108,8 @@ alias ae='deactivate &> /dev/null; source ./venv/bin/activate'
 alias de='deactivate'
 alias vi='vim'
 alias p='pnpm'
+# use only pnpm
+alias npm='echo "⚠️  Use pnpm instead!" && false'
 
 
 # Utility Functions
