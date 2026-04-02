@@ -30,6 +30,11 @@ export LANG=en_US.UTF-8
 export SYSTEM_FILES_DIR="$HOME/workspace/system_files"
 export PYENV_ROOT="$HOME/.pyenv"
 
+# Prevent NextJS from tracking
+# https://nextjs.org/telemetry
+# Fuck off Vercel!
+NEXT_TELEMETRY_DISABLED=1
+
 # Path Configuration (consolidated)
 typeset -U path
 path=(
