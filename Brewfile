@@ -55,15 +55,16 @@ brew "libslirp"
 brew "libwebsockets"
 brew "llm"
 brew "markdownlint-cli"
+brew "direnv"
 brew "mas"
 brew "maven"
 brew "minicom"
+brew "mise"
 brew "mosquitto"
 brew "nghttp2"
 brew "ninja"
 brew "node"
 brew "open-mpi"
-brew "openjdk"
 brew "openjdk@11"
 brew "openslide"
 brew "openssl@1.1"
@@ -79,12 +80,12 @@ brew "pyenv-virtualenv"
 brew "python-tabulate"
 brew "python@3.10"
 brew "python@3.11"
-brew "python@3.12"
 brew "qemu"
 brew "redis", restart_service: :changed
 brew "ruby-build"
 brew "rust"
 brew "screen"
+brew "starship"
 brew "shared-mime-info"
 brew "shopify/shopify/shopify-cli"
 brew "smartmontools"
@@ -112,23 +113,42 @@ cask "gcloud-cli"
 cask "gimp"
 cask "google-chrome"
 cask "iterm2"
-cask "jsonschema"
 cask "miniconda"
 cask "monitorcontrol"
 cask "ngrok"
-cask "postgres-unofficial"
+cask "postgres-app"
 cask "proton-mail"
 cask "proton-mail-bridge"
 cask "protonvpn"
 cask "rar"
 cask "slack"
 cask "sony-ps-remote-play"
+cask "sourcemeta/apps/jsonschema"
 cask "spotify"
 cask "steam"
 cask "visual-studio-code"
 cask "warp"
 cask "whatsapp"
 cask "zoom"
+mas "1Password for Safari", id: 1569813296
+mas "AdBlock", id: 1402042596
+mas "Adblock Plus", id: 1432731683
+mas "Developer", id: 640199958
+mas "GarageBand", id: 682658836
+mas "HP", id: 1474276998
+mas "iMovie", id: 408981434
+mas "Keynote", id: 409183694
+mas "Kindle", id: 302584613
+mas "Numbers", id: 409203825
+mas "Pages", id: 409201541
+mas "Prime Video", id: 545519333
+mas "QuickShade", id: 931571202
+mas "Slack", id: 803453959
+mas "TestFlight", id: 899247664
+mas "WhatsApp", id: 310633997
+mas "Xcode", id: 497799835
+npm "@anthropic-ai/claude-code"
+npm "@mermaid-js/mermaid-cli"
 tap "github/gh"
 tap "hivemq/mqtt-cli"
 tap "homebrew/bundle"
@@ -170,6 +190,7 @@ vscode "ms-azuretools.vscode-docker"
 vscode "ms-dotnettools.vscode-dotnet-runtime"
 vscode "ms-python.debugpy"
 vscode "ms-python.isort"
+vscode "ms-python.python"
 vscode "ms-python.vscode-pylance"
 vscode "ms-python.vscode-python-envs"
 vscode "ms-toolsai.jupyter"
@@ -179,6 +200,7 @@ vscode "ms-toolsai.vscode-jupyter-cell-tags"
 vscode "ms-toolsai.vscode-jupyter-slideshow"
 vscode "ms-vscode-remote.remote-containers"
 vscode "ms-vscode.cmake-tools"
+vscode "ms-vscode.cpp-devtools"
 vscode "ms-vscode.cpptools"
 vscode "ms-vscode.cpptools-extension-pack"
 vscode "ms-vscode.cpptools-themes"

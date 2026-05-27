@@ -1,0 +1,27 @@
+format = """
+[┌─](bold green)$directory$git_branch$ruby$python$nodejs$fill[─┐](bold green)
+[└─](bold green)$character"""
+
+[fill]
+symbol = "─"
+style = "bold green"
+
+[directory]
+truncation_length = 4
+format = "[$path]($style) "
+style = "bold cyan"
+
+[git_branch]
+format = "on [$branch]($style) "
+
+[ruby]
+format = "[ruby $version]($style) "
+
+[python]
+format = "[py $version($virtualenv)]($style) "
+
+[nodejs]
+format = "[node $version]($style) "
+
+[battery]
+display = [{ threshold = 20, style = "bold red" }]

@@ -28,7 +28,6 @@ export TERM='xterm-256color'
 export LC_CTYPE=en_US.UTF-8
 export LANG=en_US.UTF-8
 export SYSTEM_FILES_DIR="$HOME/workspace/system_files"
-export PYENV_ROOT="$HOME/.pyenv"
 
 # Prevent NextJS from tracking
 # https://nextjs.org/telemetry
@@ -38,7 +37,6 @@ NEXT_TELEMETRY_DISABLED=1
 # Path Configuration (consolidated)
 typeset -U path
 path=(
-  $PYENV_ROOT/bin
   /opt/homebrew/bin
   $HOME/.poetry/bin
   $HOME/.local/bin
@@ -49,14 +47,11 @@ path=(
   $path
 )
 
-# Use pyenv for managing python dendencies
-eval "$(pyenv init -)"
-eval "$(pyenv virtualenv-init -)"
+# mise — single version manager for ruby, python, node (replaces pyenv, fnm, RVM)
+eval "$(mise activate zsh)"
 
-# Javascript support
-#
-# Fast Version Manager
-eval "$(fnm env --log-level quiet)"
+# direnv — auto-activate/deactivate project envs on cd
+eval "$(direnv hook zsh)"
 
 # Load service keys
 if [ -d "$HOME/.keys" ]; then
@@ -114,7 +109,7 @@ alias de='deactivate'
 alias vi='vim'
 alias p='pnpm'
 # use only pnpm
-alias npm='echo "⚠️  Use pnpm instead!" && false'
+alias npm='echo "⚠️  Use pnpm instead!" && pnpm'
 
 
 # Utility Functions
@@ -124,31 +119,8 @@ u() {
   cd $ud
 }
 
-chpwd() { 
-  ls 
-  # lazy load rvm as needed
-  if [[ -s ".ruby-version" && ! -v rvm ]]; then
-    [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
-  fi
-
-  # Handle node version switching
-  local dir="$PWD"
-  local found=false
-  
-  # Search up through parent directories
-  while [[ "$dir" != "/" ]]; do
-    if [[ -f "$dir/.node-version" ]]; then
-      found=true
-      fnm use "$(cat "$dir/.node-version")"
-      break
-    fi
-    dir="$(dirname "$dir")"
-  done
-  
-  # If no .node-version found in path, unset node version
-  if [[ "$found" == "false" ]]; then
-    fnm use system
-  fi
+chpwd() {
+  ls
 }
 
 bk() {
@@ -184,8 +156,8 @@ else
   export RUBY_CONFIGURE_OPTS="--with-openssl-dir=$(brew --prefix openssl@3)"
 fi
 
-# Load theme configuration
-source $HOME/.zshrc.cmdprompt
+# Starship prompt (replaces zshrc.cmdprompt)
+eval "$(starship init zsh)"
 
 # Git Configuration
 git config --global alias.ignore '!gi() { curl -L -s https://www.gitignore.io/api/$@ ;}; gi'
