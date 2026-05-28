@@ -183,6 +183,7 @@ LINKS=(
 "$SYSTEM_FILES_DIR/zshrc.cmdprompt:$HOME/.zshrc.cmdprompt"
 "$SYSTEM_FILES_DIR/vimrc:$HOME/.vimrc"
 "$SYSTEM_FILES_DIR/screenrc:$HOME/.screenrc"
+"$SYSTEM_FILES_DIR/tmux.conf:$HOME/.tmux.conf"
 "$SYSTEM_FILES_DIR/irbrc:$HOME/.irbrc"
 "$SYSTEM_FILES_DIR/inputrc:$HOME/.inputrc"
 "$SYSTEM_FILES_DIR/gemrc:$HOME/.gemrc"
