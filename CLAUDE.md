@@ -14,6 +14,7 @@ Personal macOS dotfiles and system configuration for a developer machine. All co
 | `Brewfile` — add or remove packages | Run `brew bundle --file=Brewfile` after editing; `brew bundle cleanup` to uninstall removed packages |
 | `setup.sh` Vim plugin list (`VIM_PACKAGES` array) | Run `setup.sh` again, or manually: `git clone <url> ~/.vim/pack/vendor/start/<name>` |
 | `git_hooks/prepare-commit-msg` | Immediately via symlink at `~/.git-hooks/` |
+| `claude/settings.json`, `claude/statusline-command.sh`, `CLAUDE.user.md` | Immediately via symlink into `~/.claude/`; restart Claude Code to pick up `settings.json` changes |
 
 ## Key Conventions
 
@@ -22,6 +23,7 @@ Personal macOS dotfiles and system configuration for a developer machine. All co
 - **API keys**: Loaded at shell startup from `~/.keys/` (not in this repo — gitignored). Key name templates are in `keys/`. Never commit real keys.
 - **Vim plugins**: Managed in the `VIM_PACKAGES` array in `setup.sh`. Plugins are cloned to `~/.vim/pack/vendor/start/<name>` during setup. Use the `/add-vim-plugin` skill to add new ones.
 - **Global git hooks**: Configured via `gitconfig` (`hooksPath = ~/.git-hooks`). The `prepare-commit-msg` hook uses `OPENAI_API_KEY` (from `~/.keys/openai`) to auto-generate conventional commit messages.
+- **Claude config**: Only the portable config files are checked in (`claude/settings.json`, `claude/statusline-command.sh`, `CLAUDE.user.md`), symlinked individually into `~/.claude/`. Do **not** symlink the whole `~/.claude/` directory — it also holds conversation transcripts (`projects/`), `history.jsonl`, plugins, caches, and credentials, none of which belong in a published repo. Machine-local overrides go in `~/.claude/settings.local.json` (untracked).
 
 ## setup.sh
 

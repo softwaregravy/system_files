@@ -162,6 +162,8 @@ LINKS=(
 "$SYSTEM_FILES_DIR/npmrc:$HOME/.npmrc"
 "$SYSTEM_FILES_DIR/starship.toml:$HOME/.config/starship.toml"
 "$SYSTEM_FILES_DIR/CLAUDE.user.md:$HOME/.claude/CLAUDE.md"
+"$SYSTEM_FILES_DIR/claude/settings.json:$HOME/.claude/settings.json"
+"$SYSTEM_FILES_DIR/claude/statusline-command.sh:$HOME/.claude/statusline-command.sh"
 "$SYSTEM_FILES_DIR/ir_black.vim:$HOME/.vim/colors/ir_black.vim"
 "$SYSTEM_FILES_DIR/ngrok.yml:$HOME/Library/Application Support/ngrok/ngrok.yml"
 "$SYSTEM_FILES_DIR/vim/after/syntax/sh.vim:$HOME/.vim/after/syntax/sh.vim"
