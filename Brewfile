@@ -59,8 +59,6 @@ brew "dtc"
 brew "duckdb"
 # Play, record, convert, and stream select audio and video codecs
 brew "ffmpeg"
-# Fast and simple Node.js version manager
-brew "fnm"
 # Command-line fuzzy finder written in Go
 brew "fzf"
 # GNU awk utility
@@ -157,10 +155,6 @@ brew "platformio"
 brew "pnpm"
 # PDF rendering library (based on the xpdf-3.0 code base)
 brew "poppler"
-# Python version management
-brew "pyenv"
-# Pyenv plugin to manage virtualenv
-brew "pyenv-virtualenv"
 # Pretty-print tabular data in Python
 brew "python-tabulate"
 # Interpreted, interactive, object-oriented programming language
@@ -171,8 +165,6 @@ brew "python@3.11"
 brew "qemu"
 # Persistent key-value database, with built-in net interface
 brew "redis", restart_service: :changed
-# Install various Ruby versions and implementations
-brew "ruby-build"
 # Safe, concurrent, practical language
 brew "rust"
 # Terminal multiplexer with VT100/ANSI terminal emulation

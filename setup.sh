@@ -130,49 +130,21 @@ else
 fi
 
 
-echo "Setting up pyenv global Python version..."
-if command -v pyenv &>/dev/null; then
-  if [ -z "$(pyenv versions --bare)" ]; then
-    echo "No Python versions installed. Installing latest Python 3..."
-    pyenv install 3 -s 
-    pyenv rehash
+# Set up language runtimes with mise (replaces pyenv, RVM, and fnm)
+echo "Setting up language runtimes with mise..."
+if command -v mise &>/dev/null; then
+  # Help ruby-build find OpenSSL when compiling Ruby (mirrors zshrc).
+  if brew list openssl@3 &>/dev/null; then
+    export RUBY_CONFIGURE_OPTS="--with-openssl-dir=$(brew --prefix openssl@3)"
   fi
-
-  highest_version=$(pyenv versions --bare | grep -v "/" | grep -e "^3\." | sort -V | tail -1)
-  if [ -n "$highest_version" ]; then
-    echo "Setting global Python version to $highest_version..."
-    pyenv global "$highest_version" || echo "Failed to set global Python version"
-  else
-    echo "No suitable Python versions found. Install one with: pyenv install <version>"
-  fi
-fi
-
-# Install or update RVM
-echo "Setting up RVM..."
-if ! command -v rvm &>/dev/null; then
-  
-  echo "...Importing GPG keys for RVM"
-  command curl -sSL https://rvm.io/mpapis.asc | gpg --import -
-  command curl -sSL https://rvm.io/pkuczynski.asc | gpg --import -
-  
-  # Install RVM
-  # the following works around error:
-  # /Users/john/.rvm/scripts/functions/support: line 182: _system_name: unbound variable
-  # I guess we just hope
-
-  set +u
-  echo "... Installing RVM"
-  curl -sSL https://get.rvm.io | bash -s stable 
-  
-  source "$HOME/.rvm/scripts/rvm"
-  
-  echo "...Removing default Ruby alias from RVM"
-  rvm alias delete default
-  set -u
+  # Pin global defaults; per-project versions come from .ruby-version /
+  # .node-version / .python-version files plus `mise use` + direnv.
+  # ruby@latest / python@latest = newest *stable* release (not nightly);
+  # node@lts = current Node LTS line.
+  mise use --global ruby@latest python@latest node@lts \
+    || echo "mise: some runtimes failed to install; set them up later with 'mise use -g ...'"
 else
-  echo "...RVM already installed" 
-  # if you need to update
-  # rvm get stable 
+  echo "mise not found — ensure it is installed via the Brewfile. Skipping runtime setup."
 fi
 
 # Create symbolic links
@@ -180,7 +152,6 @@ echo "Setting up symbolic links..."
 LINKS=(
 "$SYSTEM_FILES_DIR/setup.sh:$HOME/setup.sh"
 "$SYSTEM_FILES_DIR/zshrc:$HOME/.zshrc"
-"$SYSTEM_FILES_DIR/zshrc.cmdprompt:$HOME/.zshrc.cmdprompt"
 "$SYSTEM_FILES_DIR/vimrc:$HOME/.vimrc"
 "$SYSTEM_FILES_DIR/screenrc:$HOME/.screenrc"
 "$SYSTEM_FILES_DIR/tmux.conf:$HOME/.tmux.conf"
@@ -188,7 +159,6 @@ LINKS=(
 "$SYSTEM_FILES_DIR/inputrc:$HOME/.inputrc"
 "$SYSTEM_FILES_DIR/gemrc:$HOME/.gemrc"
 "$SYSTEM_FILES_DIR/gitconfig:$HOME/.gitconfig"
-"$SYSTEM_FILES_DIR/rvmrc:$HOME/.rvmrc"
 "$SYSTEM_FILES_DIR/npmrc:$HOME/.npmrc"
 "$SYSTEM_FILES_DIR/starship.toml:$HOME/.config/starship.toml"
 "$SYSTEM_FILES_DIR/CLAUDE.user.md:$HOME/.claude/CLAUDE.md"

@@ -10,7 +10,7 @@ Personal macOS dotfiles and system configuration for a developer machine. All co
 
 | Change type | How it takes effect |
 |---|---|
-| `zshrc`, `zshrc.cmdprompt`, `vimrc`, `gitconfig`, `screenrc`, etc. | Immediately via symlink; `source ~/.zshrc` to reload in the current shell session |
+| `zshrc`, `vimrc`, `gitconfig`, `starship.toml`, `tmux.conf`, `screenrc`, etc. | Immediately via symlink; `source ~/.zshrc` to reload in the current shell session |
 | `Brewfile` — add or remove packages | Run `brew bundle --file=Brewfile` after editing; `brew bundle cleanup` to uninstall removed packages |
 | `setup.sh` Vim plugin list (`VIM_PACKAGES` array) | Run `setup.sh` again, or manually: `git clone <url> ~/.vim/pack/vendor/start/<name>` |
 | `git_hooks/prepare-commit-msg` | Immediately via symlink at `~/.git-hooks/` |
@@ -25,10 +25,10 @@ Personal macOS dotfiles and system configuration for a developer machine. All co
 
 ## setup.sh
 
-Full machine bootstrap — creates all symlinks, installs Homebrew packages, sets up pyenv/RVM/fnm, and clones Vim plugins. Re-running is safe (idempotent for most steps). Requires interactive terminal (prompts for some decisions).
+Full machine bootstrap — creates all symlinks, installs Homebrew packages, sets up language runtimes via mise, and clones Vim plugins. Re-running is safe (idempotent for most steps). Requires interactive terminal (prompts for some decisions).
 
 ## Version Managers
 
-- **Python**: pyenv (auto-detects highest installed Python 3.x)
-- **Ruby**: RVM — lazy-loaded when a `.ruby-version` file is detected in the current directory
-- **Node**: fnm — auto-switches on `cd` if `.node-version` is present
+- **mise** is the single runtime manager for Ruby, Python, and Node (replaced pyenv, RVM, and fnm). Activated in `zshrc` via `mise activate zsh`; auto-switches on `.ruby-version` / `.python-version` / `.node-version`. Global defaults are pinned in `setup.sh` with `mise use -g ruby@latest python@latest node@lts` (`@latest` = newest stable, not nightly).
+- **direnv** activates per-project env on `cd` (`direnv hook zsh`). The `PATH_add bin` pattern puts a Ruby project's binstubs on PATH so `rails`/`rake`/`rspec` run without `bundle exec` — see `CLAUDE.user.md`.
+- **Prompt**: `starship` (`starship.toml`), which replaced the old hand-rolled `zshrc.cmdprompt`.
