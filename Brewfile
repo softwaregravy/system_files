@@ -1,5 +1,4 @@
 tap "github/gh"
-tap "hivemq/mqtt-cli"
 tap "homebrew/bundle"
 tap "homebrew/services"
 tap "oven-sh/bun"
@@ -253,23 +252,6 @@ cask "warp"
 cask "whatsapp"
 # Video communication and virtual meeting platform
 cask "zoom"
-mas "1Password for Safari", id: 1569813296
-mas "AdBlock", id: 1402042596
-mas "Adblock Plus", id: 1432731683
-mas "Developer", id: 640199958
-mas "GarageBand", id: 682658836
-mas "HP", id: 1474276998
-mas "iMovie", id: 408981434
-mas "Keynote", id: 409183694
-mas "Kindle", id: 302584613
-mas "Numbers", id: 409203825
-mas "Pages", id: 409201541
-mas "Prime Video", id: 545519333
-mas "QuickShade", id: 931571202
-mas "Slack", id: 803453959
-mas "TestFlight", id: 899247664
-mas "WhatsApp", id: 310633997
-mas "Xcode", id: 497799835
 vscode "akiramiyakoda.cppincludeguard"
 vscode "aliariff.vscode-erb-beautify"
 vscode "aquilalabs.superflex"

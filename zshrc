@@ -173,12 +173,28 @@ preexec () {
 # Update Brewfile 
 update_brewfile() {
     echo "Updating Brewfile..."
-    brew bundle dump --file="$SYSTEM_FILES_DIR/Brewfile" --force
+    # Main Brewfile: everything EXCEPT Mac App Store apps. --no-mas keeps them
+    # out so routine `brew bundle` against this file stays non-interactive.
+    brew bundle dump --file="$SYSTEM_FILES_DIR/Brewfile" --force --no-mas
     # Sort the Brewfile by type (tap, brew, cask, vscode) and then alphabetically
     sed '/^$\|^#/d' "$SYSTEM_FILES_DIR/Brewfile" | sort -t '"' -k1,1 -k2,2 > "$SYSTEM_FILES_DIR/Brewfile.tmp"
     mv "$SYSTEM_FILES_DIR/Brewfile.tmp" "$SYSTEM_FILES_DIR/Brewfile"
 
-    echo "Brewfile updated at $SYSTEM_FILES_DIR/Brewfile"
+    # Brewfile.mas: Mac App Store apps only. Separate because mas installs need
+    # App Store authorization and can't run unattended (see CLAUDE.md). setup.sh
+    # installs these at bootstrap; periodic `brew bundle` ignores them.
+    brew bundle dump --file="$SYSTEM_FILES_DIR/Brewfile.mas.tmp" --force \
+        --mas --no-formula --no-cask --no-tap --no-vscode
+    {
+        echo "# Mac App Store apps — installed interactively by setup.sh."
+        echo "# Do not move these into the main Brewfile: mas installs require App"
+        echo "# Store authorization and cannot run unattended. Regenerated here."
+        echo ""
+        sort "$SYSTEM_FILES_DIR/Brewfile.mas.tmp"
+    } > "$SYSTEM_FILES_DIR/Brewfile.mas"
+    rm -f "$SYSTEM_FILES_DIR/Brewfile.mas.tmp"
+
+    echo "Brewfile updated at $SYSTEM_FILES_DIR/Brewfile (+ Brewfile.mas)"
 }
 
 check_brewfile_update() {
