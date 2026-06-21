@@ -121,6 +121,12 @@ else
   echo "Homebrew already installed"
 fi
 
+# Trust required third-party taps before bundling.
+# Homebrew now requires explicit trust for non-official taps; without it,
+# brew bundle ignores their formulae/casks and prints a trust warning.
+echo "Trusting third-party Homebrew taps..."
+brew trust --tap github/gh oven-sh/bun shopify/shopify
+
 # Install programs from Brewfile
 echo "Installing programs from Brewfile..."
 if [ -f "$SYSTEM_FILES_DIR/Brewfile" ]; then

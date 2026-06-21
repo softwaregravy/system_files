@@ -1,5 +1,4 @@
 tap "github/gh"
-tap "hivemq/mqtt-cli"
 tap "homebrew/bundle"
 tap "homebrew/services"
 tap "oven-sh/bun"
