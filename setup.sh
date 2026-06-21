@@ -258,9 +258,6 @@ mkdir -p "$GLOBAL_GIT_HOOKS_DIR"
 create_symlink "$SYSTEM_FILES_DIR/git_hooks/prepare-commit-msg" "$GLOBAL_GIT_HOOKS_DIR/prepare-commit-msg"
 chmod +x "$GLOBAL_GIT_HOOKS_DIR/prepare-commit-msg"
 
-# Configure Git to use global hooks
-git config --global core.hooksPath "$GLOBAL_GIT_HOOKS_DIR"
-
 # Create program specific completions
 echo "Setting up bespoke commandline completions"
 if command -v ngrok &>/dev/null; then
