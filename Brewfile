@@ -4,7 +4,6 @@ tap "homebrew/bundle"
 tap "homebrew/services"
 tap "oven-sh/bun"
 tap "shopify/shopify"
-tap "sourcemeta/apps"
 # Run your GitHub Actions locally
 brew "act"
 # GNU compiler collection
@@ -222,8 +221,6 @@ cask "gimp"
 cask "google-chrome"
 # Terminal emulator as alternative to Apple's Terminal app
 cask "iterm2"
-# The CLI for working with JSON Schema
-cask "sourcemeta/apps/jsonschema"
 # Minimal installer for conda
 cask "miniconda"
 # Tool to control external monitor brightness & volume
