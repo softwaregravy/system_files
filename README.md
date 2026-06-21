@@ -20,12 +20,12 @@ with some slight modifications for os x
 To set up a new Mac with your system configuration, run this command in Terminal:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/softwaregravy/system_files/master/setup.sh | bash
+curl -fsSL https://raw.githubusercontent.com/softwaregravy/system_files/main/setup.sh | bash
 ```
 
 ```bash
 # Or to inspect before running Download the script
-curl -fsSL https://raw.githubusercontent.com/softwaregravy/system_files/master/setup.sh -o setup.sh
+curl -fsSL https://raw.githubusercontent.com/softwaregravy/system_files/main/setup.sh -o setup.sh
 
 # Review the contents
 less setup.sh
