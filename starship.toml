@@ -1,6 +1,6 @@
 format = """
-[┌─](bold green)$directory$git_branch$ruby$python$nodejs$fill[─┐](bold green)
-[└─](bold green)$character"""
+[┌─](bold green)$directory$git_branch$ruby$python$nodejs$fill$battery[─┐](bold green)
+[└─](bold green)$time$character"""
 
 [fill]
 symbol = "─"
@@ -23,5 +23,15 @@ format = "[py $version($virtualenv)]($style) "
 [nodejs]
 format = "[node $version]($style) "
 
+[time]
+disabled = false
+time_format = "%H:%M"
+format = "[\\($time\\)─]($style)"
+style = "bold yellow"
+
 [battery]
-display = [{ threshold = 20, style = "bold red" }]
+format = "[\\($percentage\\)─]($style)"
+display = [
+  { threshold = 20, style = "bold red" },
+  { threshold = 100, style = "bold green" },
+]
