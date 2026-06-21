@@ -135,6 +135,16 @@ else
   echo "Warning: Brewfile not found in $SYSTEM_FILES_DIR"
 fi
 
+# Install Mac App Store apps (Brewfile.mas) — kept separate from the main
+# Brewfile because mas installs require App Store authorization and can't run
+# unattended. This is the bootstrap path (run rarely), so the prompt/sign-in is
+# fine; periodic `brew bundle` against the main Brewfile stays non-interactive.
+# Sign into the App Store first.
+if [ -f "$SYSTEM_FILES_DIR/Brewfile.mas" ]; then
+  echo "Installing Mac App Store apps (requires App Store sign-in)..."
+  brew bundle --file="$SYSTEM_FILES_DIR/Brewfile.mas"
+fi
+
 
 # Set up language runtimes with mise (replaces pyenv, RVM, and fnm)
 echo "Setting up language runtimes with mise..."
