@@ -137,6 +137,10 @@ if command -v mise &>/dev/null; then
   if brew list openssl@3 &>/dev/null; then
     export RUBY_CONFIGURE_OPTS="--with-openssl-dir=$(brew --prefix openssl@3)"
   fi
+  # Honor idiomatic version files (.ruby-version / .node-version / .nvmrc /
+  # .python-version). Modern mise ignores these by default — without this,
+  # `cd` into a project with a .ruby-version would NOT auto-switch ruby.
+  mise settings idiomatic_version_file_enable_tools=ruby,node,python
   # Pin global defaults; per-project versions come from .ruby-version /
   # .node-version / .python-version files plus `mise use` + direnv.
   # ruby@latest / python@latest = newest *stable* release (not nightly);
@@ -239,7 +243,8 @@ fi
 echo "Checking for yek..."
 if ! command -v yek &>/dev/null; then
   echo "Installing yek..."
-  curl -fsSL https://bodo.run/yek.sh | bash
+  curl -fsSL https://azimi.me/yek.sh | bash \
+    || echo "yek: install failed (host unreachable?); skipping — install later from https://github.com/mohsen1/yek"
 else
   echo "yek already installed"
 fi
