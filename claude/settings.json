@@ -1,9 +1,9 @@
 {
-  "model": "opus",
   "statusLine": {
     "type": "command",
     "command": "bash /Users/john/.claude/statusline-command.sh"
   },
-  "effortLevel": "max",
-  "theme": "dark"
+  "tui": "fullscreen",
+  "theme": "dark",
+  "model": "sonnet"
 }
