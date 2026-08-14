@@ -93,7 +93,7 @@
 [pager]
   diff = less -r
 [push]
-	default = matching
+	default = simple
 [heroku]
 	account = work
 [init]
