@@ -16,6 +16,7 @@ Personal macOS dotfiles and system configuration for a developer machine. All co
 | `setup.sh` Vim plugin list (`VIM_PACKAGES` array) | Run `setup.sh` again, or manually: `git clone <url> ~/.vim/pack/vendor/start/<name>` |
 | `git_hooks/prepare-commit-msg` | Immediately via symlink at `~/.git-hooks/` |
 | `claude/settings.json`, `claude/statusline-command.sh`, `CLAUDE.user.md` | Immediately via symlink into `~/.claude/`; restart Claude Code to pick up `settings.json` changes |
+| `iterm2/com.googlecode.iterm2.plist` | Not symlinked — iTerm2 reads/writes this file directly (Preferences > General > "Load preferences from a custom folder or URL", wired up by `setup.sh`). Edit via the iTerm2 GUI as normal; changes autosave into this file, then `git diff`/commit it. **Quit iTerm2 first** before hand-editing this file or running `defaults write com.googlecode.iterm2 ...` — iTerm2 holds the whole domain in memory and overwrites the file wholesale on its next save/quit |
 
 ## Key Conventions
 
@@ -25,6 +26,7 @@ Personal macOS dotfiles and system configuration for a developer machine. All co
 - **Vim plugins**: Managed in the `VIM_PACKAGES` array in `setup.sh`. Plugins are cloned to `~/.vim/pack/vendor/start/<name>` during setup. Use the `/add-vim-plugin` skill to add new ones.
 - **Global git hooks**: Configured via `gitconfig` (`hooksPath = ~/.git-hooks`). The `prepare-commit-msg` hook uses `OPENAI_API_KEY` (from `~/.keys/openai`) to auto-generate conventional commit messages.
 - **Claude config**: Only the portable config files are checked in (`claude/settings.json`, `claude/statusline-command.sh`, `CLAUDE.user.md`), symlinked individually into `~/.claude/`. Do **not** symlink the whole `~/.claude/` directory — it also holds conversation transcripts (`projects/`), `history.jsonl`, plugins, caches, and credentials, none of which belong in a published repo. Machine-local overrides go in `~/.claude/settings.local.json` (untracked).
+- **iTerm2 config**: Profiles, keybindings, hotkey-window bindings, and color schemes live in `iterm2/com.googlecode.iterm2.plist`, loaded via iTerm2's own "custom preferences folder" feature rather than a symlink. `setup.sh` points iTerm2 at that folder (skipped if iTerm2 is currently running, since it caches prefs in memory). To edit: quit iTerm2 if it's running, make the change, relaunch — never edit the plist while iTerm2 is open.
 
 ## setup.sh
 

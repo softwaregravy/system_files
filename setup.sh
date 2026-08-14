@@ -195,6 +195,22 @@ for link in "${LINKS[@]}"; do
   create_symlink "$(realpath "$source")" "$target"
 done
 
+# Point iTerm2 at a version-controlled preferences folder (not a symlink —
+# iTerm2 itself reads/writes the plist there directly). This must run while
+# iTerm2 is closed: it caches its whole prefs domain in memory and overwrites
+# these keys with its stale in-memory copy on its next save/quit otherwise.
+echo "Configuring iTerm2 custom preferences folder..."
+ITERM_PREFS_DIR="$SYSTEM_FILES_DIR/iterm2"
+mkdir -p "$ITERM_PREFS_DIR"
+if pgrep -x iTerm2 >/dev/null; then
+  echo "iTerm2 is running — skipping custom prefs folder setup."
+  echo "Quit iTerm2 and re-run setup.sh to link it to $ITERM_PREFS_DIR."
+else
+  defaults write com.googlecode.iterm2 PrefsCustomFolder -string "$ITERM_PREFS_DIR"
+  defaults write com.googlecode.iterm2 LoadPrefsFromCustomFolder -bool true
+  echo "iTerm2 will read/write preferences from $ITERM_PREFS_DIR on next launch."
+fi
+
 # Setup Vim packages
 echo "Setting up Vim packages..."
 VIM_PACKAGES=(
