@@ -1,0 +1,129 @@
+# Ubuntu variant of the sibling `gitconfig`.
+#
+# The ONLY difference from `gitconfig` is that the `hooksPath = ~/.git-hooks` line has
+# been removed from the [core] section: the AI-generated `prepare-commit-msg` hook calls
+# the OpenAI API on every `git commit`, and that is explicitly opted out of on this server.
+#
+# To enable it later: add `hooksPath = ~/.git-hooks` back under [core], and symlink
+# `git_hooks/prepare-commit-msg` into `~/.git-hooks/`.
+
+# -- START TIDBITS --
+############################################################
+# SHARED GIT CONFIGURATION
+############################################################
+# This is a shared git-config file. It should be inserted at the top of your
+# ~/.gitconfig file which allows you to override settings by placing them farther
+# down in the file.
+#
+##############################
+# POTENTIAL CONFLICTS WITH GIT
+##############################
+# git-config commands like add/remove are not smart enough to add/remove settings
+# from the proper place in your ~/gitconfig file when using shared configs. You may 
+# need to add/remove them manually. If you store your ~/.gitconfig file in a git repository
+# itself then it will be extremely easy to see if unexpected changes occurred. For more
+# information on how-to do that contact your local git ninja.
+
+[alias]
+  
+  # +head+ shows the latest commit for the current branch
+  head = log -n1
+  
+  # +del+ will have run "git rm" on any files you deleted so git knows to delete them to
+  del = !"git status | grep deleted | cut -d' ' -f 5 | xargs git rm 2> /dev/null"
+
+  # +cbranch+ returns the current branch you are on
+  cbranch = !"git branch | grep '*' | cut -f2 -d' '"
+  
+  # +rbranch+ returns the remote branch for the current branch you are on assuming it
+  # is named the same
+  rbranch = !"git branch -r | grep -E \"/`git cbranch`$\" | grep -v -e \"->\""
+  
+  # +review+ shows changes in the remote branch that your current local branch does not have
+  review = !"git log `git cbranch`..`git rbranch`"
+  
+  # +rreview+ shows changes in your local branch that its remote branch does not have
+  rreview = !"git log `git rbranch`..`git cbranch`"
+  
+  # +rollback+ performs a "git reset --soft HEAD~n" where n is a parameter you
+  # pass in, ie: git rollback 1 is the same as git reset --soft HEAD~1
+  rollback = !"function mhsrc_gitconfig_rollback(){ num=$1 ;git reset --soft HEAD~$num ; echo Rolled back softly $num commits ;} ; mhsrc_gitconfig_rollback "
+  
+  # +unmerged+ - see http://mutuallyhuman.com/blog/2009/07/02/finding-unmerged-commits-with-git-unmerged
+  unmerged = !"ruby ~/.tidbits/lib/git-unmerged.rb"
+  
+  # +anim+ - lists branches merged into acceptance that are not in master. (anim == acceptance not in master)
+  anim = !"echo 'Branches merged into acceptance that are not in master:' && git log master..acceptance | grep -i 'Merge branch'"
+  
+  # +pushr+ - pushes the current branch to the remote origin
+  pushr = !"git push --set-upstream origin `git cbranch`"
+
+  # +pre+ - shortcut for pull --rebase
+  pre = pull --rebase
+  
+############################################################
+# END SHARED GIT CONFIGURATION
+############################################################
+
+# -- END TIDBITS --
+
+[user]
+	name = softwaregravy
+	email = 426690+softwaregravy@users.noreply.github.com
+[alias]
+  st = status
+  ci = commit
+  br = branch
+  co = checkout
+  df = diff
+  dc = diff --cached
+  lg = log -p
+  lol = log --graph --decorate --pretty=oneline --abbrev-commit
+  lola = log --graph --decorate --pretty=oneline --abbrev-commit --all
+  ls = ls-files
+
+  # Show files ignored by git:
+  ign = ls-files -o -i --exclude-standard
+	d = difftool
+	ignore = "!gi() { curl -L -s https://www.gitignore.io/api/$@ ;}; gi"
+
+[core]
+	quotepath = false
+	autocrlf = input
+	whitespace = cr-at-eol
+	pager = less -r
+
+[diff]
+  tool = less -r
+  # tool = vimdiff
+  # external = ~/.git_diff_wrapper
+[pager]
+  diff = less -r
+[push]
+	default = simple
+[heroku]
+	account = work
+[init]
+	templatedir = ~/.git_template
+	defaultBranch = main
+[help]
+	autocorrect = 1
+[difftool]
+	prompt = false
+[merge]
+	tool = vimdiff
+[filter "lfs"]
+	required = true
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+[color]
+  diff = auto
+  status = auto
+  branch = auto
+  interactive = auto
+  pager = true
+[pull]
+	rebase = false
+[fetch]
+	prune = true

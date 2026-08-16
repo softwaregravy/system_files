@@ -1,0 +1,298 @@
+# Ubuntu port of `zshrc` (24.04 noble, headless server).
+# The macOS original is the sibling file `zshrc` in this repo — keep the two in
+# sync: most edits should be made to BOTH files. Differences here are limited to
+# things that are genuinely macOS-only (Homebrew, BSD coreutils, /Applications).
+# This file becomes ~/.zshrc for the login shell, so nothing in it may hard-fail.
+
+# Profiling - Uncomment this section when profiling
+# zmodload zsh/zprof
+
+#typeset -F SECONDS
+#typeset -A _timing_starts
+
+#_start_timing() {
+  #echo "[timing] Starting $1..."
+  #_timing_starts[$1]=$SECONDS
+#}
+
+#_end_timing() {
+  #local end_time=$SECONDS
+  #local start_time=${_timing_starts[$1]}
+  #local init_time=${_timing_starts["ZSH Initialize"]}
+  #local section_elapsed=$(( end_time - start_time ))
+  #local total_elapsed=$(( end_time - init_time ))
+  #printf "[timing] %-20s %.1fs (total: %.1fs)\n" "$1:" $section_elapsed $total_elapsed
+#}
+
+# Environment Variables
+export EDITOR="vim"
+export VISUAL="$EDITOR"
+export PAGER=less
+export GIT_PAGER=less
+export LESS='-i -R'
+# Only promote a bare `xterm` to 256 colors, and only outside tmux/screen.
+# tmux sets TERM=tmux-256color and screen sets screen-256color; overwriting
+# those makes everything inside the multiplexer load the wrong terminfo.
+# Both terminfo entries exist here (ncurses-base), so nothing needs faking.
+if [[ -z "$TMUX" && -z "$STY" && "$TERM" == "xterm" ]]; then
+  export TERM='xterm-256color'
+fi
+export LC_CTYPE=en_US.UTF-8
+export LANG=en_US.UTF-8
+export SYSTEM_FILES_DIR="$HOME/workspaces/system_files"
+
+# Prevent NextJS from tracking
+# https://nextjs.org/telemetry
+# Fuck off Vercel!
+export NEXT_TELEMETRY_DISABLED=1
+
+# Path Configuration (consolidated)
+# ~/.local/bin is where the user-level tools live here: starship, bat, fd,
+# newrc, claude. typeset -U keeps the array deduplicated.
+typeset -U path
+path=(
+  $HOME/.local/bin
+  /usr/local/sbin
+  /usr/local/bin
+  $path
+)
+
+# mise — single version manager for ruby, python, node (replaces pyenv, fnm, RVM)
+# Guarded: this file is the login shell's ~/.zshrc, and an unconditional eval of
+# a missing binary is a lockout risk.
+command -v mise >/dev/null 2>&1 && eval "$(mise activate zsh)"
+
+# direnv — auto-activate/deactivate project envs on cd
+command -v direnv >/dev/null 2>&1 && eval "$(direnv hook zsh)"
+
+# Load service keys
+if [ -d "$HOME/.keys" ]; then
+  for f in $HOME/.keys/*; do
+    if [ -f "$f" ]; then
+      source "$f"
+    fi
+  done
+fi
+
+# History Configuration
+HISTSIZE=20000
+SAVEHIST=15000
+HISTFILE=$HOME/.history
+setopt EXTENDED_HISTORY HIST_EXPIRE_DUPS_FIRST HIST_VERIFY INC_APPEND_HISTORY
+
+# Directory Options
+setopt AUTO_CD AUTO_PUSHD PUSHD_IGNORE_DUPS AUTO_NAME_DIRS
+DIRSTACKSIZE=20
+
+# General Options
+setopt ALWAYS_TO_END NO_BEEP RM_STAR_WAIT
+autoload colors && colors
+
+# Key Bindings
+bindkey -v
+KEYTIMEOUT=1
+bindkey '^R' history-incremental-search-backward
+
+
+# Aliases
+alias py=python3
+# alias python=python3
+# Ubuntu 24.04 ships an externally-managed system python (PEP 668,
+# /usr/lib/python3.12/EXTERNALLY-MANAGED), so `pip install` outside a venv is
+# refused. Use a mise-managed python, a venv, or pipx.
+alias pip=pip3
+alias r=rails
+alias grep='nocorrect grep --color=auto'
+# GNU grep matches --exclude-dir against the directory *basename*, so the
+# macOS-era "./tmp"-style patterns silently excluded nothing. Bare names only.
+# (ripgrep — `rg` — is installed and is usually the better tool for this.)
+alias rgrep='nocorrect grep -inR --color=auto --exclude-dir={tmp,log,.git,node_modules,public,coverage} --exclude-dir=assets --exclude=".overmind.sock"'
+# GNU ls: -G means --no-group (it does NOT error, it just silently drops color
+# and the group column). Colour is --color=auto here.
+alias ls='ls --color=auto'
+alias l='ls'
+# ll expands the ls alias above, so it inherits --color=auto
+alias ll='ls -alh'
+alias pg='ps auxwww | grep'
+# procps-ng top wants the real field name; `-o cpu` is a hard error
+alias top='top -o %CPU'
+alias cpplint='find . -iname \*.h -o -iname \*.cpp -o -iname \*.c -o -iname \*.ino | xargs clang-format -i'
+alias reset_db='rake db:drop:all db:create db:migrate db:seed db:test:prepare'
+alias ae='deactivate &> /dev/null; source ./venv/bin/activate'
+alias de='deactivate'
+alias vi='vim'
+alias p='pnpm'
+# use only pnpm
+alias npm='echo "⚠️  Use pnpm instead!" && pnpm'
+
+
+# Utility Functions
+u() {
+  local ud="."
+  for i in {1..$1}; do ud="$ud/.."; done
+  cd $ud
+}
+
+chpwd() {
+  # Interactive only — otherwise every non-interactive `cd` (scripts, and
+  # Claude Code's Bash tool once zsh is the login shell) gets ls output
+  # injected into its stdout.
+  [[ -o interactive ]] || return
+  ls
+}
+
+bk() {
+  if [ -f "$1" ]; then
+    cp "$1" "$1.bk"
+  else
+    echo "File $1 does not exist"
+    return 1
+  fi
+}
+
+swap() {
+  if [ -f "$1" ] && [ -f "$2" ]; then
+    local tmpfile=$(mktemp)
+    mv "$1" "$tmpfile"
+    mv "$2" "$1"
+    mv "$tmpfile" "$2"
+  else
+    echo "Both files must exist"
+    return 1
+  fi
+}
+
+timestamp() {
+  # macOS used a BSD `date -j -f ...` round-trip of `date`; GNU date has no -j.
+  # Same number, far less ceremony.
+  date +%s
+}
+
+# No RUBY_CONFIGURE_OPTS block here: on Ubuntu ruby-build/mise find OpenSSL via
+# pkg-config from libssl-dev, and the macOS version shelled out to brew on every
+# shell start (printing an error when brew is absent).
+
+# Starship prompt (replaces zshrc.cmdprompt)
+command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
+
+# Git Configuration
+# The `git config --global alias.ignore ...` line that lived here wrote to
+# ~/.gitconfig on every single shell start. setup-ubuntu.sh sets it once.
+
+# Screen title setting for terminal
+preexec () {
+    # tmux sets TERM=tmux-256color and screenrc sets screen-256color, so the
+    # old exact `== "screen"` test never matched.
+    case "$TERM" in
+        screen*|tmux*)
+            local CMD=${1[(wr)^(*=*|sudo|-*)]}
+            # \\\\ survives double-quote processing as \\, which print turns
+            # into the single backslash of the ESC-\ string terminator.
+            print -n "\ek$CMD\e\\\\"
+            ;;
+    esac
+}
+
+# (update_brewfile / check_brewfile_update lived here on macOS — dropped, along
+# with their BSD `stat -f %m`. Nothing on this box has a Homebrew to dump.)
+
+# ZSH Plugin and completion setup
+# Ubuntu's zsh already compiles /usr/share/zsh/vendor-completions,
+# /usr/share/zsh/vendor-functions and /usr/local/share/zsh/site-functions into
+# the default $fpath, so the Homebrew FPATH prepend has no replacement here.
+# ~/.zsh/completions is where setup-ubuntu.sh drops hand-installed completions
+# (e.g. _ngrok); a missing directory in $fpath is harmless.
+fpath=("$HOME/.zsh/completions" $fpath)
+
+    # Compile new completion dump
+    autoload -Uz compinit
+    compinit -C
+
+      # Git completion
+    zstyle ':completion:*:*:git-remote:*' group-order remote-groups aliases remote-tags remote-heads
+    zstyle ':completion:*:*:git-checkout:*' sort false
+    zstyle ':completion:*:*:git-switch:*' sort false
+
+    # Basic completion settings
+    zstyle ':completion:*' completer _complete _approximate _expand
+    zstyle ':completion:*' menu select
+    zstyle ':completion:*' max-errors 2
+
+    ## Case-insensitive completion
+    zstyle ':completion:*' matcher-list 'm:{[:lower:][:upper:]}={[:upper:][:lower:]}' 'm:{[:lower:][:upper:]}={[:upper:][:lower:]} l:|=* r:|=*'
+
+    #zstyle ':completion:*:default' list-prompt '%S%M matches%s'
+    #zstyle ':completion:*' file-sort modification reverse
+    zstyle ':completion:*' list-colors "=(#b) #([0-9]#)*=36=31"
+    #zstyle ':completion:*:manuals' separate-sections true
+
+
+   ## Enhanced completion settings
+   zstyle ':completion:*' special-dirs true
+   zstyle ':completion:*' squeeze-slashes true
+   zstyle ':completion:*:descriptions' format '%U%B%d%b%u'
+   zstyle ':completion:*:warnings' format '%BSorry, no matches for: %d%b'
+   zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
+
+   # zsh-autosuggestions first — syntax highlighting has to come last so it can
+   # wrap the final set of ZLE widgets. Every source is guarded, so a missing
+   # plugin package is a no-op rather than a broken login.
+   [[ -r /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]] && source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+
+   # Syntax highlighting (must be last). Prefer fast-syntax-highlighting if it
+   # has been cloned into ~/.zsh, otherwise the apt zsh-syntax-highlighting
+   # package. NEVER both: they share the _zsh_highlight* function namespace and
+   # would double-wrap the ZLE widgets.
+   # NOTE: the macOS original ends this source with `&!`, which backgrounds it
+   # into a subshell — the widget definitions die with that subshell, so the
+   # plugin has never actually loaded there either. Do not re-add the `&!`.
+   if [[ -r "$HOME/.zsh/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh" ]]; then
+     source "$HOME/.zsh/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh"
+   elif [[ -r /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
+     source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+   fi
+
+# pnpm
+export PNPM_HOME="$HOME/.local/share/pnpm"
+# pnpm v11+ puts global binaries in $PNPM_HOME/bin; older layouts used
+# $PNPM_HOME itself. `typeset -U path` above handles dedup, so the macOS
+# case ":$PATH:" guard is unnecessary.
+path=(
+  $PNPM_HOME
+  $PNPM_HOME/bin
+  $path
+)
+# pnpm end
+
+# Auto-attach to tmux on SSH login.
+# Every guard has to hold:
+#   [[ -o interactive ]] — never touch scripts, `ssh host cmd`, scp/rsync/sftp
+#   -n $SSH_TTY          — only real SSH logins with a tty (not local/console)
+#   -z $TMUX             — already inside tmux; this also covers the claude-rc@
+#                          systemd tmux sessions, whose panes set $TMUX
+#   -z $CLAUDECODE       — Claude Code's Bash tool must never be exec'd away
+#   -z $NO_TMUX          — manual escape hatch
+#   command -v tmux      — never exec a binary that isn't installed
+# Bypass:  ssh ghost -t /bin/bash        (skips zsh entirely)
+#          NO_TMUX=1 ssh ghost           (needs SendEnv/AcceptEnv NO_TMUX)
+# -A attaches to session "main" if it exists and creates it otherwise.
+#
+# Deliberately NOT `exec tmux`: exec replaces this shell, so if the tmux server
+# ever fails to start you get logged straight back out with no way in short of
+# `ssh ghost -t /bin/bash`. Running it as a child and exiting only on success
+# costs one idle shell process and keeps a working prompt as the fallback.
+# Detaching (C-a d) still ends the SSH session, which is the point.
+if [[ -o interactive ]] &&
+   [[ -n "$SSH_TTY" ]] &&
+   [[ -z "$TMUX" ]] &&
+   [[ -z "$CLAUDECODE" ]] &&
+   [[ -z "$NO_TMUX" ]] &&
+   command -v tmux >/dev/null 2>&1; then
+  tmux new-session -A -s main && exit 0
+  print -u2 "tmux failed to start; continuing in a plain zsh shell."
+fi
+
+# Finish profiling
+# zprof
+
+

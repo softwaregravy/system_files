@@ -1,0 +1,10 @@
+{
+  "statusLine": {
+    "type": "command",
+    "command": "bash ~/.claude/statusline-command.sh"
+  },
+  "tui": "fullscreen",
+  "theme": "dark",
+  "model": "sonnet",
+  "autoUpdatesChannel": "stable"
+}

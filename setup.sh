@@ -3,6 +3,14 @@
 
 set -euo pipefail
 
+# macOS only — this script uses Homebrew, xcode-select, `defaults` and mas.
+# Without this guard a Linux run dies further down at the XCode Command Line
+# Tools check with a misleading error message.
+if [[ "$(uname -s)" != "Darwin" ]]; then
+  echo "setup.sh is for macOS. On Ubuntu/Debian, run ./setup-ubuntu.sh instead." >&2
+  exit 1
+fi
+
 echo "Starting system setup..."
 
 

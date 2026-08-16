@@ -1,0 +1,71 @@
+# Ubuntu 24.04 (headless server) port of the sibling `tmux.conf`.
+# The macOS original lives next to this file as `tmux.conf`; structure, comments
+# and ordering are kept aligned so a diff between the two stays readable.
+# Only the clipboard section genuinely differs — see "Clipboard" below.
+
+# Keep Ctrl-a prefix (screen muscle memory)
+set -g prefix C-a
+unbind C-b
+bind a send-prefix
+
+# Proper color support — fixes zsh plugin issues
+# tmux-256color terminfo is present on Ubuntu 24.04 via the ncurses-base package
+# (/usr/share/terminfo/t/tmux-256color), so no local terminfo compile is needed.
+set -g default-terminal "tmux-256color"
+set -ag terminal-overrides ",xterm-256color:RGB"
+
+# Large scrollback
+set -g history-limit 50000
+
+# Mouse support
+# Tip: hold ⌥ Option while dragging in iTerm2 to suppress mouse reporting, so iTerm2
+# does its own local selection (handy across split panes, or inside a pager).
+# A normal drag goes through tmux copy-mode → OSC 52 → macOS clipboard.
+set -g mouse on
+
+# Window nav — both C-a n and C-a C-n work (screen muscle memory)
+bind n next-window
+bind C-n next-window
+bind p previous-window
+bind C-p previous-window
+
+# New window — both C-a c and C-a C-c work
+bind c new-window
+bind C-c new-window
+
+# Clipboard integration over OSC 52 (no pbcopy, no X11 on a headless box)
+#
+# macOS-side requirement: iTerm2 → Settings → General → Selection tab →
+#   ☑ "Applications in terminal may access clipboard"
+# Without that checkbox iTerm2 silently drops the OSC 52 and nothing is copied.
+#
+# `set-clipboard on` is load-bearing — do NOT weaken it to `external`.
+# Verified in tmux 3.4's input.c: input_osc_52() returns early unless the option is
+# exactly `on` (the enum is off=0, external=1, on=2). With `external`, tmux would still
+# set the outer clipboard from its OWN copy-mode, but it would silently discard OSC 52
+# sequences emitted by applications running inside a pane — which would break Vim's `vv`
+# mapping (vim-oscyank).
+set -g set-clipboard on
+setw -g mode-keys vi
+
+# Deliberately NOT setting `allow-passthrough`.
+# That option governs only the DCS wrapper escape hatch (\ePtmux;...\e\\), which passes
+# bytes through untouched. vim-oscyank sends a plain \e]52;c;<b64>\a, which tmux parses
+# in input_osc_52() and re-emits to the outer terminal via the `Ms` terminfo capability —
+# the intercept path, gated on `set-clipboard on`, not on `allow-passthrough`.
+# The intercept path is the one we want: it also populates a tmux paste buffer, so
+# `C-a P` pastes whatever Vim just yanked.
+
+# Copy mode → macOS clipboard via OSC 52
+# No pipe target needed — `set-clipboard on` makes tmux emit the OSC 52 itself.
+# MouseDragEnd1Pane uses copy-selection (no -and-cancel) on purpose, matching the
+# original's behavior of staying in copy mode after a drag.
+bind-key -T copy-mode-vi y                 send-keys -X copy-selection-and-cancel
+bind-key -T copy-mode-vi Enter             send-keys -X copy-selection-and-cancel
+bind-key -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-selection
+
+# Paste tmux buffer (Cmd+V from iTerm also works)
+bind P paste-buffer
+
+# Status bar (GNU date supports %H/%M)
+set -g status-right " #(date +%H:%M) "

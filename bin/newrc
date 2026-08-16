@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+NAME="${1:-}"; REPO="${2:-}"
+ROOT="$HOME/workspaces/claude-rc-projects"
+
+[[ -n "$NAME" ]] || { echo "usage: newrc <name> [git-url]" >&2; exit 1; }
+[[ "$NAME" != */* ]] || { echo "name cannot contain /" >&2; exit 1; }
+
+DIR="$ROOT/$NAME"
+if [[ -n "$REPO" ]]; then
+  [[ ! -e "$DIR" ]] || { echo "$DIR already exists" >&2; exit 1; }
+  git clone "$REPO" "$DIR"
+else
+  mkdir -p "$DIR"
+fi
+
+python3 - "$DIR" <<'PY'
+import json, os, sys, tempfile
+p = os.path.expanduser("~/.claude.json")
+try:
+    cfg = json.load(open(p))
+except FileNotFoundError:
+    cfg = {}
+cfg.setdefault("projects", {}).setdefault(sys.argv[1], {})["hasTrustDialogAccepted"] = True
+fd, tmp = tempfile.mkstemp(dir=os.path.dirname(p))
+with os.fdopen(fd, "w") as f:
+    json.dump(cfg, f, indent=2)
+os.chmod(tmp, 0o600); os.replace(tmp, p)
+PY
+
+systemctl --user enable --now "claude-rc@$NAME"
+sleep 3
+systemctl --user is-active "claude-rc@$NAME"
