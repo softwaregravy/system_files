@@ -259,6 +259,13 @@ case ":$PATH:" in
 esac
 # pnpm end
 
+# Startup cheatsheet (tmux / starship / mise+direnv) — shown once on a fresh
+# terminal. Skipped inside an existing tmux pane ($TMUX set) so splitting or
+# creating panes all day doesn't reprint it. Edit: $SYSTEM_FILES_DIR/motd.sh
+if [[ -o interactive && -z "$TMUX" ]]; then
+  source "$SYSTEM_FILES_DIR/motd.sh"
+fi
+
 # Finish profiling
 # zprof
 
