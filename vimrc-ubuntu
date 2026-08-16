@@ -1,0 +1,453 @@
+" -----------------------------------------------------------------------------
+" |                       Ubuntu port of the macOS vimrc                      |
+" |                                                                           |
+" | This is the Ubuntu 24.04 (noble) headless-server port of the sibling      |
+" | file `vimrc` in this repo -- that one stays the macOS original and is     |
+" | left untouched. Every deliberate difference is tagged with an             |
+" | "UBUNTU:" comment, so `diff vimrc vimrc-ubuntu` reads as the changelog.   |
+" |                                                                           |
+" | Target: vim-nox 9.1.0016 (+ruby +python3 +perl +lua) but -clipboard       |
+" | and -xterm_clipboard, since Debian builds vim-nox --without-x. Driven     |
+" | over SSH from macOS iTerm2, usually inside tmux, so the system            |
+" | clipboard is reached with OSC 52 escapes (the vim-oscyank plugin)         |
+" | instead of the "+ register:                                               |
+" |   vv / 3vv = yank N lines to the Mac clipboard over OSC 52                |
+" |   ,y = OSC 52 yank operator (,yy = current line); ,y also in visual       |
+" -----------------------------------------------------------------------------
+
+" -----------------------------------------------------------------------------  
+" |                            VIM Settings                                   |
+" |                   (see gvimrc for gui vim settings)                       |
+" |                                                                           |
+" | Some highlights:                                                          |
+" |   jj = <esc>  Very useful for keeping your hands on the home row          |
+" |   ,n = toggle NERDTree off and on                                         |
+" |                                                                           |
+" |   ,f = fuzzy find all files                                               |
+" |   ,b = fuzzy find in all buffers                                          |
+" |   ,p = go to previous file                                                |
+" |                                                                           |
+" |   hh = inserts '=>'                                                       |
+" |   aa = inserts '@'                                                        |
+" |                                                                           |
+" |   ,h = new horizontal window                                              |
+" |   ,v = new vertical window                                                |
+" |                                                                           |
+" |   ,i = toggle invisibles                                                  |
+" |                                                                           |
+" |   enter and shift-enter = adds a new line after/before the current line   |
+" |                                                                           |
+" |   :call Tabstyle_tabs = set tab to real tabs                              |
+" |   :call Tabstyle_spaces = set tab to 2 spaces                             |
+" |                                                                           |
+" -----------------------------------------------------------------------------  
+
+set nocompatible
+
+let mapleader = ","
+" Professor VIM says '87% of users prefer jj over esc', jj abrams disagrees
+" UBUNTU: was `imap jj <Esc> ` -- note the TRAILING SPACE. :imap takes no "
+" comments and does not strip trailing whitespace, so the RHS was <Esc><Space>;
+" combined with `map <space> /` below, every jj dropped you at a search prompt.
+inoremap jj <Esc>
+
+" Tabs ************************************************************************
+"set sta " a <Tab> in an indent inserts 'shiftwidth' spaces
+
+function! Tabstyle_tabs()
+  " Using 4 column tabs
+  set softtabstop=4
+  set shiftwidth=4
+  set tabstop=4
+  set noexpandtab
+endfunction
+
+" function! Tabstyle_spaces()
+  " Use 2 spaces
+  set softtabstop=2
+  set shiftwidth=2
+  set tabstop=2
+  set expandtab
+" endfunction
+
+" why didn't this work?
+" call Tabstyle_spaces()
+
+
+" Indenting *******************************************************************
+set ai " Automatically set the indent of a new line (local to buffer)
+set si " smartindent (local to buffer)
+
+
+" Scrollbars ******************************************************************
+set sidescrolloff=2
+set numberwidth=4
+
+
+" Windows *********************************************************************
+set equalalways " Multiple windows, when created, are equal in size
+set splitbelow splitright
+
+" Vertical and horizontal split then hop to a new buffer
+" UBUNTU: the original had `:vsp^M^W^W<cr>`, where ^M ^W ^W are six LITERAL
+" ASCII characters (verified with od -c), not control codes -- so ,v failed
+" with "E492: Not an editor command: vsp^M^W^W". Spelled out properly here.
+:noremap <Leader>v :vsp<CR><C-w><C-w>
+:noremap <Leader>h :split<CR><C-w><C-w>
+
+
+" Cursor highlights ***********************************************************
+set cursorline
+"set cursorcolumn
+
+
+" Searching *******************************************************************
+set hlsearch  " highlight search
+set incsearch  " Incremental search, search as you type
+set ignorecase " Ignore case when searching 
+set smartcase " Ignore case when searching lowercase
+
+
+" Colors **********************************************************************
+" Harmless safety net; tmux/iTerm2 over SSH already report 256 colors
+set t_Co=256
+" Enable true color support - commented out due to screen compatibility issues
+" UBUNTU: still left off. ir_black is a 16-color cterm scheme, so termguicolors
+" buys nothing here, and the screen/tmux caveat above still applies.
+"let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+"let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+"set termguicolors
+set background=dark 
+syntax on " syntax highlighting
+colorscheme ir_black
+
+
+" Status Line *****************************************************************
+set showcmd
+set ruler " Show ruler
+"set ch=2 " Make command line two lines high
+
+
+" Line Wrapping ***************************************************************
+set nowrap
+set linebreak  " Wrap at word
+
+
+" Directories *****************************************************************
+" Setup backup location and enable
+"set backupdir=~/backup/vim
+"set backup
+
+" Set Swap directory
+"set directory=~/backup/vim/swap
+
+" Sets path to directory buffer was loaded from
+"autocmd BufEnter * lcd %:p:h
+
+
+" File Stuff ******************************************************************
+filetype plugin indent on
+" To show current filetype use: set filetype
+
+"autocmd FileType html :set filetype=xhtml
+
+
+" Insert New Line *************************************************************
+" awesome, inserts new line without going into insert mode
+" UBUNTU: the comment used to trail on the same line; :map takes no " comments,
+" so the comment text became part of the RHS and was replayed as normal-mode
+" keys. Moved above. Note also that a terminal cannot tell <S-Enter> from
+" <Enter> unless CSI-u / modifyOtherKeys is enabled (both send a bare CR), so
+" over SSH this mapping is effectively dead and only <Enter> below ever fires.
+map <S-Enter> O<ESC>
+map <Enter> o<ESC>
+"set fo-=r " do not insert a comment leader after an enter, (no work, fix!!)
+
+
+" Sessions ********************************************************************
+" Sets what is saved when you save a session
+set sessionoptions=blank,buffers,curdir,folds,help,resize,tabpages,winsize
+
+
+" Invisible characters *********************************************************
+set listchars=trail:.,tab:>-,eol:$
+set nolist
+" Toggle invisible chars
+" UBUNTU: comment moved off the mapping line -- :noremap takes no " comments
+:noremap <Leader>i :set list!<CR>
+
+" Line Numbers ***************************************************************
+map <Leader>s :set number!<CR>
+
+" Mouse ***********************************************************************
+"set mouse=a " Enable the mouse
+"behave xterm
+"set selectmode=mouse
+
+
+" Misc settings ***************************************************************
+set backspace=indent,eol,start
+set number " Show line numbers
+set matchpairs+=<:>
+set vb t_vb= " Turn off bell, this could be more annoying, but I'm not sure how
+set nofoldenable " Turn off folding 
+
+
+" Navigation ******************************************************************
+
+" Make cursor move by visual lines instead of file lines (when wrapping)
+map <up> gk
+map k gk
+imap <up> <C-o>gk
+map <down> gj
+map j gj
+imap <down> <C-o>gj
+map E ge
+" Use CTR to move between split windows
+map <C-J> <C-W>j
+map <C-K> <C-W>k
+map <C-H> <C-W>h
+map <C-L> <C-W>l
+" use space to search
+map <space> /
+" UBUNTU: <C-space> is usually not delivered as a distinct key through a
+" terminal (it arrives as NUL or nothing), so this one rarely fires over SSH
+map <C-space> ?
+
+" Go to previous file
+" UBUNTU: comment moved off the mapping line -- :map takes no " comments
+map <Leader>p <C-^>
+
+
+" Ruby stuff ******************************************************************
+"compiler ruby         " Enable compiler support for ruby
+"map <F5> :!ruby %<CR>
+" source: https://github.com/standardrb/standard/wiki/IDE:-vim
+let g:ruby_indent_assignment_style = 'variable'
+let g:ruby_indent_hanging_elements = 0
+
+
+" Omni Completion *************************************************************
+autocmd FileType html :set omnifunc=htmlcomplete#CompleteTags
+" UBUNTU: pythoncomplete# is the Python 2 completer and needs +python; this
+" build is -python +python3, so use the python3 one (present in the noble
+" runtime as /usr/share/vim/vim91/autoload/python3complete.vim)
+autocmd FileType python set omnifunc=python3complete#Complete
+autocmd FileType javascript set omnifunc=javascriptcomplete#CompleteJS
+autocmd FileType css set omnifunc=csscomplete#CompleteCSS
+autocmd FileType xml set omnifunc=xmlcomplete#CompleteTags
+autocmd FileType php set omnifunc=phpcomplete#CompletePHP
+autocmd FileType c set omnifunc=ccomplete#Complete
+" May require ruby compiled in
+" UBUNTU: this needs the vim-nox package (+ruby). Stock vim.basic is -ruby and
+" throws two errors on every ruby buffer before falling back to syntax
+" completion.
+autocmd FileType ruby,eruby set omnifunc=rubycomplete#Complete 
+" Note, this is matching the start of the filename, not the extension
+autocmd BufNewFile,BufRead .env* set filetype=sh
+
+" ZSH file handling
+autocmd FileType zsh set expandtab
+autocmd FileType zsh set tabstop=2
+autocmd FileType zsh set softtabstop=2
+autocmd FileType zsh set shiftwidth=2
+autocmd FileType zsh set autoindent
+autocmd FileType zsh set formatoptions+=r
+autocmd FileType zsh set formatoptions+=o
+autocmd FileType zsh set formatoptions+=j
+autocmd FileType zsh set commentstring=#\ %s
+
+
+" Hard to type *****************************************************************
+imap uu _
+imap hh =>
+imap aa @
+
+
+" -----------------------------------------------------------------------------  
+" |                              Plug-ins                                     |
+" -----------------------------------------------------------------------------  
+
+" NERDTree ********************************************************************
+:noremap <Leader>n :NERDTreeToggle<CR>
+let NERDTreeHijackNetrw=1 " User instead of Netrw when doing an edit /foobar
+let NERDTreeMouseMode=1 " Single click for everything
+let NERDTreeWinSize=40 " set default width of nerdtree
+
+
+" NERD Commenter **************************************************************
+let NERDCreateDefaultMappings=0 " I turn this off to make it simple
+
+" Toggle commenting on 1 line or all selected lines. Wether to comment or not
+" is decided based on the first line; if it's not commented then all lines
+" will be commented
+" :map <Leader>c :call NERDComment(0, "toggle")<CR><ESC>
+:map <Leader>c :call nerdcommenter#Comment(0, "toggle")<CR><ESC>
+" let g:NERDCreateDefaultMappings = 1
+
+" rails-vim ***************************************************************
+map <Leader>ra :AS<CR>
+map <Leader>rs :RS<CR>
+
+" AutoComplPop
+set completeopt=menu,longest,preview
+let g:AutoComplPop_IgnoreCaseOption = 0
+let g:AutoComplPop_BehaviorKeywordLength = 2
+set complete=.,w,b,u,t,k
+let g:AutoComplPop_CompleteOption = '.,w,b,u,t,k'
+" trying this behavior for a while
+inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
+inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+" inoremap <Tab> <C-n>
+
+" -----------------------------------------------------------------------------  
+" |                             OS Specific                                   |
+" |                      (GUI stuff goes in gvimrc)                           |
+" -----------------------------------------------------------------------------  
+
+" Mac *************************************************************************
+"if has("mac") 
+  "" 
+"endif
+ 
+" Windows *********************************************************************
+"if has("gui_win32")
+  "" 
+"endif
+
+
+
+" -----------------------------------------------------------------------------  
+" |                               Startup                                     |
+" -----------------------------------------------------------------------------  
+" Open NERDTree on start
+" Never turn this on cause it opens on all the git commit/rebase stuff
+" autocmd VimEnter * exe 'NERDTree' | wincmd l 
+
+
+
+" -----------------------------------------------------------------------------  
+" |                               Host specific                               |
+" -----------------------------------------------------------------------------  
+" UBUNTU: the actual `source ~/.vimrc.local` moved to the very END of this file
+" (see below) so that host-specific overrides win over everything here. In the
+" macOS original it is sourced at this point, i.e. before the clipboard
+" mappings, the clipboard block and `set columns&`, so it could not override
+" any of them.
+
+"if hostname() == "foo"
+  " do something
+"endif
+
+" Example .vimrc.local:
+
+"call Tabstyle_tabs()
+"colorscheme ir_dark
+
+"autocmd User ~/git/some_folder/* call Tabstyle_spaces() | let g:force_xhtml=1
+
+" play nice with rvm https://rvm.beginrescueend.com/integration/vim/
+" removing as we are not using rvm anymore
+" set shell=/bin/sh
+
+" cause
+iabbrev busienss business
+iabbrev custmoer customer
+
+" -----------------------------------------------------------------------------
+" |                           Clipboard Mappings                               |
+" -----------------------------------------------------------------------------
+" UBUNTU: this host has no clipboard at all. vim-nox is built --without-x, so
+" has('clipboard'), has('clipboard_working') and has('unnamedplus') are all 0
+" and "+ is just an ordinary register that nothing ever reads. Vim 9.1.0016 in
+" noble also predates native OSC 52 (no 'clipmethod', no base64_encode(), no
+" pack/dist/opt/osc52) and an LTS will never rebase vim, so copying to the
+" Mac's clipboard goes through the vim-oscyank plugin: it emits an OSC 52
+" escape sequence that tmux and iTerm2 forward to macOS. setup-ubuntu.sh clones
+" it to ~/.vim/pack/vendor/start/vim-oscyank. Everything below degrades to a
+" plain register yank when the plugin is missing.
+let g:oscyank_silent = 1 " we print our own message
+
+" Map yy and vv to show their copy destinations, vv copies to system clipboard
+" nnoremap <expr> yy v:count ? v:count.'yy:echo "'.v:count.' lines copied to buffer"<CR>' : 'yy:echo "1 line copied to buffer"<CR>'
+nnoremap yy :<C-u>execute 'normal! '.v:count1.'yy' \| echon v:count1.' lines copied to buffer'<CR>
+
+" UBUNTU: vv used to be `<expr>` yanking into "+, which copies nowhere here.
+" Now: yank into the unnamed register (so p still works locally), then ship
+" that register out over OSC 52. Counts still behave -- vv = 1 line, 3vv = 3
+" lines. It is a function rather than a one-liner so the count is captured into
+" the argument up front: v:count is only dependable at the start of a mapping
+" (:h v:count) and :normal can reset it. (Plain yy above is an ordinary,
+" non-<expr> mapping, so its <CR> is translated as usual -- nothing to fix.)
+function! s:OscYankLines(n) abort
+  " silent so vim's own "N lines yanked" report does not stack with the echo
+  " below and force a hit-enter prompt once N is over 'report' (default 2)
+  silent execute 'normal! ' . a:n . 'yy'
+  if exists('*OSCYankRegister')
+    call OSCYankRegister('"')
+    echo a:n . (a:n > 1 ? ' lines' : ' line') . ' copied to system clipboard (OSC 52)'
+  else
+    echohl WarningMsg | echo 'vim-oscyank not installed; yanked to register only' | echohl NONE
+  endif
+endfunction
+
+nnoremap <silent> vv :<C-u>call <SID>OscYankLines(v:count1)<CR>
+
+" Operator and visual variants from the vim-oscyank README. ,y not ,c because
+" ,c is already NERDCommenter above. These are nmap/xmap on purpose (<Plug>
+" has to be resolved); if the plugin is absent the <Plug> is simply undefined,
+" so the mapping is an inert no-op rather than an error.
+nmap <leader>y  <Plug>OSCYankOperator
+nmap <leader>yy <leader>y_
+xmap <leader>y  <Plug>OSCYankVisual
+
+" Deliberately NOT using the README's TextYankPost autocmd recipe: it would
+" double-fire with the vv mapping above, and its default operator list includes
+" d, so every dd would clobber the Mac clipboard.
+
+" yank to clipboard
+" UBUNTU: dead code on this host (both has() checks are 0) -- kept, tightened with
+" clipboard_working, so the file still does the right thing under MacVim/gvim
+" or a real +clipboard build on an X11 box. Copying here is OSC 52's job.
+if has('clipboard') && has('clipboard_working')
+  set clipboard=unnamed " copy to the system clipboard
+
+  if has("unnamedplus") " X11 support
+    set clipboard+=unnamedplus
+  endif
+endif
+
+" source: https://github.com/standardrb/standard/wiki/IDE:-vim
+" packadd vim-lsp
+" Use standard if available
+if executable('standardrb')
+  au User lsp_setup call lsp#register_server({
+        \ 'name': 'standardrb',
+        \ 'cmd': ['standardrb', '--lsp'],
+        \ 'allowlist': ['ruby'],
+        \ })
+endif
+
+" UBUNTU: dropped `autocmd VimEnter * echom "Current colorscheme: " .
+" execute('colorscheme')`. execute() returns a string with a LEADING NEWLINE,
+" so the message was two lines tall in a one-line command area and triggered
+" "Press ENTER or type command to continue" on every single vim invocation --
+" including every git commit, git rebase -i and crontab -e. It was only debug
+" output, so it is gone rather than wrapped in trim().
+
+" -----------------------------------------------------------------------------
+" |                           General Preferences                             |
+" -----------------------------------------------------------------------------
+" UBUNTU: dropped `set columns&`, with nothing in its place. It resets 'columns'
+" to 80 and asks the terminal to resize via t_CWS, which inside a tmux pane over
+" SSH either resizes the user's pane down to 80 columns or leaves vim drawing
+" into an 80-column virtual screen. The pty already reports the real size.
+
+
+" -----------------------------------------------------------------------------
+" |                   Host specific (moved here from above)                   |
+" -----------------------------------------------------------------------------
+" UBUNTU: sourced LAST -- see the note in the Host specific section above.
+if filereadable(expand("~/.vimrc.local"))
+  source ~/.vimrc.local
+endif

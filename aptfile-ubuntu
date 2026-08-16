@@ -1,0 +1,300 @@
+# aptfile-ubuntu — the Brewfile analogue for Ubuntu (24.04 noble, headless server)
+#
+# WHAT THIS IS
+#   A plain list of apt package names, one per line. This is to `setup-ubuntu.sh`
+#   what `Brewfile` is to `brew bundle` on the Mac. It is NOT a shell script and
+#   NOT the Brewfile format — no `brew "x"` quoting, just bare package names.
+#
+# HOW IT IS CONSUMED
+#   `setup-ubuntu.sh` reads this file, strips comments and blank lines, drops any
+#   name that isn't available in the configured apt sources, and passes everything
+#   that's left to a single `apt-get install`.
+#   Its reader is `sed -e 's/#.*//' -e 's/[[:space:]]//g'`, so a `#` starts a
+#   comment ANYWHERE on the line: a whole-line `# note` and a trailing
+#   `pkgname  # note` both work, and surrounding whitespace is discarded. One
+#   package name per line regardless — the reader never splits on spaces, so two
+#   names on one line would be glued into a single bogus token.
+#
+# HOW TO ADD A PACKAGE
+#   1. Add the bare package name on its own line, in the right section.
+#   2. Either re-run `setup-ubuntu.sh` (idempotent, already-installed packages
+#      are a no-op), or just `sudo apt install <pkg>` and add the line so the
+#      next machine picks it up too.
+#   Check a name exists first with `apt-cache policy <pkg>` — make sure it prints
+#   a real Candidate and not "(none)", which means the name is only a virtual
+#   alias (see the STALE-DOC note further down). Then dry-run the whole resolve
+#   with the same parsing the script uses:
+#     apt-get -s install $(sed -e 's/#.*//' -e 's/[[:space:]]//g' aptfile-ubuntu)
+#   The -s simulation needs no root and changes nothing; it should end in a
+#   "N newly installed" line with no "Unable to locate" and no E: lines.
+#
+# WHAT IS *NOT* HERE
+#   Anything that apt doesn't ship (or ships too stale to bother with) is
+#   installed by `setup-ubuntu.sh` directly — mise, starship, pnpm/corepack,
+#   zsh-fast-syntax-highlighting, and ngrok. See the last section of this file.
+#
+# TARGET: Ubuntu 24.04.x LTS (noble), x86_64, headless server. No GUI packages —
+# nothing here should pull X11, Wayland, or a desktop stack.
+
+
+# ---- Shell ----
+# zsh is the login shell. The two plugin packages are Ubuntu-packaged and get
+# sourced from /usr/share/zsh-*/ by `zshrc` (no git clone needed for these two).
+zsh
+zsh-autosuggestions
+zsh-syntax-highlighting
+
+
+# ---- Editor ----
+# vim-nox is the "everything but the GUI" build: +ruby +python3 +perl +lua, which
+# the vimrc/plugins want. It registers /usr/bin/vim via update-alternatives at
+# priority 40, beating vim.basic's 30, so it takes over `vim` automatically with
+# no manual `update-alternatives --set` step.
+vim-nox
+
+
+# ---- Multiplexers ----
+# Long-running remote sessions. tmux.conf and screenrc are both in this repo.
+tmux
+screen
+
+
+# ---- Version control ----
+# git-lfs still needs a one-time `git lfs install` per user (setup-ubuntu.sh does it).
+# NOTE: noble universe ships gh 2.45.0, which is ~2 years behind upstream (2.97.0).
+# It is fine for the things actually used here — auth, repo, pr, issue, run — but
+# newer subcommands and flags won't exist. If you need current gh, add GitHub's own
+# apt repo (cli.github.com); see the README.
+git
+git-lfs
+gh
+
+
+# ---- Core CLI ----
+# The everyday toolbelt: fetching, searching, inspecting, archiving.
+# NOTE on two renames: Debian/Ubuntu ship `bat` as the binary `batcat` (the name
+# `bat` collides with bacula-console-qt) and `fd-find` as `fdfind` (collides with
+# fdclone). setup-ubuntu.sh symlinks both to their real names in ~/.local/bin, so
+# `bat` and `fd` work as expected once that's on PATH.
+curl
+wget
+jq
+tree
+fzf
+ripgrep
+bat
+fd-find
+htop
+ncdu
+unzip
+zip
+less
+man-db
+locales
+ca-certificates
+gnupg
+openssh-client
+rsync
+bash-completion
+direnv
+
+
+# ---- Python tooling ----
+# Ubuntu 24.04's system python is PEP 668 "externally managed": `pip install` into
+# it is refused on purpose. Do not fight it with --break-system-packages. Use a
+# mise-managed python, a venv, or pipx (which makes its own venv per CLI tool).
+# python3-dev is here so that C extensions build against the system python when
+# something insists on it.
+python3-pip
+python3-venv
+python3-dev
+pipx
+
+
+# ---- Build toolchain ----
+# C/C++ compile + the autotools/cmake/ninja trio, for native gems, python wheels
+# with C extensions, and embedded work.
+# `pkgconf` is the real implementation in noble; `pkg-config` is just a compat
+# wrapper built from the same source version, so listing pkgconf is enough.
+# `gawk` because Ubuntu's default awk is mawk, which lacks GNU extensions that
+# ruby-build and various Makefiles assume.
+build-essential
+autoconf
+automake
+libtool
+pkgconf
+cmake
+ninja-build
+patch
+gawk
+bison
+ccache
+
+
+# ---- Ruby / Python build headers (mise source-build fallback) ----
+# READ THIS BEFORE TRIMMING: mise installs PRECOMPILED node/python/ruby by
+# default, so on a normal day none of these are touched. They are insurance for
+# the case where a requested version has no prebuilt artifact for this platform
+# and mise falls back to compiling from source — at which point a missing header
+# means a silently feature-crippled build (no readline in irb, no ssl in pip, no
+# sqlite3 module) rather than a clean error. Cheap to have, painful to lack.
+#
+# STALE-DOC WARNING: the ruby-build and pyenv wikis still tell Ubuntu users to
+# install libreadline6-dev, libncurses5-dev, libncursesw5-dev and libgdbm6. On
+# noble NONE of those four exist as real packages any more. They survive only as
+# virtual `Provides:` aliases on the modern names, so a hand-typed
+# `apt install libncurses5-dev` does still work — it silently resolves to
+# libncurses-dev (same for libncursesw5-dev; libreadline6-dev -> libreadline-dev;
+# libgdbm6 -> libgdbm6t64, the 64-bit-time_t ABI rename).
+# But a virtual name has NO candidate version of its own — `apt-cache policy`
+# prints "Candidate: (none)" — which is exactly what an availability filter keys
+# on, so putting the legacy spellings in THIS file would get them quietly dropped
+# by setup-ubuntu.sh and you'd build without readline/ncurses and never be told.
+# Always use the real names below. libgdbm6t64 arrives as a dependency of
+# libgdbm-dev anyway, so it never needs its own line.
+libssl-dev
+zlib1g-dev
+libyaml-dev
+libffi-dev
+libreadline-dev
+libncurses-dev
+libgdbm-dev
+libgdbm-compat-dev
+libdb-dev
+libbz2-dev
+libsqlite3-dev
+liblzma-dev
+uuid-dev
+libgmp-dev
+xz-utils
+
+
+# ---- Containers ----
+# noble-updates carries Docker Engine 29.x, so the universe packages are current
+# rather than stale — no need for Docker's own apt repo on this box.
+# `docker-buildx` must be listed explicitly: docker.io only Suggests it, so a
+# plain `apt install docker.io` leaves you without `docker buildx`.
+# `docker-compose-v2` is the Go plugin invoked as `docker compose`. Do NOT add
+# `docker-compose` — that is the deprecated Python v1 `docker-compose` binary.
+# setup-ubuntu.sh runs `usermod -aG docker $USER`; group membership only applies
+# to new logins, so log all the way out and back in (a new shell is not enough).
+docker.io
+docker-compose-v2
+docker-buildx
+
+
+# ============================================================================
+# OPTIONAL — all commented out. Uncomment a line and re-run setup-ubuntu.sh
+# (or `sudo apt install <pkg>`). Every name below was verified to resolve on
+# noble, so uncommenting is safe. Sizes are installed-size deltas.
+#
+# TO ENABLE ONE: delete only the LEADING "#". Any trailing "# note" on the line
+# can stay — the reader strips from the first `#` onward, so `entr  # rerun ...`
+# is read as just `entr`.
+# ============================================================================
+
+# ---- Python / Ruby build extras ----
+# Only needed for specific interpreter features. Sizes below were measured on
+# noble as the delta on top of the default list above (apt-get -s install).
+# tk-dev            # +21 MB but +30 pkgs — drags in the whole X11 header stack
+#                   # (libx11-dev, x11proto-dev, libxcb1-dev, libxft-dev, ...) on a
+#                   # headless box. ONLY needed for tkinter / IDLE. Skip unless you
+#                   # actually import tkinter.
+# llvm              # +513 MB (llvm-18-dev alone is 329 MB) — NOT needed to build
+#                   # CPython with gcc; only for clang/JIT work.
+# libxml2-dev       # for nokogiri/lxml built from source (both usually ship binaries)
+# libxmlsec1-dev    # for the xmlsec / SAML gems
+# rustc             # some newer gems and python wheels have Rust extensions
+# cargo             # ditto
+
+# ---- Linting / text ----
+# shellcheck
+# yamllint
+# aspell
+# aspell-en
+# silversearcher-ag   # `ag`; ripgrep above already covers this, keep for muscle memory
+
+# ---- Media / documents (heavy) ----
+# All of these pull large codec/font/library trees. Only install on a box that
+# actually processes media or PDFs.
+# imagemagick
+# ffmpeg
+# ghostscript
+# poppler-utils
+# tesseract-ocr
+
+# ---- Services ----
+# These install systemd units that start on boot — check `systemctl status`
+# after installing and disable what you don't want listening.
+# redis-server
+# mosquitto
+# mosquitto-clients
+# sqlite3             # the CLI; libsqlite3-dev above is the library
+
+# ---- Embedded / C++ (mirrors the Brewfile's embedded toolchain) ----
+# clang-format
+# cppcheck
+# lcov
+# gcovr
+# gperf
+# dfu-util
+# device-tree-compiler   # `dtc` in the Brewfile
+# minicom
+# qemu-system            # large; the full system-emulation set
+# qemu-utils             # small; just qemu-img and friends
+
+# ---- Server ops / diagnostics ----
+# smartmontools
+# sysstat
+# lsof
+# strace
+# socat
+# netcat-openbsd
+# dnsutils            # dig, nslookup
+# moreutils           # sponge, ts, vipe, chronic
+# entr                # rerun a command when files change
+# plocate             # faster mlocate; adds a daily updatedb timer
+# universal-ctags
+# p7zip-full
+# libarchive-tools    # bsdtar
+
+# ---- Modern CLI (nice-to-have replacements) ----
+# btop
+# tig
+# git-delta           # binary is `delta`
+# zoxide
+# eza                 # ls replacement, the maintained exa fork
+# hyperfine
+# httpie
+# tldr
+# pv
+
+# ---- JVM / language / misc ----
+# maven
+# openjdk-17-jdk
+# emacs-nox           # terminal-only emacs, no X deps
+# libpq-dev           # headers for the pg gem / psycopg2 source builds
+# libcurl4-openssl-dev
+
+
+# ============================================================================
+# NOT AVAILABLE VIA APT — handled separately in setup-ubuntu.sh
+# ============================================================================
+# Do not try to add these here; apt either has no package or has one too old to
+# be worth it. setup-ubuntu.sh installs each one:
+#
+#   mise      — official signed apt repo (mise.jdx.dev), added by the script with
+#               its own keyring. Manages ruby/python/node; replaces rbenv/pyenv/fnm.
+#   starship  — upstream install.sh into ~/.local/bin. Config is starship.toml.
+#   pnpm      — via corepack, which ships with node, so mise-node must be
+#               installed FIRST. Do not `apt install npm`; see the npm alias in zshrc.
+#   zsh-fast-syntax-highlighting
+#             — not packaged; git clone into ~/.zsh. Note this is a *different*
+#               plugin from the zsh-syntax-highlighting deb listed up top.
+#   ngrok     — official apt repo (ngrok.com), added by the script.
+#
+# Also, from the Brewfile but deliberately NOT here: coreutils, gnu-sed, gawk-as-
+# a-replacement. On the Mac those exist to replace BSD userland with GNU. Linux
+# is already GNU — /usr/bin/sed, ls, date etc. are the GNU versions, so there is
+# nothing to install and no `g`-prefixed binaries to alias around.
+# (`gawk` IS listed above, but only because Ubuntu's default awk is mawk.)
