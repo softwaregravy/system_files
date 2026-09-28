@@ -1,67 +1,63 @@
-# Plan: Claude-driven issue → PR workflow
+# Plan v2: Claude-driven issue → PR workflow
 
-Status: agreed design, not yet built. Written 2026-09-28 from a planning session; facts about Claude Code surfaces were verified against the docs on that date (sources at the end).
+Status: agreed design, not yet built. v2 written 2026-09-28 after a critique of v1; §14 lists what changed and why. Facts about Claude Code surfaces were verified against the docs on 2026-09-27 (sources in §15).
 
 ## 1. Goal
 
-Work is planned with Claude, recorded as GitHub issues, and executed one issue at a time without opening and driving a session by hand:
+Work is planned with Claude, recorded as GitHub issues, and executed one issue at a time without me driving a session by hand:
 
-1. An issue exists (written by me, quickly, or by Claude from a higher-level feature session).
-2. Before any code: the deliverables and acceptance criteria are clear and an implementation plan is agreed.
-3. Claude implements, tests, and opens a PR.
-4. Claude reviews the PR and fixes what it finds, in a loop, until the review is clean and CI is green.
+1. An issue exists: filed quickly by me through a form, or written by Claude from a higher-level feature session.
+2. Before any code: deliverables and acceptance criteria are clear, and an implementation plan is agreed.
+3. Claude implements, tests, self-reviews, and opens a PR.
+4. Claude fixes what review and CI find until the PR is clean.
 5. I read, approve, merge.
 
-Personal conventions (the skills, templates, and workflows) live in one shared place and work identically across repos and across every Claude surface (terminal, cloud session, GitHub Action).
+I should never have to remember the workflow. There is one command, and Claude always says what happens next.
 
-## 2. Design principles
+## 2. Principles
 
-- **The issue is the only shared state.** Every phase reads its inputs from the issue and writes its outputs back to it. Labels are the state machine. Any phase can be swapped for a different surface later without touching the others.
-- **Thinking wants persistence; executing wants a clean slate.** The design conversation runs in one persistent, interactive session (no lost context, warm cache). Implementation and review run fresh, from a fully written spec and plan.
-- **Claude authors, I review.** Anything that writes code or opens a PR runs as `claude[bot]` (GitHub Action). GitHub then treats me as a distinct reviewer, so I can approve.
+- **One command: `go`.** `/go 42` in any Claude session; `@claude go` on GitHub. It works out where the issue is and does the next step. Every phase ends with "Next: …".
+- **The issue is the only shared state.** Phases read from and write to the issue. State is *derived from facts* on the issue (which comments exist, whether a PR is linked, PR review state), never stored in labels. Labels are display.
+- **Thinking wants persistence; executing wants a clean slate.** The design conversation runs in one persistent interactive session where I am. Implementation runs fresh, from a written spec and plan.
+- **Claude authors, I review.** Anything that writes code or opens a PR runs as `claude[bot]` (GitHub Action), so I'm a distinct reviewer and can approve.
+- **Loops converge inside one job.** Review-and-fix happens inside the implementation run with a fresh-context subagent, before the PR opens. The external loop is the fallback.
 - **Repo files carry facts; the plugin carries procedure.** `CLAUDE.md` says how this repo builds and tests. The plugin says how an issue becomes a PR. Neither references the other.
-- **Deterministic stops.** Round caps, `--max-turns`, workflow timeouts, and labels decide when a loop ends. "Looks done" is never the signal.
+- **Two surfaces only.** My session (terminal, cloud session, phone, later Projects) and GitHub Actions. No routines, no API bridges.
 
 ## 3. Architecture
 
 ```
-                 ┌──────────────────────────────────────────────────────────────┐
-                 │ GitHub issue  (form-templated; labels = state machine)        │
-                 └──────────────────────────────────────────────────────────────┘
-   "@claude go"        │ no approved plan                       │ label claude:go
-   or auto-label       ▼                                        ▼
-   ┌─────────────────────────────────┐          ┌─────────────────────────────────┐
-   │ Action: claude-go.yml           │          │ Action: claude-implement.yml     │
-   │ POST routine /fire → session URL│          │ claude-code-action as claude[bot]│
-   │ comment link on issue           │          │ /implement-issue N → PR          │
-   └─────────────────────────────────┘          └─────────────────────────────────┘
-                 │                                               │ PR opened / synchronize
-                 ▼                                               ▼
-   ┌─────────────────────────────────┐          ┌─────────────────────────────────┐
-   │ Cloud session (Anthropic VM,    │          │ Action: claude-review.yml        │
-   │ acts as me) /plan-issue N       │          │ /review-pr → inline findings +   │
-   │ interview → spec → plan →       │          │ verdict comment (marker)         │
-   │ approve? → flips label claude:go│          └─────────────────────────────────┘
-   └─────────────────────────────────┘                          │ verdict has findings
-                                                                ▼
-                                                ┌─────────────────────────────────┐
-                                                │ Action: claude-fix.yml           │
-                                                │ (allowed_bots: claude[bot])      │
-                                                │ /fix-pr → push → re-review       │
-                                                │ also: workflow_run failure → fix │
-                                                └─────────────────────────────────┘
-                                                                │ clean + CI green
-                                                                ▼
-                                                   me: approve → merge → issue closes
+  ┌────────────────────────────────────────────────────────────────────────┐
+  │ GitHub issue (form-templated). Spec, plan, PR link, outcomes = comments │
+  └────────────────────────────────────────────────────────────────────────┘
+        ▲            │ "@claude go"                    │ "@claude go"
+        │            │ no approved plan                 │ approved plan
+        │            ▼                                  ▼
+        │   Action replies:                    Action: claude.yml (claude[bot])
+        │   "Run /go 42 in a session"          /go 42 → implement → local tests
+        │            │                          → self-review (fresh subagent)
+        │            ▼                          → fix → … clean → open PR
+        │   My session (terminal / cloud /                │
+        │   phone): /go 42                                ▼
+        │   interview → spec → plan            Action: claude-review.yml
+        │   → "approve?"                       /go <pr> → findings + verdict
+        └── posts spec + plan as comments               │
+            I comment "@claude go" ─────┐               │ findings > 0 (or CI red)
+                                        │               ▼
+                                        │      Action: claude.yml (fix branch)
+                                        │      /go <pr> → fix → push → re-review
+                                        │               │ clean + CI green
+                                        │               ▼
+                                        └──▶  me: approve → merge → issue closes
 ```
 
-Two clicks from me in the happy path: the design-session link, and Approve.
+My touches: file the issue, one design conversation, `@claude go`, Approve.
 
 ## 4. Components
 
-### 4.1 `softwaregravy/claude-plugins` (new, public repo)
+### 4.1 `softwaregravy/claude-plugins` (new, public)
 
-A plugin marketplace (`.claude-plugin/marketplace.json`) with one plugin, `workflow`. Public so the GitHub Action can fetch it without extra credentials.
+Marketplace repo with one plugin, `workflow`. Public so the Action can fetch it without credentials.
 
 ```
 claude-plugins/
@@ -69,239 +65,258 @@ claude-plugins/
 └── plugins/workflow/
     ├── .claude-plugin/plugin.json
     ├── skills/
-    │   ├── plan-issue/SKILL.md          # design session: interview → spec → plan → gate
-    │   ├── implement-issue/SKILL.md     # fresh run: plan → code → tests → PR
-    │   ├── review-pr/SKILL.md           # findings + verdict marker
-    │   ├── fix-pr/SKILL.md              # address findings / CI, reply on threads, push
+    │   ├── go/SKILL.md                  # dispatcher: the only user-facing skill
+    │   ├── go-plan/SKILL.md             # design conversation → spec + plan (internal)
+    │   ├── go-implement/SKILL.md        # plan → code → tests → self-review → PR (internal)
+    │   ├── go-review/SKILL.md           # PR findings + verdict (internal)
+    │   ├── go-fix/SKILL.md              # address findings / CI, push (internal)
+    │   ├── go-reset/SKILL.md            # restart / cleanup (internal, via `/go N reset`)
     │   ├── feature-to-issues/SKILL.md   # big-picture session → templated issues
-    │   └── init-repo/SKILL.md           # copy per-repo bootstrap into a repo
+    │   └── init-repo/SKILL.md           # copy the per-repo bootstrap into a repo
     ├── templates/
-    │   ├── spec.md                      # section headings shared by form, skills, feature session
-    │   ├── plan.md                      # task list format (borrowed from spec-kit / Superpowers)
-    │   ├── ISSUE_TEMPLATE/task.yml      # issue form
-    │   ├── ISSUE_TEMPLATE/task-go.yml   # same form, auto-applies claude:go
-    │   ├── ISSUE_TEMPLATE/config.yml
-    │   └── workflows/*.yml              # the five workflows below
-    └── README.md
+    │   ├── spec.md, plan.md             # shared headings and rules (§6)
+    │   ├── ISSUE_TEMPLATE/{task.yml, config.yml}
+    │   ├── workflows/{claude.yml, claude-review.yml, agent-approval-check.yml, sweep.yml}
+    │   └── actions/setup/action.yml     # composite setup action stub
+    └── README.md                        # the workflow, written for a reader who forgot it
 ```
+
+Internal skills use `disable-model-invocation: true` and are invoked only by `go`. All side-effecting skills declare `allowed-tools` explicitly (§10).
 
 Distribution:
 
 | Surface | How the skills get there |
 |---|---|
-| Local terminal | `/plugin marketplace add softwaregravy/claude-plugins` then `/plugin install workflow@softwaregravy-claude-plugins` (marketplace `name` TBD in `marketplace.json`) |
-| GitHub Action | `plugin_marketplaces: https://github.com/softwaregravy/claude-plugins.git` + `plugins: workflow@<marketplace-name>` |
-| Cloud sessions / routines | Enable the skills on my claude.ai account (Settings → Capabilities → Skills). Cloud sessions load account-enabled skills; they do **not** load plugins declared in a repo's `.claude/settings.json` |
+| Terminal | `/plugin marketplace add softwaregravy/claude-plugins`, `/plugin install workflow@<marketplace-name>` |
+| GitHub Action | `plugin_marketplaces` + `plugins` inputs |
+| Cloud sessions | Enable the skills on my claude.ai account (cloud sessions load account-enabled skills; they don't load plugins declared in a repo) |
 | Projects (when available) | Project settings → Plugins |
 
-The plugin never contains repo-specific instructions.
+### 4.2 Per-repo bootstrap (`/init-repo`)
 
-### 4.2 Per-repo bootstrap (`/init-repo` copies these in)
+- `.github/ISSUE_TEMPLATE/task.yml`, `config.yml`
+- `.github/workflows/claude.yml`, `claude-review.yml`, `agent-approval-check.yml`, `sweep.yml`
+- `.github/actions/setup/action.yml`: the composite that installs toolchain, deps, services. Used by `ci.yml` **and** the Claude jobs, so Claude runs tests in the same environment CI does
+- `CLAUDE.md` must name: test, lint, typecheck commands (ideally one `bin/test`), branch and PR conventions
+- Labels (display only): `claude:designing`, `claude:implementing`, `claude:pr-open`, `claude:blocked`, `claude:done`
+- One secret: `CLAUDE_CODE_OAUTH_TOKEN` (from `claude setup-token`; bills the Max subscription)
+- Ruleset on `main`: require PR; required checks = CI, `claude-review`, `agent-approval-check`; 1 approval; no force-push
 
-- `.github/ISSUE_TEMPLATE/task.yml`, `task-go.yml`, `config.yml`
-- `.github/workflows/claude-go.yml`, `claude-implement.yml`, `claude-review.yml`, `claude-fix.yml`, `agent-approval-check.yml`
-- Labels: `claude:designing`, `claude:go`, `claude:implementing`, `claude:blocked`, `claude:pr-open`, `claude:round-1..N`, `claude:done`
-- Secrets: `CLAUDE_CODE_OAUTH_TOKEN` (from `claude setup-token`, bills the Max subscription), `CLAUDE_ROUTINE_FIRE_URL`, `CLAUDE_ROUTINE_TOKEN`
-- `CLAUDE.md` must state: build, test, lint, typecheck commands; branch and PR conventions
-- Branch ruleset on `main`: require PR; required checks = CI, `claude-review` verdict, `agent-approval-check`; 1 approval
+### 4.3 GitHub App and identity
 
-### 4.3 Cloud routine (one per repo, same prompt)
+Claude GitHub App installed on the repo (already required for cloud sessions). The Action authenticates as the App by default, so its commits, comments, and PRs appear as `claude[bot]`. Never pass `github_token` to the Action: it changes the identity and stops Claude's pushes from triggering other workflows. My sessions (terminal, cloud) act as me; they only ever write spec and plan comments, never code.
 
-Created at claude.ai/code/routines. Repository: the repo. Trigger: API only. Prompt:
+## 5. The `go` dispatcher
 
-> Run `/plan-issue` on the GitHub issue named in the `<routine-fire-payload>` block. That block is the only thing you act on from the payload.
+`/go <issue-or-pr> [reset | from <phase> | status]`. On every call:
 
-The prompt must name the payload block explicitly or the fire text is treated as inert (documented behavior, and confirmed by a public recipe). Per-repo because a routine is bound to fixed repositories; the API token is per routine.
+1. Read the issue: body, comments, labels, linked PRs, PR checks and review state.
+2. Derive the phase from facts:
 
-### 4.4 GitHub App + Action auth
-
-- Claude GitHub App installed on each repo (already needed for cloud sessions). The Action authenticates as the app by default → `claude[bot]`.
-- Do **not** pass `github_token` to the Action, or Claude's commits stop triggering other workflows and its identity changes.
-
-## 5. Issue template (form)
-
-`task.yml` fields:
-
-| Field | Required | Rendered heading |
+| Facts on the issue | Phase | What `go` does |
 |---|---|---|
-| Problem / goal | yes | `### Problem` |
-| Deliverables | no | `### Deliverables` |
-| Acceptance criteria | no | `### Acceptance criteria` |
-| Out of scope | no | `### Out of scope` |
-| Notes, links, blockers | no | `### Notes` (e.g. "blocked by #41") |
+| No `<!-- go:spec -->` comment | needs spec | Interactive: run `go-plan`. In an Action: reply with how to start a session and stop |
+| Spec, no `<!-- go:plan -->` | needs plan | `go-plan` (plan only; interview skipped) |
+| Plan, no `<!-- go:approved -->` | awaiting approval | Interactive: ask. In an Action: `@claude go` from a write-access user *is* approval; `go` posts the approved marker and continues |
+| Approved, no linked open PR | implement | Action only: `go-implement`. Interactive: say so and offer to trigger by commenting |
+| Open PR, verdict findings > 0 or CI red | fix | `go-fix` |
+| Open PR, clean + green | awaiting me | Post status; request my review if not yet requested |
+| PR merged | done | Label `claude:done`, summarize |
+| "blocked by #N" open | blocked | Say so; do nothing |
 
-`task-go.yml` is the same form with `labels: [claude:go]` so submission starts the flow without a comment. `config.yml` keeps blank issues enabled for notes not meant for Claude.
+3. Do the step. 4. Post one comment: what it did, outcome, link to the run or session. 5. Set the display label. 6. End with "Next: …".
 
-`feature-to-issues` writes issues with exactly these headings, plus `### Parent` (link to the feature issue) and the marker `<!-- claude-go: spec v1 -->`. Downstream, issues from me and from Claude are indistinguishable.
+`/go 42 status` does steps 1–2 and prints. `/go 42 reset` and `from <phase>` are in §11.
 
-## 6. Phases in detail
+## 6. Spec and plan templates
 
-### Phase 0: issue exists
+Headings are fixed so the form, `feature-to-issues`, and the skills agree.
 
-Created via the form (me) or by `feature-to-issues` (Claude). Nothing runs on creation unless the `task-go` form applied `claude:go`.
+**Issue form (`task.yml`)** — Problem (required); Deliverables, Acceptance criteria, Out of scope, Notes (optional). Blank optional sections are what `go-plan` interviews about. `config.yml` leaves blank issues enabled for notes not meant for Claude.
 
-### Phase 1: design session
+**Spec rules** (`templates/spec.md`), enforced by `go-plan`:
 
-| | |
-|---|---|
-| Trigger | `issue_comment` beginning `@claude go` on an issue **without** an approved plan marker, or `claude:go` label on such an issue |
-| Runner | `claude-go.yml`: a few seconds on a GitHub runner; no Claude. `curl -X POST $FIRE_URL` with `{"text":"<owner>/<repo>#<n>"}` and the documented headers (`anthropic-version`, `anthropic-beta: experimental-cc-routine-2026-04-01`) |
-| Session | Anthropic cloud VM, created by the routine; acts as my GitHub user; loads `plan-issue` from account-enabled skills |
-| Posts back | Comment: session URL + `claude "/plan-issue <n>"` for the terminal alternative; label `claude:designing` |
-| Inside `plan-issue` | 1. Read the issue thread and parent. 2. **Triage**: which template sections are filled? 3. Subagents explore the codebase (keeps the interview focused). 4. Interview me with `AskUserQuestion` only about the blank sections. 5. Post the spec (`<!-- claude-go: spec vN -->`). 6. Pre-mortem the spec (risks, edge cases). 7. Write the plan in the plan template; post it (`<!-- claude-go: plan vN -->`). 8. Ask "approve?" |
-| Exit | On yes: label `claude:go` (the actor is me, so the Action's write-access check passes). On no: revise and re-ask. If I leave, the session idles at the question at no cost |
-| Terminal path | Same skill run locally in plan mode; ends the same way. Teleport (`claude --teleport <session>`) also works |
+- Every acceptance criterion is a check someone could run: *given X, expect Y*, with at least one concrete example.
+- Out-of-scope is explicit, even if "none".
+- Dependencies: "blocked by #N" in Notes.
+- The spec is posted as one comment starting with `<!-- go:spec v1 -->`; revisions post a new comment with a bumped version.
 
-Triage outcomes: free-form issue → full interview; spec present, no plan → skip interview, write plan, approve; spec and plan present → one-click approve. A later `claude:auto` label could skip the gate for Claude-authored issues; off until the flow has been observed.
+**Plan rules** (`templates/plan.md`):
 
-### Phase 2: implementation
+- Header: goal, approach, files touched, spec version it implements.
+- **Criterion → test map** before any task: each acceptance criterion names the test that verifies it.
+- Tasks in order, each with exact file paths, the test to write first, the verification command, and a commit message. Small enough that one task is one commit.
+- Posted as one comment starting with `<!-- go:plan v1 -->`; copied into the PR as `docs/plans/<n>-<slug>.md`.
 
-| | |
-|---|---|
-| Trigger | `issues: [labeled]` with `claude:go` and a plan marker present |
-| Runner | `claude-implement.yml`: `claude-code-action`, automation mode, `prompt: "/implement-issue <n>"`, plugin inputs, `claude_args: --max-turns 80 --allowedTools "Edit,Write,Read,Glob,Grep,Bash(git:*),Bash(gh:*),Bash(<test/lint cmds>)"`, `timeout-minutes`, `concurrency: issue-<n>` |
-| Identity | `claude[bot]` |
-| Inside `implement-issue` | Refuse if any "blocked by" issue is open. Branch `claude/<n>-<slug>`. Copy the plan to `docs/plans/<n>-<slug>.md`. Implement task by task; write and run tests; lint/typecheck per `CLAUDE.md`; verify the acceptance criteria. Blocked → comment the question on the issue, label `claude:blocked`, stop |
-| Exit | `gh pr create` with "Closes #<n>", body = spec summary + plan link; comment PR link on the issue; label `claude:pr-open` |
+Claude-authored issues (from `feature-to-issues`) arrive with the spec sections filled and `### Parent` linking the feature issue, so `go` skips straight to planning.
 
-Fresh context is deliberate here: the plan format exists so a reader with no memory of the design conversation can execute it.
+## 7. Phases
 
-### Phase 3: review-and-fix loop
+### Phase 1: design (my session)
 
-| | |
-|---|---|
-| Reviewer | `claude-review.yml` on `pull_request: [opened, synchronize, ready_for_review]`, `prompt: "/review-pr <pr>"`, allowed tools: inline-comment MCP tool, `gh pr view/diff/comment`. Posts severity-tagged inline findings and one verdict comment with a marker (`<!-- claude-review: findings=3 round=1 -->` or `findings=0`). Reviews plan-vs-diff as well as correctness |
-| Fixer | `claude-fix.yml` on `issue_comment` where the body has the review marker with `findings>0`, `allowed_bots: claude[bot]`, `prompt: "/fix-pr <pr>"`. Fixes, replies on each thread, resolves what it fixed, pushes → `synchronize` → reviewer runs again. Increments `claude:round-N` |
-| CI red | Same `fix-pr` skill triggered by `workflow_run` (conclusion failure, same-repo PR), per Anthropic's `ci-failure-auto-fix` example, but pushing to the PR branch rather than a side branch |
-| Stop | `findings=0` and CI green → comment "ready for human review" on PR and issue, request my review. Round cap (default 3) → comment what is still open and stop. Never skip or disable a test to get green |
+Trigger: I run `/go 42` in a session, or `@claude go` on an issue without a spec makes the Action reply "Start a session in this repo and run `/go 42`" (from a phone: claude.ai/code → new session in the repo). No session is created from GitHub.
 
-Known gotcha: Anthropic's `code-review` plugin skips PRs that already have a Claude comment, so `review-pr` is our own skill (it may call `/code-review` internally for the bug hunt).
+`go-plan`: read issue and parent → subagents explore the codebase → interview me with `AskUserQuestion` only about blank sections → post spec → pre-mortem (risks, edge cases, what tests would miss) → write plan → post plan → "Approve?" If yes, I'm asked to comment `@claude go` on the issue (a clickable link is posted). The session never flips state on my behalf; approval is always my comment.
 
-### Phase 4: me
+### Phase 2: implement (Action, `claude[bot]`)
 
-Read the PR (plan file is in the diff, so plan-vs-implementation is reviewable), approve, merge. `agent-approval-check` (required status) blocks merge of `claude[bot]` commits without a human approval. Merge closes the issue; label `claude:done`. Optional later: a post-merge step that appends a decision record to `docs/decisions/`.
+Trigger: `@claude go` on an issue with a plan and no open PR. `claude.yml` runs the composite setup, then `claude-code-action` with `prompt: "/go 42"`.
 
-### Phase -1: feature session (optional front end)
+`go-implement`:
+1. Refuse if a blocker issue is open or the plan's spec version is stale (spec revised after plan).
+2. Branch `claude/42-<slug>` from current `main`; commit the plan file.
+3. For each task: write the test, implement, run `bin/test` locally in the runner. Many local runs, no CI runs.
+4. Self-review loop: run `/code-review` in a forked subagent (fresh context) against the diff and the plan's criterion→test map; fix; re-run tests; repeat until the review is clean.
+5. Blocked → comment the question on the issue, label `claude:blocked`, stop.
+6. `gh pr create` with "Closes #42", body = spec summary, criterion→test map, link to plan. Comment the PR link on the issue.
 
-A local, cloud, or Projects session runs `feature-to-issues`: big-picture interview once, then decomposes into templated issues with dependencies ("blocked by") and parent links. Nothing auto-starts; I label or comment when ready, which keeps ordering in my hands.
+Push count: one, when the PR opens. CI runs once.
 
-## 7. Label state machine
+### Phase 3: PR review (Action, `claude[bot]`)
 
-```
-(none) ──@claude go / claude:go──▶ claude:designing ──approve──▶ claude:go
-claude:go ──Action starts──▶ claude:implementing ──PR──▶ claude:pr-open
-claude:implementing ──question──▶ claude:blocked ──answer + re-label──▶ claude:go
-claude:pr-open ──loop rounds──▶ claude:round-N ──clean + green──▶ (review requested)
-merge ──▶ claude:done
-```
+Trigger: `pull_request` opened / synchronize / ready_for_review, same-repo branches only. `claude-review.yml` → `go-review`.
 
-Exactly one `claude:*` phase label at a time; the round label is additive.
+- Inline findings with stable IDs and severities. First pass is the criterion→test map: a criterion without a passing test is Important.
+- Verdict comment whose body **starts with** `<!-- go:review pr=123 round=2 findings=3 -->`. Also written as the `claude-review` check conclusion (required status).
+- Convergence rules: round 2+ reports Important and regressions only; never reopens an ID resolved with a "won't fix: reason"; if the same ID survives two rounds, stop and request my review instead of another round.
 
-## 8. Skills: responsibilities
+### Phase 4: fix (Action, `claude[bot]`)
 
-| Skill | Runs in | Reads | Writes | Must never |
-|---|---|---|---|---|
-| `plan-issue` | cloud session / terminal (interactive) | issue, parent, codebase | spec + plan comments, labels | write code |
-| `implement-issue` | Action (fresh) | spec, plan, `CLAUDE.md` | branch, `docs/plans/<n>.md`, PR, issue comment | start with open blockers; open a PR with failing tests |
-| `review-pr` | Action | PR diff, plan file, `CLAUDE.md` | inline findings, verdict comment | approve or block (it can't anyway) |
-| `fix-pr` | Action | findings / CI logs | commits, thread replies | skip/disable tests; exceed round cap |
-| `feature-to-issues` | any interactive | conversation, codebase | templated issues with deps | start work |
-| `init-repo` | terminal | plugin templates | repo files, labels, instructions for secrets/routine | commit secrets |
+Trigger, in `claude.yml`: `issue_comment` on a PR whose body starts with the review marker and author is `claude[bot]` (`allowed_bots: claude[bot]`), with `findings > 0`; or `workflow_run` of CI concluded failure on a same-repo PR; or `@claude go` on the PR.
 
-Skill frontmatter: `disable-model-invocation: true` on everything with side effects; `allowed-tools` scoped per skill; `$ARGUMENTS` = issue or PR number. Shared templates referenced via `${CLAUDE_SKILL_DIR}/../../templates/`.
+`go-fix`: merge `main` into the branch first (never rebase or force-push; my commits are kept) → address each finding or the CI failure → reply on each thread (fixed, or won't fix with reason, and resolve) → `bin/test` locally → push once. The push re-runs review and CI.
 
-## 9. Workflow sketches
+No round cap. Stop conditions are the reviewer's convergence rules and CI green.
 
-`claude-go.yml`:
+### Phase 5: me
+
+Read the PR (plan file is in the diff), approve, merge. `agent-approval-check` (required) blocks merging `claude[bot]` commits without a human approval. Merge closes the issue; the next `/go` or the sweep labels it done.
+
+### Phase 0: feature session (optional front end)
+
+`feature-to-issues` in any interactive session: one big-picture interview, then templated issues with parent links and "blocked by" dependencies. Nothing starts until I `@claude go` each one, so ordering stays mine.
+
+## 8. Workflows
+
+`claude.yml` (one file, three jobs):
 
 ```yaml
 on:
   issue_comment: { types: [created] }
-  issues: { types: [labeled] }
+  workflow_run: { workflows: [CI], types: [completed] }
+concurrency: { group: go-${{ github.event.issue.number || github.event.workflow_run.pull_requests[0].number }}, cancel-in-progress: false }
+
 jobs:
-  fire:
-    if: >-
-      (github.event_name == 'issue_comment' && !github.event.issue.pull_request
-        && startsWith(github.event.comment.body, '@claude go'))
-      || (github.event_name == 'issues' && github.event.label.name == 'claude:go')
-    runs-on: ubuntu-latest
-    permissions: { issues: write }
+  go-issue:     # "@claude go" on an issue → implement (or reply how to plan)
+    if: github.event_name == 'issue_comment' && !github.event.issue.pull_request
+        && startsWith(github.event.comment.body, '@claude go')
+    permissions: { contents: write, issues: write, pull-requests: write, id-token: write, actions: read }
     steps:
-      - id: state   # has an approved plan marker? then this event belongs to claude-implement.yml
-        run: gh issue view "$N" --json body,comments -q '…' …
-      - if: steps.state.outputs.has_plan == 'false'
-        run: |
-          RESP=$(curl -sS -X POST "$FIRE_URL" \
-            -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
-            -H "anthropic-version: 2023-06-01" \
-            -H "anthropic-beta: experimental-cc-routine-2026-04-01" \
-            -d "{\"text\":\"${{ github.repository }}#$N\"}")
-          URL=$(jq -r .claude_code_session_url <<<"$RESP")
-          gh issue comment "$N" --body "🧠 Design session: $URL …"
-          gh issue edit "$N" --add-label claude:designing --remove-label claude:go
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          plugin_marketplaces: https://github.com/softwaregravy/claude-plugins.git
+          plugins: workflow@<marketplace-name>
+          prompt: "/go ${{ github.event.issue.number }}"
+          claude_args: --max-turns 120 --allowedTools "<list in §10>"
+      - if: always()     # never leave the issue without a status
+        run: gh issue comment "$N" --body "…outcome + run link…" && gh issue edit "$N" --add-label …
+
+  go-pr:        # review verdict with findings, or "@claude go" on a PR → fix
+    if: github.event_name == 'issue_comment' && github.event.issue.pull_request
+        && ( startsWith(github.event.comment.body, '@claude go')
+          || (github.event.comment.user.login == 'claude[bot]'
+              && startsWith(github.event.comment.body, '<!-- go:review ')
+              && !contains(github.event.comment.body, 'findings=0')) )
+    with: { allowed_bots: "claude[bot]", prompt: "/go ${{ github.event.issue.number }}", … }
+
+  go-ci:        # CI failed on a same-repo PR → fix
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure'
+        && github.event.workflow_run.pull_requests[0]
+        && startsWith(github.event.workflow_run.head_branch, 'claude/')
 ```
 
-`claude-implement.yml`, `claude-review.yml`, `claude-fix.yml`: `anthropics/claude-code-action@v1` with `claude_code_oauth_token`, `plugin_marketplaces`, `plugins`, a `prompt` invoking the skill, `claude_args` with `--max-turns` and a tight `--allowedTools`, `concurrency` per issue/PR, `timeout-minutes`. `claude-fix.yml` adds `allowed_bots: claude[bot]`. `agent-approval-check.yml` is Anthropic's example with `required_approvals: 1`.
+`claude-review.yml`: `pull_request` events → setup → `claude-code-action` with `prompt: "/go <pr>"` and review-only tools; writes the `claude-review` check.
 
-## 10. Costs and limits
+`agent-approval-check.yml`: Anthropic's example, `required_approvals: 1`, `agent_logins: claude[bot]`.
 
-- Action runs: GitHub Actions minutes + Max subscription usage via the OAuth token. Every phase is a cold run; keep prompts tight and `CLAUDE.md` short.
-- Design session: subscription usage; idles free while waiting on me. Routine fires count against the daily routine-run cap.
-- No managed Code Review on Max (Team/Enterprise only). `/code-review ultra` is available for big PRs: 3 free runs, then $5–25 in usage credits each; not wired into the loop by default.
-- The `/fire` endpoint is research preview behind a dated beta header; pin the header and expect to bump it.
+`sweep.yml`: weekly cron, no Claude: delete `claude/*` branches with no open PR older than 14 days; comment on issues with a `claude:*` label and no activity for 14 days; label merged-PR issues `claude:done`.
 
-## 11. Verify on the first real run
+Reads to keep in mind: `issue_comment` fires for PR comments too (the `issue.pull_request` guard sorts them); an `if: always()` final step reports every outcome; `cancel-in-progress: false` so a fix never cancels a running implement.
 
-1. `/fire` from the Action returns the session URL and the session receives the payload (prompt names the block).
-2. A routine-started session pauses on `AskUserQuestion` and resumes when I answer later.
-3. The session's label flip (as me) triggers `claude-implement.yml`.
-4. With `gh pr create` allowed, the PR author is `claude[bot]`.
-5. A `claude[bot]` verdict comment triggers `claude-fix.yml` with `allowed_bots` set, and its push re-triggers `claude-review.yml`.
-6. The round cap and `concurrency` actually stop the loop.
-7. Account-enabled skills load in the cloud session; plugin skills load in the Action.
+## 9. Efficiency
 
-## 12. Rollout
+- Self-review inside the implementation job means the typical issue is 3 Action runs (implement, one review, occasionally one fix) instead of 8. Warm cache and no runner boots between rounds.
+- Local `bin/test` inside the runner is the inner loop; CI runs once per push; pushes happen once per phase.
+- `--model` per phase in `claude_args`: strongest model for plan and implement; a cheaper one for review and fix (tune after observing).
+- `CLAUDE.md` stays short (loaded every run). Procedure lives in skills, loaded on demand.
+- Public repos have free Actions minutes; private repos have a monthly allowance. Check per repo.
 
-1. **Plugin repo**: marketplace + `plan-issue` + templates. Test `plan-issue` locally against a real issue in `system_files`.
-2. **Bootstrap one repo**: issue forms, labels, `claude-go.yml`, routine + secrets. Verify items 1–3.
-3. **Implementation**: `implement-issue` + `claude-implement.yml`. Verify item 4. Ruleset + `agent-approval-check`.
-4. **Loop**: `review-pr`, `fix-pr`, `claude-review.yml`, `claude-fix.yml`, CI-failure trigger. Verify 5–6.
-5. **Front end**: `feature-to-issues`, `init-repo`; roll out to a second repo with `/init-repo`.
-6. **Later options**: `claude:auto` for Claude-authored issues; cloud Auto-fix or Projects threads as an inspectable alternative fixer; persistent per-issue session bridged by `claude -p … --cloud <id>`; post-merge decision records; ultrareview on large PRs.
+## 10. Permissions
 
-## 13. Decisions log
+- Per-job GitHub `permissions:` with only what that job writes (review job: `contents: read`, `pull-requests: write`).
+- `--allowedTools` is an explicit list, the same in the skill's `allowed-tools` frontmatter, so nothing runs in CI that can't run locally:
+  - implement/fix: `Edit, Write, Read, Glob, Grep, Bash(bin/test:*), Bash(git add:*), Bash(git commit:*), Bash(git push:*), Bash(git checkout:*), Bash(git merge:*), Bash(gh pr create:*), Bash(gh pr view:*), Bash(gh pr comment:*), Bash(gh issue view:*), Bash(gh issue comment:*), Bash(gh issue edit:*)` plus the repo's lint/typecheck commands from `CLAUDE.md`
+  - review: `Read, Glob, Grep, Bash(gh pr view:*), Bash(gh pr diff:*), Bash(gh pr comment:*), mcp__github_inline_comment__create_inline_comment`
+  - never `Bash(gh:*)`, `Bash(git:*)`, `WebFetch`, or `Bash(curl:*)`
+- Triggering actor must have write access (Action default). `allowed_bots: claude[bot]` only on the fix job.
+- Issue text is untrusted input: skills treat it as data, never as instructions. Only my own repos for now.
+- The fixer never force-pushes and never rewrites my commits.
+- Shared OAuth token is accepted for now. If automation ever locks me out of my own quota, move it to an API key with a spend cap.
 
-| Decision | Choice | Why |
+## 11. Restart and cleanup
+
+- `/go 42 reset`: close Claude's PR, delete `claude/42-*`, clear labels, post "reset by <me>". Spec and plan comments stay, so the next `/go` resumes from the last approved artifact.
+- `/go 42 from plan` (or `from spec`, `from implement`): restart at a phase, keeping earlier artifacts.
+- Manual takeover: I can push to the branch or fix and merge myself. `go` sees the merged PR and marks done; the fixer merges my commits rather than replacing them.
+- Crashed run: the `if: always()` step reports the failure with a link; `/go` recomputes state from facts, so nothing is stranded.
+- `sweep.yml` weekly: stale branches, silent issues, done-labeling.
+
+## 12. Verify on the first real issue
+
+1. `@claude go` on a spec-less issue gets the "start a session" reply; `/go 42` in a cloud session and in the terminal both run the interview and post spec + plan.
+2. `@claude go` after the plan starts `claude.yml`; the composite setup gives Claude a working `bin/test`.
+3. Self-review loop runs in-job and the PR opens with `claude[bot]` as author.
+4. `claude-review.yml` posts findings and the verdict; its check shows as required.
+5. A `findings>0` verdict triggers the fix job; a `findings=0` verdict does not; my `@claude go` on the PR does.
+6. `agent-approval-check` blocks merge until I approve; approve + merge closes the issue.
+7. `/go 42 status`, `/go 42 reset`, and the `if: always()` outcome comment behave.
+
+## 13. Rollout
+
+1. **Plugin repo + `go`, `go-plan`, templates.** Test `/go` locally against a real issue in `system_files`. No Actions yet.
+2. **Bootstrap one repo:** form, labels, composite setup, `claude.yml` (implement only), token, ruleset, `agent-approval-check`. Verify 1–3, 6.
+3. **Review:** `go-review`, `claude-review.yml`. Verify 4. Fix by hand or with `@claude go` on the PR.
+4. **Automatic fix:** enable the verdict and CI triggers. Verify 5, 7. Add `sweep.yml`.
+5. **Front end and second repo:** `feature-to-issues`, `init-repo`.
+6. **Later:** pin the plugin to a tag (supply chain); Projects as the design surface; `claude:auto` to skip the approval comment for Claude-authored issues; ultrareview on large PRs; API key with spend cap if quota sharing bites; post-merge decision records.
+
+## 14. What changed from v1 and why
+
+| v1 | v2 | Why |
 |---|---|---|
-| Plan tier | Max | Sets what's available: no managed Code Review; Projects when rolled out |
-| System of record | GitHub issue + labels | Every surface reads/writes it; independent of betas |
-| Where the plan lives | Issue comment (approved) + file in the PR | Reviewable with the code; durable in history |
-| Design conversation | Persistent interactive cloud session (or terminal), not per-comment Action runs | Keeps unwritten context and cache; per-comment runs re-explore and cost more |
-| Execution/review identity | `claude[bot]` via GitHub Action | I can approve; `agent-approval-check` enforces it |
-| Trigger | `@claude go` comment, or `claude:go` via the `task-go` form | Explicit; works from a phone |
-| Human gate | Required approval + `agent-approval-check` + required checks | Yes to all |
-| Skills repo | Public `softwaregravy/claude-plugins` | Action can fetch it without credentials |
-| Superpowers / feature-dev / spec-kit | Not dependencies; borrow templates and stage ideas | Terminal-shaped, opinionated, extra context cost; we need issue-centric behavior |
-| Sortie / daemons | Not used | Actions + cloud sessions cover it without hosting anything |
-| Issue authoring | GitHub issue form; optional fields | I can file thin issues without loading Claude; Claude-written issues use the same headings |
+| Action → routine `/fire` → session URL on the issue | Action replies "run `/go 42`"; I start the session | Removed a research-preview endpoint, a per-repo routine and token, and an unverified pause behavior. Costs one manual step |
+| Several user-facing skills and labels to remember | One command, `go`, that dispatches and says what's next | Brain-dead by design |
+| Labels as state | State derived from issue facts; labels display only | Stuck labels can't strand work |
+| Design session flips `claude:go` as me | Approval is always my `@claude go` comment | Human approval is distinguishable from automation |
+| External review/fix loop, round cap 3 | Self-review loop inside the implement job; external loop as fallback; no cap, convergence rules + stall detection | Fewer runs, warmer cache; I'm the backstop |
+| "Never skip a test" rule | Test-shaped acceptance criteria and a criterion→test map the reviewer checks | Verifiable instead of advisory |
+| Marker substring match | Body must *start* with the marker, author must be `claude[bot]` | No false triggers |
+| Five workflows, three secrets | Three workflows + sweep, one secret | Less to maintain per repo |
+| Tests assumed to run | Composite setup action shared with CI; `bin/test` as the inner loop | Claude can actually verify |
+| No observability, no restart | Outcome comment on every phase; `status`, `reset`, `from`; weekly sweep | Issue timeline is the log; nothing is stranded |
 
-## 14. Prior art reviewed
-
-- Anthropic `claude-code-action` (+ examples `issue-triage`, `ci-failure-auto-fix`, `pr-review-comprehensive`, `agent-approval-check`) — used directly.
-- `dsj1984/mandrel-platform#434` — recipe for firing a routine from a workflow; reports routines' native GitHub triggers never fired for them.
-- `softwareone-platform/issue-to-pr` — local 11-stage pipeline with a plan-approval gate and adversarial reviewers; borrowed fact-check and pre-mortem stages.
-- `github/spec-kit` — spec/plan templates; `taskstoissues`.
-- `SiddaharthSuman/spec-driven-dev` — same mechanism-vs-project-rules split.
-- Sortie, `ableinc/coding-agent-loop`, GitHub Copilot coding agent — label-to-PR orchestration comparables.
+Kept from v1: issue forms, spec and plan as issue comments plus a plan file in the PR, `claude[bot]` authoring via Action, my approval + `agent-approval-check` as the gate, public plugin repo, shared OAuth token, no third-party workflow plugins (templates borrowed from spec-kit and Superpowers; stage ideas from `softwareone-platform/issue-to-pr`).
 
 ## 15. Sources
 
-- https://code.claude.com/docs/en/claude-code-on-the-web
-- https://code.claude.com/docs/en/cloud-environments (what carries over into cloud sessions)
-- https://code.claude.com/docs/en/routines (API trigger, payload wrapping, PR/release-only GitHub triggers)
-- https://code.claude.com/docs/en/github-actions and https://github.com/anthropics/claude-code-action (identity, inputs, examples)
-- https://code.claude.com/docs/en/claude-projects
-- https://code.claude.com/docs/en/code-review, https://code.claude.com/docs/en/ultrareview
-- https://code.claude.com/docs/en/plugins/loading, https://code.claude.com/docs/en/plugins/install, https://code.claude.com/docs/en/skills
-- https://code.claude.com/docs/en/feature-availability
-- https://code.claude.com/docs/en/best-practices, https://code.claude.com/docs/en/memory
+- https://code.claude.com/docs/en/github-actions and https://github.com/anthropics/claude-code-action (identity, inputs, `allowed_bots`, examples incl. `agent-approval-check`, `ci-failure-auto-fix`)
+- https://code.claude.com/docs/en/claude-code-on-the-web, https://code.claude.com/docs/en/cloud-environments (what reaches cloud sessions)
+- https://code.claude.com/docs/en/skills (frontmatter, `allowed-tools`, account-enabled skills in cloud sessions)
+- https://code.claude.com/docs/en/plugins/loading, https://code.claude.com/docs/en/plugins/install
+- https://code.claude.com/docs/en/code-review (`/code-review`, forked subagent), https://code.claude.com/docs/en/ultrareview
+- https://code.claude.com/docs/en/claude-projects, https://code.claude.com/docs/en/feature-availability
+- https://code.claude.com/docs/en/best-practices ("interview me", spec then fresh session, adversarial review subagent)
+- Prior art: https://github.com/softwareone-platform/issue-to-pr, https://github.com/github/spec-kit, https://github.com/dsj1984/mandrel-platform/issues/434
