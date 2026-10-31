@@ -1,0 +1,16 @@
+[Unit]
+Description=Virtual display :99 for Chrome
+# BindsTo= in these units stops them when the display dies, and nothing would
+# start them again without this.
+Wants=browser-openbox.service browser-chrome.service browser-vnc.service
+
+[Service]
+# A fixed display, not xvfb-run -a, so VNC knows where to attach.
+ExecStart=/usr/bin/Xvfb :99 -screen 0 1600x1000x24 -nolisten tcp
+# Stay "activating" until the socket exists, so nothing After= this races it.
+ExecStartPost=/bin/sh -c 'until [ -S /tmp/.X11-unix/X99 ]; do sleep 0.2; done'
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target

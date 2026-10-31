@@ -1,0 +1,19 @@
+[Unit]
+Description=x11vnc on :99, tailnet only
+BindsTo=browser-xvfb.service
+After=browser-xvfb.service
+# No password file, no server. x11vnc must never come up open.
+ConditionFileNotEmpty=%h/.vnc/passwd
+
+[Service]
+# The address is read at each start. Without one this exits rather than falling
+# back to x11vnc's default of every interface, and Restart= covers boot, when
+# tailscaled may not have its address yet. -rfbportv6 -1 is the flag that closes
+# IPv6: -listen and -noipv6 only cover x11vnc's own sockets, and LibVNCServer
+# opens [::]:5900 by itself without it.
+ExecStart=/bin/sh -c 'ip=$$(/usr/bin/tailscale ip -4) && [ -n "$$ip" ] && exec /usr/bin/x11vnc -display :99 -listen "$$ip" -rfbport 5900 -rfbportv6 -1 -noipv6 -rfbauth %h/.vnc/passwd -forever -shared'
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target

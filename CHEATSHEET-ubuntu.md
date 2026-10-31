@@ -77,6 +77,33 @@ so the units survive logout.
 
 ---
 
+## Browser on the virtual display
+
+Linux-only. Headed Chrome runs on display `:99`, which you can see over VNC at
+`ghost:5900` from anything on the tailnet.
+
+```bash
+systemctl --user status 'browser-*'           # xvfb, openbox, chrome, vnc
+systemctl --user restart browser-chrome       # Chrome alone
+systemctl --user restart browser-xvfb         # the display and everything on it
+journalctl --user -u browser-vnc -f           # logs
+
+ss -ltn | grep 5900                           # must show the 100.x address only
+DISPLAY=:99 scrot /tmp/display.png            # screenshot without VNC
+```
+
+VNC stays off until the password file exists. Only its first 8 characters count:
+
+```bash
+install -dm 700 ~/.vnc && x11vnc -storepasswd ~/.vnc/passwd
+systemctl --user start browser-vnc
+```
+
+Chrome updates arrive through unattended-upgrades, but the running browser keeps
+the old version until `browser-chrome` restarts or the box reboots.
+
+---
+
 ## Command differences from macOS
 
 | macOS | Ubuntu | Why |

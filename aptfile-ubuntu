@@ -31,10 +31,12 @@
 # WHAT IS *NOT* HERE
 #   Anything that apt doesn't ship (or ships too stale to bother with) is
 #   installed by `setup-ubuntu.sh` directly — mise, starship, pnpm/corepack,
-#   zsh-fast-syntax-highlighting, and ngrok. See the last section of this file.
+#   zsh-fast-syntax-highlighting, ngrok, and Google Chrome. See the last section
+#   of this file.
 #
 # TARGET: Ubuntu 24.04.x LTS (noble), x86_64, headless server. No GUI packages —
-# nothing here should pull X11, Wayland, or a desktop stack.
+# nothing here should pull Wayland or a desktop stack. The one exception is the
+# "Browser display" section, which pulls X11 on purpose.
 
 
 # ---- Shell ----
@@ -183,6 +185,17 @@ docker-compose-v2
 docker-buildx
 
 
+# ---- Browser display ----
+# A virtual display so Chrome can run headed on this box, with VNC onto it for
+# clearing challenges from the phone. Not a desktop: Xvfb is the display and
+# openbox only places the windows. Together these pull about 130 packages, X11
+# and GTK libraries included. The units are systemd/browser-*.service; Chrome
+# itself comes from Google's repo (see the last section).
+xvfb
+openbox
+x11vnc
+
+
 # ============================================================================
 # OPTIONAL — all commented out. Uncomment a line and re-run setup-ubuntu.sh
 # (or `sudo apt install <pkg>`). Every name below was verified to resolve on
@@ -292,6 +305,9 @@ docker-buildx
 #             — not packaged; git clone into ~/.zsh. Note this is a *different*
 #               plugin from the zsh-syntax-highlighting deb listed up top.
 #   ngrok     — official apt repo (ngrok.com), added by the script.
+#   google-chrome-stable
+#             — Google's signed apt repo, added by the script. The package then
+#               owns its own .sources file and keyring.
 #
 # Also, from the Brewfile but deliberately NOT here: coreutils, gnu-sed, gawk-as-
 # a-replacement. On the Mac those exist to replace BSD userland with GNU. Linux

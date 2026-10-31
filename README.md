@@ -70,6 +70,7 @@ macOS original is never modified.
 | `claude/settings-ubuntu.json` | `$HOME`-relative statusline path; keeps `autoUpdatesChannel` |
 | `aptfile-ubuntu` | The `Brewfile` equivalent — one apt package per line |
 | `bin/newrc`, `systemd/claude-rc@.service` | Linux-only; spin up a `claude remote-control` session under systemd |
+| `systemd/browser-*.service` | Linux-only; headed Chrome on virtual display `:99`, with VNC over the tailnet only |
 
 Shared unchanged: `screenrc`, `inputrc`, `irbrc`, `gemrc`, `npmrc`,
 `starship.toml`, `ir_black.vim`, `vim/after/syntax/sh.vim`, `CLAUDE.user.md`,

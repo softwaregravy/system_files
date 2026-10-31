@@ -48,6 +48,7 @@ Tested on Ubuntu 24.04 "noble", x86_64, headless. Entrypoint is `setup-ubuntu.sh
 | `gitconfig-ubuntu` | Identical minus `core.hooksPath` — the AI `prepare-commit-msg` hook is deliberately not installed on the server |
 | `claude/settings-ubuntu.json` | `$HOME`-relative statusline path (the macOS one hardcodes `/Users/john/…`) plus `autoUpdatesChannel` |
 | `bin/newrc`, `systemd/claude-rc@.service` | Linux-only. `newrc <name> [git-url]` creates a project under `~/workspaces/claude-rc-projects/` and enables a `claude remote-control` systemd user unit for it |
+| `systemd/browser-*.service` | Linux-only. Headed Chrome on virtual display `:99`: `browser-xvfb` → `browser-openbox` → `browser-chrome` and `browser-vnc`. VNC listens on the Tailscale address only and stays off until `~/.vnc/passwd` exists; the password is never committed. Keep Chrome's default profile: a custom `--user-data-dir` hides the Claude in Chrome native-messaging manifest |
 | `CHEATSHEET-ubuntu.md` | Ubuntu deltas to `CHEATSHEET.md` |
 
 Not ported: `Brewfile`, `Brewfile.mas`, `iterm2/`, `iTerm2 State.itermexport`, `git_hooks/prepare-commit-msg`, `init.vim` (vestigial — `setup.sh` never linked it).
@@ -56,7 +57,7 @@ Not ported: `Brewfile`, `Brewfile.mas`, `iterm2/`, `iTerm2 State.itermexport`, `
 
 **Never run `git lfs install` on the server** — `~/.gitconfig` is a symlink into this repo, so it would dirty the working tree. The lfs filter is already in `gitconfig-ubuntu`.
 
-**Not available via apt**, installed separately by `setup-ubuntu.sh`: `mise` and `ngrok` (official signed apt repos), `starship` (`install.sh` into `~/.local/bin`), `zsh-fast-syntax-highlighting` (git clone into `~/.zsh`), `pnpm` (corepack, after mise installs node).
+**Not available via apt**, installed separately by `setup-ubuntu.sh`: `mise`, `ngrok` and `google-chrome-stable` (official signed apt repos; Chrome's package owns its own `.sources` file and keyring after the first install), `starship` (`install.sh` into `~/.local/bin`), `zsh-fast-syntax-highlighting` (git clone into `~/.zsh`), `pnpm` (corepack, after mise installs node).
 
 ## setup.sh
 

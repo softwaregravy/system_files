@@ -1,0 +1,19 @@
+[Unit]
+Description=Google Chrome on :99
+BindsTo=browser-xvfb.service
+Wants=browser-openbox.service
+After=browser-xvfb.service browser-openbox.service
+
+[Service]
+Environment=DISPLAY=:99
+# Launched as a normal headed browser on the default profile. A custom
+# --user-data-dir hides the native-messaging manifest Claude in Chrome needs.
+# --password-store=basic because there is no keyring here to unlock.
+ExecStart=/usr/bin/google-chrome-stable --no-first-run --no-default-browser-check --password-store=basic --start-maximized
+# SIGTERM to Chrome alone lets it shut down its own children and exit cleanly.
+KillMode=mixed
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target
