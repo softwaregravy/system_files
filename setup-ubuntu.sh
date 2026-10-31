@@ -358,6 +358,34 @@ add_apt_repos() {
   fi
   echo "deb [signed-by=/etc/apt/keyrings/ngrok.gpg] https://ngrok-agent.s3.amazonaws.com bookworm main" \
     | sudo tee /etc/apt/sources.list.d/ngrok.list >/dev/null
+
+  # Google Chrome — not in the archive either. The package's postinst owns both
+  # of these paths and rewrites them on upgrades, so this only seeds them for the
+  # first install, in the same place it keeps them. A .list line or a keyring
+  # under /etc/apt/keyrings would just get migrated away.
+  if [[ ! -s /usr/share/keyrings/google-chrome.gpg ]]; then
+    say "  adding the Google Chrome signing key"
+    curl -fsSL https://dl.google.com/linux/linux_signing_key.pub \
+      | gpg --dearmor \
+      | sudo tee /usr/share/keyrings/google-chrome.gpg >/dev/null \
+      || warn "could not add the Google Chrome signing key"
+  fi
+  if [[ ! -f /etc/apt/sources.list.d/google-chrome.sources ]]; then
+    say "  adding the Google Chrome apt repo"
+    sudo tee /etc/apt/sources.list.d/google-chrome.sources >/dev/null <<'EOF'
+Types: deb
+URIs: https://dl.google.com/linux/chrome-stable/deb/
+Suites: stable
+Components: main
+Architectures: amd64
+Signed-By: /usr/share/keyrings/google-chrome.gpg
+EOF
+  fi
+
+  # unattended-upgrades only takes Ubuntu's own origins unless told otherwise,
+  # and nothing else here would patch a browser that is always running.
+  echo 'Unattended-Upgrade::Origins-Pattern { "origin=Google LLC,suite=stable"; };' \
+    | sudo tee /etc/apt/apt.conf.d/52unattended-upgrades-google-chrome >/dev/null
 }
 
 phase_apt() {
@@ -383,12 +411,12 @@ phase_apt() {
   mapfile -t pkgs < <(sed -e 's/#.*//' -e 's/[[:space:]]//g' "$APTFILE" | grep -v '^$' || true)
   (( ${#pkgs[@]} )) || { warn "$APTFILE contained no package names"; return 0; }
 
-  # These two come from the third-party repos added by add_apt_repos, not from
+  # These come from the third-party repos added by add_apt_repos, not from
   # Ubuntu's archive, so they are deliberately NOT listed in aptfile-ubuntu
   # (that file documents itself as covering only what plain Ubuntu ships).
   # They still have to be installed, though — adding a repo and then never
   # pulling from it is how mise silently went missing.
-  pkgs+=(mise ngrok)
+  pkgs+=(mise ngrok google-chrome-stable)
 
   # NOTE: do NOT write this as `apt-cache policy "$p" | grep -q ...`. grep -q
   # exits on first match, apt-cache takes SIGPIPE, and `pipefail` surfaces 141 —
@@ -573,6 +601,10 @@ phase_links() {
     "ngrok.yml:$HOME/.config/ngrok/ngrok.yml"
     "bin/newrc:$HOME/.local/bin/newrc"
     "systemd/claude-rc@.service:$HOME/.config/systemd/user/claude-rc@.service"
+    "systemd/browser-xvfb.service:$HOME/.config/systemd/user/browser-xvfb.service"
+    "systemd/browser-openbox.service:$HOME/.config/systemd/user/browser-openbox.service"
+    "systemd/browser-chrome.service:$HOME/.config/systemd/user/browser-chrome.service"
+    "systemd/browser-vnc.service:$HOME/.config/systemd/user/browser-vnc.service"
   )
   local link source target
   for link in "${links[@]}"; do
@@ -712,6 +744,17 @@ phase_systemd() {
   else
     require_sudo
     sudo loginctl enable-linger "$USER" || warn "could not enable lingering"
+  fi
+
+  # enable --now leaves running units alone, so a re-run never restarts Chrome.
+  # browser-vnc is skipped, not failed, until ~/.vnc/passwd exists.
+  if command -v Xvfb >/dev/null 2>&1 && command -v google-chrome-stable >/dev/null 2>&1; then
+    systemctl --user enable --now \
+      browser-xvfb.service browser-openbox.service browser-chrome.service browser-vnc.service \
+      || warn "could not enable the browser units"
+    say "  browser units enabled"
+  else
+    warn "Xvfb or Chrome is missing — browser units not enabled"
   fi
   return 0
 }
@@ -906,10 +949,23 @@ Next steps
    clipboard".
 EOF
 
+  local n=8
+  if [[ ! -s "$HOME/.vnc/passwd" ]]; then
+    cat <<EOF
+
+$n. Set the VNC password, from your password manager. Only its first 8 characters
+   count. VNC stays off until this file exists:
+
+       install -dm 700 ~/.vnc && x11vnc -storepasswd ~/.vnc/passwd
+       systemctl --user start browser-vnc
+EOF
+    n=$((n + 1))
+  fi
+
   if (( SSH_KEY_CREATED )); then
     cat <<EOF
 
-8. A new SSH key was generated. Upload it via 'gh auth login' in step 3, or
+$n. A new SSH key was generated. Upload it via 'gh auth login' in step 3, or
    paste the line below at https://github.com/settings/ssh/new
 
 EOF

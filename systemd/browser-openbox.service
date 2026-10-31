@@ -1,0 +1,13 @@
+[Unit]
+Description=Openbox window manager on :99
+BindsTo=browser-xvfb.service
+After=browser-xvfb.service
+
+[Service]
+Environment=DISPLAY=:99
+ExecStart=/usr/bin/openbox
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target
