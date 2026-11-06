@@ -4,10 +4,22 @@
       "mcp__todoist"
     ]
   },
-  "model": "opus[1m]",
+  "model": "opus",
   "statusLine": {
     "type": "command",
     "command": "bash ~/.claude/statusline-command.sh"
+  },
+  "enabledPlugins": {
+    "egm@egm": true,
+    "mattpocock-skills@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "egm": {
+      "source": {
+        "source": "github",
+        "repo": "google/elephant-goldfish-model"
+      }
+    }
   },
   "modelSettings": {
     "claude-opus-5-5": {
