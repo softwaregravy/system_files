@@ -1,11 +1,21 @@
 {
+  "model": "opus[1m]",
   "statusLine": {
     "type": "command",
     "command": "npx -y ccstatusline@latest",
     "padding": 0,
     "refreshInterval": 10
   },
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": true
+  },
+  "spinnerVerbs": {
+    "mode": "replace",
+    "verbs": [
+      " "
+    ]
+  },
+  "effortLevel": "xhigh",
   "tui": "fullscreen",
-  "theme": "dark",
-  "model": "sonnet"
+  "theme": "dark"
 }
