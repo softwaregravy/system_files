@@ -20,6 +20,18 @@ If a gem lacks a binstub: `bundle binstubs <gemname>` once, then it's available 
 
 **Why:** mise replaced RVM — mise reads `.ruby-version` and switches ruby automatically, but doesn't support RVM gemsets. direnv + `PATH_add bin` replicates the "no bundle exec" workflow.
 
+## Pull Requests
+
+Every pull request targets the repository's **default branch** — `main` in the recent repos, `master` in the older ones. Never set another branch as a PR's base, and never stack PRs.
+
+- `gh pr create` defaults to the default branch. Passing `--base` is the mistake; omit it unless there is a reason.
+- One concern per PR is still right. But when two changes touch the same file, land the first, then rebase the second onto the default branch — don't chain them.
+- Expect **no help from GitHub**. It retargets a dependent PR only when the base branch is *deleted* after merge; merging alone never retargets it, and these repos keep `delete_branch_on_merge` off by choice. So a stacked PR stays pointed at its branch right up to the moment it merges into the wrong place.
+- If work is already stacked, retarget every PR before merging any of them.
+- After merging, verify the commit reached the default branch — `git merge-base --is-ancestor <sha> main` — instead of trusting the "Merged" badge, which only means the merge succeeded somewhere.
+
+**Why:** a PR based on another branch merges into *that branch*, not the default branch, and GitHub reports it as merged either way. In this repo three stacked PRs were merged in order and two of them landed in the branch below; `main` received only the first. Because head branches were not being deleted on merge, the automatic retarget never fired, and recovering took a fourth PR.
+
 ## Task Queue (Todoist)
 
 My to-dos live in Todoist, reached through the Todoist connector. When a to-do for me comes up in any session, don't leave it in the conversation: offer to file it, or file it when I wrap up.
