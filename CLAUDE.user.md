@@ -20,6 +20,16 @@ If a gem lacks a binstub: `bundle binstubs <gemname>` once, then it's available 
 
 **Why:** mise replaced RVM — mise reads `.ruby-version` and switches ruby automatically, but doesn't support RVM gemsets. direnv + `PATH_add bin` replicates the "no bundle exec" workflow.
 
+## Pull Requests
+
+Every pull request targets `main`. Never set another branch as a PR's base, and never stack PRs.
+
+- One concern per PR is still right. But when two changes touch the same file, land the first, then rebase the second onto `main` — don't chain them.
+- If work is already stacked, retarget every PR to `main` *before* merging any of them.
+- After merging, verify the commit actually reached `main` (`git merge-base --is-ancestor <sha> main`) instead of trusting the "Merged" badge.
+
+**Why:** a PR based on another branch merges into *that branch*, not `main`. GitHub only retargets a stacked PR once its base merges, and merging several back-to-back beats that retarget — so the later PRs show "Merged" while `main` never receives them, and recovering costs another PR.
+
 ## Task Queue (Todoist)
 
 My to-dos live in Todoist, reached through the Todoist connector. When a to-do for me comes up in any session, don't leave it in the conversation: offer to file it, or file it when I wrap up.
