@@ -8,6 +8,8 @@ Personal macOS dotfiles and system configuration for a developer machine. All co
 
 There is also an **Ubuntu port** for headless servers, driven by `setup-ubuntu.sh` + `aptfile-ubuntu`. It is strictly additive: files that needed changing have a `-ubuntu` sibling, and the macOS originals are never modified. See "Ubuntu Port" below before touching anything with a `-ubuntu` suffix.
 
+The Ubuntu box is **Ghost**, the headless machine Claude Code works from. Services that run unattended on it, starting with the claude-task runner, live in the private repo `softwaregravy/ghost-infra`, not here: this repo is config files that tools read. `bin/newrc`, `claude-rc@.service` and the `browser-*` units predate that split and stay here for now.
+
 ## Applying Changes by Type
 
 | Change type | How it takes effect |
