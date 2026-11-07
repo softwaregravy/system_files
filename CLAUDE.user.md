@@ -26,7 +26,7 @@ Every pull request targets the repository's **default branch** — `main` in the
 
 - `gh pr create` defaults to the default branch. Passing `--base` is the mistake; omit it unless there is a reason.
 - One concern per PR is still right. But when two changes touch the same file, land the first, then rebase the second onto the default branch — don't chain them.
-- Keep **"Automatically delete head branches"** on in every repo (`gh api -X PATCH repos/<owner>/<repo> --field delete_branch_on_merge=true`). GitHub retargets a dependent PR only when the base branch is *deleted*; merging alone never retargets it.
+- Expect **no help from GitHub**. It retargets a dependent PR only when the base branch is *deleted* after merge; merging alone never retargets it, and these repos keep `delete_branch_on_merge` off by choice. So a stacked PR stays pointed at its branch right up to the moment it merges into the wrong place.
 - If work is already stacked, retarget every PR before merging any of them.
 - After merging, verify the commit reached the default branch — `git merge-base --is-ancestor <sha> main` — instead of trusting the "Merged" badge, which only means the merge succeeded somewhere.
 
