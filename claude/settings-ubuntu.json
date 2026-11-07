@@ -1,7 +1,9 @@
 {
   "statusLine": {
     "type": "command",
-    "command": "bash ~/.claude/statusline-command.sh"
+    "command": "mise exec node@lts -- npx -y ccstatusline@latest",
+    "padding": 0,
+    "refreshInterval": 30
   },
   "tui": "fullscreen",
   "theme": "dark",

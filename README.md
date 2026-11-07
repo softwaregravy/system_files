@@ -67,14 +67,15 @@ macOS original is never modified.
 | `vimrc-ubuntu` | OSC 52 clipboard (headless vim has no `+clipboard`) via the vim-oscyank plugin |
 | `tmux.conf-ubuntu` | Copy goes over OSC 52 instead of `pbcopy` |
 | `gitconfig-ubuntu` | No `core.hooksPath` — the AI `prepare-commit-msg` hook is not installed here |
-| `claude/settings-ubuntu.json` | `$HOME`-relative statusline path; keeps `autoUpdatesChannel` |
+| `claude/settings-ubuntu.json` | Status line wrapped in `mise exec node@lts --` (mise-managed node is not on the systemd `PATH`), refreshed every 30s not 10; keeps `autoUpdatesChannel` |
 | `aptfile-ubuntu` | The `Brewfile` equivalent — one apt package per line |
 | `bin/newrc`, `systemd/claude-rc@.service` | Linux-only; spin up a `claude remote-control` session under systemd |
 
 Shared unchanged: `screenrc`, `inputrc`, `irbrc`, `gemrc`, `npmrc`,
 `starship.toml`, `ir_black.vim`, `vim/after/syntax/sh.vim`, `CLAUDE.user.md`,
-`claude/statusline-command.sh`, `ngrok.yml` (linked to `~/.config/ngrok/` rather
-than `~/Library/Application Support/`).
+`claude/statusline-command.sh`, `claude/ccstatusline.json` (the status line's
+widget config, linked to `~/.config/ccstatusline/settings.json`), `ngrok.yml`
+(linked to `~/.config/ngrok/` rather than `~/Library/Application Support/`).
 
 ## Clipboard over SSH
 

@@ -567,6 +567,7 @@ phase_links() {
     "starship.toml:$HOME/.config/starship.toml"
     "CLAUDE.user.md:$HOME/.claude/CLAUDE.md"
     "claude/statusline-command.sh:$HOME/.claude/statusline-command.sh"
+    "claude/ccstatusline.json:$HOME/.config/ccstatusline/settings.json"
     "ir_black.vim:$HOME/.vim/colors/ir_black.vim"
     "vim/after/syntax/sh.vim:$HOME/.vim/after/syntax/sh.vim"
     # Linux-only. ngrok's config lives here, not in ~/Library/Application Support.
