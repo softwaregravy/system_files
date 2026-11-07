@@ -2,3 +2,7 @@
 *.swp
 *rsa*
 .DS_Store
+
+# ccstatusline writes its save as <target>.<pid>.<ts>.tmp in the target's
+# directory, then renames onto it — a crashed save can leave a stray behind.
+*.tmp
