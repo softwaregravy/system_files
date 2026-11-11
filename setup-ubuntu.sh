@@ -11,14 +11,20 @@
 # tmux.conf-ubuntu, gitconfig-ubuntu, claude/settings-ubuntu.json). The macOS
 # originals are never touched.
 #
+# One file is copied rather than linked: the Claude Code managed policy,
+# claude/managed-settings-ubuntu.json, installed root-owned at
+# /etc/claude-code/managed-settings.json so nothing running as you can loosen it.
+#
 # Run it from a detached tmux/screen session, NOT from an agent's shell tool:
 # it takes ~10 minutes and a mid-dpkg kill leaves apt half-configured.
 #
 #   tmux new -s setup
 #   ./setup-ubuntu.sh
 #
-# It changes your login shell to zsh, adds you to the docker group, and replaces
-# files in $HOME. Everything replaced is moved to ~/.dotfiles-backup/<timestamp>/.
+# It changes your login shell to zsh, adds you to the docker group, replaces
+# files in $HOME and replaces /etc/claude-code/managed-settings.json. Everything
+# replaced in $HOME is moved to ~/.dotfiles-backup/<timestamp>/; an existing
+# policy file that differs from the repo's is copied there.
 
 set -euo pipefail
 
@@ -46,8 +52,9 @@ Env:
                     script lives in, else ~/workspaces/system_files.
 
 Run this from a detached tmux/screen session, not from an agent's shell tool.
-It changes your login shell, adds you to the docker group, and replaces files
-in $HOME (everything replaced is moved to ~/.dotfiles-backup/<timestamp>/).
+It changes your login shell, adds you to the docker group, replaces files in
+$HOME (everything replaced is moved to ~/.dotfiles-backup/<timestamp>/) and
+installs the Claude Code managed policy in /etc/claude-code/.
 USAGE
 }
 
@@ -618,6 +625,45 @@ phase_links() {
 }
 
 # -----------------------------------------------------------------------------
+# | P8b — Claude Code managed policy                                           |
+# -----------------------------------------------------------------------------
+
+# Managed settings outrank ~/.claude/settings.json, so the starting permission
+# mode is set here. Installed as a root-owned COPY, never a symlink: a link into
+# this user-owned repo would let anything running as $USER, unattended Claude
+# workers included, edit the policy that is meant to constrain it.
+phase_claude_policy() {
+  step "Claude Code managed policy"
+  local src="$REPO_DIR/claude/managed-settings-ubuntu.json"
+  local dst=/etc/claude-code/managed-settings.json
+  local backup="$BACKUP_DIR/etc/claude-code/managed-settings.json"
+  [[ -f "$src" ]] || { warn "missing $src — managed policy not installed"; return 0; }
+
+  # ! -L because cmp follows links, so a link back into the repo compares equal.
+  if [[ -f "$dst" && ! -L "$dst" ]] && cmp -s "$src" "$dst" \
+     && [[ "$(stat -c '%U:%G %a' "$dst")" == "root:root 644" ]]; then
+    say "  ok        $dst"
+    return 0
+  fi
+
+  require_sudo
+  # Copied, not moved: if the install below fails the old policy stays in force.
+  if [[ -e "$dst" ]] && ! sudo cmp -s "$src" "$dst"; then
+    mkdir -p "$(dirname "$backup")"
+    sudo cat "$dst" > "$backup" \
+      || { warn "could not back up $dst — left it in place"; return 0; }
+    say "  backed up $dst -> $backup"
+    BACKED_UP+=("$dst")
+  fi
+
+  # install unlinks a symlink at $dst rather than writing through it.
+  sudo install -D -o root -g root -m 644 "$src" "$dst" \
+    || { warn "could not install $dst"; return 0; }
+  say "  installed $dst (restart Claude Code to pick it up)"
+  return 0
+}
+
+# -----------------------------------------------------------------------------
 # | P9 — vim plugins                                                           |
 # -----------------------------------------------------------------------------
 
@@ -1000,6 +1046,7 @@ soft "mise runtimes" phase_mise
 soft "pnpm"         phase_pnpm
 soft "key templates" phase_keys
 soft "symlinks"     phase_links
+soft "claude policy" phase_claude_policy
 soft "vim plugins"  phase_vim
 soft "ssh key"      phase_ssh
 soft "docker group" phase_docker
