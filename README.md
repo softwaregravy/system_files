@@ -68,6 +68,7 @@ macOS original is never modified.
 | `tmux.conf-ubuntu` | Copy goes over OSC 52 instead of `pbcopy` |
 | `gitconfig-ubuntu` | No `core.hooksPath` — the AI `prepare-commit-msg` hook is not installed here |
 | `claude/settings-ubuntu.json` | Status line wrapped in `mise exec node@lts --` (mise-managed node is not on the systemd `PATH`), refreshed every 30s not 10; keeps `autoUpdatesChannel` |
+| `claude/managed-settings-ubuntu.json` | Linux-only; Claude Code managed policy (start in `auto`, bypass mode disabled), installed as a root-owned copy at `/etc/claude-code/managed-settings.json` so nothing running as you can loosen it |
 | `aptfile-ubuntu` | The `Brewfile` equivalent — one apt package per line |
 | `bin/newrc`, `systemd/claude-rc@.service` | Linux-only; spin up a `claude remote-control` session under systemd |
 | `systemd/browser-*.service` | Linux-only; headed Chrome on virtual display `:99`, with VNC over the tailnet only |
