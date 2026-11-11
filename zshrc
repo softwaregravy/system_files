@@ -148,6 +148,24 @@ timestamp() {
   date -j -f "%a %b %d %T %Z %Y" "$(date)" "+%s"
 }
 
+# One-shot Claude questions: `q how do I squash the last 3 commits?`
+#   q — Sonnet at xhigh effort, for questions worth a careful answer
+#   h — Haiku at its default effort, for quick lookups
+# Read-only: web search and fetch only (pre-approved, since -p silently denies
+# anything that would prompt), no shell or file tools, no MCP servers (also
+# faster to start), and not saved to `claude --resume`. Piped input works:
+# `git diff | h commit message`. noglob lets `?` and `*` reach Claude instead
+# of failing as zsh globs. An apostrophe still opens a quote, so quote the
+# question if it has one.
+_claude_ask() {
+  claude -p --tools WebSearch,WebFetch --allowedTools WebSearch,WebFetch \
+    --strict-mcp-config --no-session-persistence "$@"
+}
+_claude_q() { _claude_ask --model sonnet --effort xhigh "$*"; }
+_claude_h() { _claude_ask --model haiku "$*"; }
+alias q='noglob _claude_q'
+alias h='noglob _claude_h'
+
 # for installing Rubies on OSX
 if ! brew list openssl@3 &>/dev/null; then
   echo "openssl@3 not found. Please install it first:"
