@@ -4,7 +4,7 @@
       "mcp__todoist"
     ]
   },
-  "model": "opus",
+  "model": "claude-fable-5-2",
   "statusLine": {
     "type": "command",
     "command": "mise exec node@lts -- npx -y ccstatusline@latest",
@@ -26,6 +26,9 @@
   "modelSettings": {
     "claude-opus-5-5": {
       "effortLevel": "xhigh"
+    },
+    "claude-fable-5-2": {
+      "effortLevel": "high"
     }
   },
   "autoUpdatesChannel": "stable",
