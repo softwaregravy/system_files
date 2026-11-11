@@ -76,7 +76,9 @@ Shared unchanged: `screenrc`, `inputrc`, `irbrc`, `gemrc`, `npmrc`,
 `starship.toml`, `ir_black.vim`, `vim/after/syntax/sh.vim`, `CLAUDE.user.md`,
 `claude/statusline-command.sh`, `claude/ccstatusline.json` (the status line's
 widget config, linked to `~/.config/ccstatusline/settings.json`), `ngrok.yml`
-(linked to `~/.config/ngrok/` rather than `~/Library/Application Support/`).
+(linked to `~/.config/ngrok/` rather than `~/Library/Application Support/`),
+`bin/protect-main` (linked to `~/.local/bin`; puts a pull-requests-only
+ruleset with no bypass list on a GitHub repo's default branch).
 
 ## Clipboard over SSH
 

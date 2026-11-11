@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# Put the "main: pull requests only" ruleset on a GitHub repo's default branch:
+# no deletion, no force push, changes only through a pull request (0 approvals,
+# so you merge your own), and an empty bypass list, so it binds admins too,
+# including anything that pushes with your credentials. Private repos need a
+# paid plan for rulesets. Safe to rerun: a ruleset with this name is left as it
+# is. Usage: protect-main <owner>/<repo>
+set -euo pipefail
+
+NAME="main: pull requests only"
+
+say()  { printf '%s\n' "$*"; }
+warn() { printf 'warn: %s\n' "$*" >&2; }
+
+[ $# -eq 1 ] && [[ "$1" == */* ]] || { warn "usage: protect-main <owner>/<repo>"; exit 2; }
+REPO="$1"
+
+id="$(gh api "repos/$REPO/rulesets" --jq ".[] | select(.name == \"$NAME\") | .id")"
+if [ -n "$id" ]; then
+  say "$REPO already has \"$NAME\" (ruleset $id); leaving it as it is"
+  bypass="$(gh api "repos/$REPO/rulesets/$id" --jq '.bypass_actors | length')"
+  [ "$bypass" = 0 ] || warn "ruleset $id has $bypass bypass actor(s): an admin push to main gets through"
+else
+  gh api -X POST "repos/$REPO/rulesets" --input - >/dev/null <<JSON
+{
+  "name": "$NAME",
+  "target": "branch",
+  "enforcement": "active",
+  "bypass_actors": [],
+  "conditions": {"ref_name": {"include": ["~DEFAULT_BRANCH"], "exclude": []}},
+  "rules": [
+    {"type": "deletion"},
+    {"type": "non_fast_forward"},
+    {"type": "pull_request", "parameters": {
+      "required_approving_review_count": 0,
+      "dismiss_stale_reviews_on_push": false,
+      "require_code_owner_review": false,
+      "require_last_push_approval": false,
+      "required_review_thread_resolution": false
+    }}
+  ]
+}
+JSON
+  say "$REPO: created \"$NAME\""
+fi
+
+# the rules that now apply to the default branch
+gh ruleset check --default -R "$REPO"
