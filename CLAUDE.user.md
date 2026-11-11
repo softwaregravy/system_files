@@ -32,6 +32,12 @@ Every pull request targets the repository's **default branch** — `main` in the
 
 **Why:** a PR based on another branch merges into *that branch*, not the default branch, and GitHub reports it as merged either way. In this repo three stacked PRs were merged in order and two of them landed in the branch below; `main` received only the first. Because head branches were not being deleted on merge, the automatic retarget never fired, and recovering took a fourth PR.
 
+## New Repositories
+
+When you create a GitHub repository for me, run `protect-main <owner>/<repo>` right after the first push to its default branch. From then on that branch takes changes only through pull requests, mine included.
+
+**Why:** a branch rule that admins can bypass doesn't stop me, or any session pushing as me, from pushing straight to `main`. `protect-main` (from system_files' `bin/`) sets a ruleset with no bypass list. It runs after the first push because a pull-requests-only rule can refuse the push that creates the branch.
+
 ## Task Queue (Todoist)
 
 My to-dos live in Todoist, reached through the Todoist connector. When a to-do for me comes up in any session, don't leave it in the conversation: offer to file it, or file it when I wrap up.
