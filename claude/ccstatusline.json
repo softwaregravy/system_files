@@ -8,6 +8,15 @@
         "color": "cyan"
       },
       {
+        "id": "10",
+        "type": "separator"
+      },
+      {
+        "id": "11",
+        "type": "thinking-effort",
+        "color": "brightBlue"
+      },
+      {
         "id": "2",
         "type": "separator"
       },
