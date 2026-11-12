@@ -257,6 +257,39 @@ autocmd FileType zsh set formatoptions+=o
 autocmd FileType zsh set formatoptions+=j
 autocmd FileType zsh set commentstring=#\ %s
 
+" Claude Code prompt (Ctrl+G opens it in $EDITOR as $TMPDIR/claude-prompt-<id>.md)
+" It is prose, so soft-wrap at word boundaries despite the global nowrap; no
+" newlines are added. Vim soft-wraps only at the window edge, so an empty pane
+" on the right narrows the prompt to 100 text columns, and closes with it.
+" Spelling marks only misspellings, underlined: no capitalization, rare or
+" regional marks. Claude Code starts a fresh vim per prompt, so the global
+" settings here (highlights, laststatus) reach nothing else.
+function! s:ClaudePrompt() abort
+  setlocal wrap linebreak breakindent textwidth=0 spell spellcapcheck=
+  highlight SpellBad cterm=underline ctermfg=NONE ctermbg=NONE
+  highlight clear SpellCap
+  highlight clear SpellRare
+  highlight clear SpellLocal
+
+  let width = 100 + getwininfo(win_getid())[0].textoff
+  if &columns <= width
+    return
+  endif
+  set laststatus=0
+  rightbelow vnew
+  setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile nonumber nocursorline
+  let &l:fillchars = 'eob: '
+  wincmd p
+  setlocal winfixwidth
+  execute 'vertical resize' width
+  autocmd QuitPre <buffer> silent! only
+endfunction
+
+augroup claude_prompt
+  autocmd!
+  autocmd VimEnter claude-prompt-*.md call s:ClaudePrompt()
+augroup END
+
 
 " Hard to type *****************************************************************
 imap uu _
