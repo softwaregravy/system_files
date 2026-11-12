@@ -7,7 +7,16 @@
     "refreshInterval": 10
   },
   "enabledPlugins": {
-    "superpowers@claude-plugins-official": true
+    "superpowers@claude-plugins-official": true,
+    "session-gist@system-files": true
+  },
+  "extraKnownMarketplaces": {
+    "system-files": {
+      "source": {
+        "source": "directory",
+        "path": "/Users/john/workspace/system_files/claude/plugins"
+      }
+    }
   },
   "spinnerVerbs": {
     "mode": "replace",
