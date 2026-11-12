@@ -53,7 +53,27 @@
         "color": "yellow"
       }
     ],
-    [],
+    [
+      {
+        "id": "12",
+        "type": "custom-command",
+        "commandPath": "echo \"Host: $(hostname -s)\"",
+        "color": "green"
+      },
+      {
+        "id": "13",
+        "type": "separator"
+      },
+      {
+        "id": "14",
+        "type": "current-working-dir",
+        "color": "blue",
+        "metadata": {
+          "abbreviateHome": "true",
+          "label": "Dir: "
+        }
+      }
+    ],
     []
   ],
   "flexMode": "full-minus-40",
