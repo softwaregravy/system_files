@@ -13,13 +13,20 @@
   },
   "enabledPlugins": {
     "egm@egm": true,
-    "mattpocock-skills@claude-plugins-official": true
+    "mattpocock-skills@claude-plugins-official": true,
+    "session-gist@system-files": true
   },
   "extraKnownMarketplaces": {
     "egm": {
       "source": {
         "source": "github",
         "repo": "google/elephant-goldfish-model"
+      }
+    },
+    "system-files": {
+      "source": {
+        "source": "directory",
+        "path": "/home/johnhin/workspaces/system_files/claude/plugins"
       }
     }
   },

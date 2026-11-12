@@ -4,7 +4,7 @@ These instructions apply across all projects on this machine.
 
 ## Dev Environment
 
-This machine uses **mise** for version management (ruby, python, node) and **direnv** for per-project env activation. See `~/workspace/system_files` for full dotfiles setup.
+This machine uses **mise** for version management (ruby, python, node) and **direnv** for per-project env activation. See `$SYSTEM_FILES_DIR` for full dotfiles setup: `~/workspace/system_files` on macOS, `~/workspaces/system_files` on Ubuntu.
 
 ## Ruby Project Setup
 

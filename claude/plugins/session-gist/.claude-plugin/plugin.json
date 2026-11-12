@@ -1,0 +1,6 @@
+{
+  "name": "session-gist",
+  "version": "0.1.0",
+  "description": "A Haiku-written row above the prompt: what this session is about, the last ask, and the last answer",
+  "types": "./types/index.d.ts"
+}

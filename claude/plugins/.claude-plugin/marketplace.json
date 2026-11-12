@@ -1,0 +1,11 @@
+{
+  "name": "system-files",
+  "owner": { "name": "John Hinnegan" },
+  "plugins": [
+    {
+      "name": "session-gist",
+      "source": "./session-gist",
+      "description": "A Haiku-written row above the prompt: what this session is about, the last ask, and the last answer"
+    }
+  ]
+}
