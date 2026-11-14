@@ -10,7 +10,7 @@ There is also an **Ubuntu port** for headless servers, driven by `setup-ubuntu.s
 
 The Ubuntu box is **Ghost**, the headless machine Claude Code works from. This repo holds config files that tools read and the scripts that install them. Services that run unattended on Ghost don't belong here; `bin/newrc`, `claude-rc@.service` and the `browser-*` units predate that rule and stay for now.
 
-**Nothing depends outward.** Other repos may build on this one and assume it's installed. Nothing here may name them, link their files or call their scripts.
+**Nothing depends outward.** Other repos may build on this one and assume it's installed. Nothing here may name them, link their files or call their scripts. The one exception is softwaregravy-sdlc, the plugin marketplace that holds the development process: this repo may name it and register it.
 
 ## Applying Changes by Type
 
@@ -53,7 +53,7 @@ Tested on Ubuntu 24.04 "noble", x86_64, headless. Entrypoint is `setup-ubuntu.sh
 | `vimrc-ubuntu` | Headless vim has no `+clipboard`, so copy goes over **OSC 52** via the `vim-oscyank` plugin. Vim 9.1 in noble has no native OSC 52 and never will (LTS doesn't rebase vim) |
 | `tmux.conf-ubuntu` | `pbcopy` → OSC 52. `set -g set-clipboard on` is load-bearing: tmux only forwards an application's OSC 52 when the value is exactly `on`, not `external` |
 | `gitconfig-ubuntu` | Identical minus `core.hooksPath` — the AI `prepare-commit-msg` hook is deliberately not installed on the server |
-| `claude/settings-ubuntu.json` | Status line is `mise exec node@lts -- npx …` instead of a bare `npx` (mise-managed node is not on the systemd `PATH`) and refreshes every 30s instead of 10; plus `autoUpdatesChannel`. The widget config `claude/ccstatusline.json` itself is shared unchanged |
+| `claude/settings-ubuntu.json` | Status line is `mise exec node@lts -- npx …` instead of a bare `npx` (mise-managed node is not on the systemd `PATH`) and refreshes every 30s instead of 10; plus `autoUpdatesChannel`, and the softwaregravy-sdlc marketplace with its `sdlc` plugin installed but switched off, so that only a project's settings switch it on. `claude plugin … --scope user` writes this file through the `~/.claude/settings.json` symlink. The widget config `claude/ccstatusline.json` itself is shared unchanged |
 | `claude/managed-settings-ubuntu.json` | Ghost's Claude Code managed policy: starting permission mode `auto`, bypass-permissions mode disabled. Managed settings outrank `~/.claude/settings.json`, so the permission mode belongs here, not in `settings-ubuntu.json`. Installed as a root-owned **copy** in `/etc/claude-code/`, never a symlink: a link into this user-owned repo would let anything running as the user, unattended Claude workers included, loosen it. A differing existing file is copied into the run's backup directory first |
 | `bin/newrc`, `systemd/claude-rc@.service` | Linux-only. `newrc <name> [git-url]` creates a project under `~/workspaces/claude-rc-projects/` and enables a `claude remote-control` systemd user unit for it |
 | `systemd/browser-*.service` | Linux-only. Headed Chrome on virtual display `:99`: `browser-xvfb` → `browser-openbox` → `browser-chrome` and `browser-vnc`. VNC listens on the Tailscale address only and stays off until `~/.vnc/passwd` exists; the password is never committed. Keep Chrome's default profile: a custom `--user-data-dir` hides the Claude in Chrome native-messaging manifest |

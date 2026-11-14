@@ -14,7 +14,8 @@
   "enabledPlugins": {
     "egm@egm": true,
     "mattpocock-skills@claude-plugins-official": true,
-    "session-gist@system-files": true
+    "session-gist@system-files": true,
+    "sdlc@softwaregravy-sdlc": false
   },
   "extraKnownMarketplaces": {
     "egm": {
@@ -27,6 +28,12 @@
       "source": {
         "source": "directory",
         "path": "/home/johnhin/workspaces/system_files/claude/plugins"
+      }
+    },
+    "softwaregravy-sdlc": {
+      "source": {
+        "source": "github",
+        "repo": "softwaregravy/softwaregravy-sdlc"
       }
     }
   },
