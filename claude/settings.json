@@ -8,13 +8,20 @@
   },
   "enabledPlugins": {
     "superpowers@claude-plugins-official": true,
-    "session-gist@system-files": true
+    "session-gist@system-files": true,
+    "sdlc@softwaregravy-sdlc": false
   },
   "extraKnownMarketplaces": {
     "system-files": {
       "source": {
         "source": "directory",
         "path": "/Users/john/workspace/system_files/claude/plugins"
+      }
+    },
+    "softwaregravy-sdlc": {
+      "source": {
+        "source": "github",
+        "repo": "softwaregravy/softwaregravy-sdlc"
       }
     }
   },
