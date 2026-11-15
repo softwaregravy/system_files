@@ -8,8 +8,7 @@
 #
 # Config files: anything already portable is symlinked straight from this repo;
 # anything that needed changes has a "-ubuntu" sibling (zshrc-ubuntu, vimrc-ubuntu,
-# tmux.conf-ubuntu, gitconfig-ubuntu, claude/settings-ubuntu.json). The macOS
-# originals are never touched.
+# tmux.conf-ubuntu, gitconfig-ubuntu). The macOS originals are never touched.
 #
 # One file is copied rather than linked: the Claude Code managed policy,
 # claude/managed-settings-ubuntu.json, installed root-owned at
@@ -233,7 +232,6 @@ backup_path() {
 # Files we know are in the way and that the user has already decided to adopt
 # from the repo. Replacing these silently (after backing them up) beats asking.
 AUTO_REPLACE=(
-  "$HOME/.claude/settings.json"
   "$HOME/.local/bin/newrc"
   "$HOME/.config/systemd/user/claude-rc@.service"
 )
@@ -591,7 +589,6 @@ phase_links() {
     "vimrc-ubuntu:$HOME/.vimrc"
     "tmux.conf-ubuntu:$HOME/.tmux.conf"
     "gitconfig-ubuntu:$HOME/.gitconfig"
-    "claude/settings-ubuntu.json:$HOME/.claude/settings.json"
     # shared, unchanged
     "setup-ubuntu.sh:$HOME/setup-ubuntu.sh"
     "screenrc:$HOME/.screenrc"
@@ -600,9 +597,6 @@ phase_links() {
     "gemrc:$HOME/.gemrc"
     "npmrc:$HOME/.npmrc"
     "starship.toml:$HOME/.config/starship.toml"
-    "CLAUDE.user.md:$HOME/.claude/CLAUDE.md"
-    "claude/statusline-command.sh:$HOME/.claude/statusline-command.sh"
-    "claude/ccstatusline.json:$HOME/.config/ccstatusline/settings.json"
     "ir_black.vim:$HOME/.vim/colors/ir_black.vim"
     "vim/after/syntax/sh.vim:$HOME/.vim/after/syntax/sh.vim"
     "bin/protect-main:$HOME/.local/bin/protect-main"
@@ -983,21 +977,19 @@ Next steps
    Do NOT run 'git lfs install' — ~/.gitconfig is a symlink into the repo and
    it would dirty your working tree. The lfs filter is already configured.
 
-4. Restart Claude Code so it picks up the new ~/.claude/settings.json.
-
-5. Docker group membership needs a full re-login. Until then expect
+4. Docker group membership needs a full re-login. Until then expect
    "permission denied" on /var/run/docker.sock.
 
-6. Service restarts were suppressed during apt so nothing would kill a running
+5. Service restarts were suppressed during apt so nothing would kill a running
    tmux or claude-rc session. When convenient:
        sudo needrestart          # or just reboot
 
-7. tmux/vim clipboard goes over OSC 52 to your Mac. Enable it in iTerm2:
+6. tmux/vim clipboard goes over OSC 52 to your Mac. Enable it in iTerm2:
    Settings -> General -> Selection -> "Applications in terminal may access
    clipboard".
 EOF
 
-  local n=8
+  local n=7
   if [[ ! -s "$HOME/.vnc/passwd" ]]; then
     cat <<EOF
 
