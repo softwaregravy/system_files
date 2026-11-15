@@ -137,8 +137,8 @@ mise use node@20           # pin for this project (writes .mise.toml)
 externally-managed and will refuse. Use a mise-managed python, a venv (`ae` /
 `de`), or `pipx` for CLI tools.
 
-For Ruby projects, the `PATH_add bin` direnv trick from `CLAUDE.user.md` works
-the same way here.
+For Ruby projects, `PATH_add bin` in a project's `.envrc` puts its binstubs on
+`PATH` here too, so `rails`, `rake` and `rspec` run without `bundle exec`.
 
 ---
 
