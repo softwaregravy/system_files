@@ -1,4 +1,3 @@
-
 #!/usr/bin/env bash
 
 set -euo pipefail
@@ -75,6 +74,39 @@ if ! xcode-select -p &>/dev/null; then
   exit 1
 fi
 
+# Existence isn't enough. After a macOS upgrade the old CLT stays installed,
+# Software Update lists the new one but never installs it on its own, and
+# Homebrew then refuses every source build (taps like oven-sh/bun ship no
+# bottles), taking the rest of the upgrade batch down with it.
+echo "Checking for Command Line Tools updates (asks Apple; takes a few seconds)..."
+CLT_LABEL=$(softwareupdate --list 2>&1 | sed -n 's/^\* Label: \(Command Line Tools.*\)$/\1/p' | tail -1 || true)
+if [ -n "$CLT_LABEL" ]; then
+  echo "Update available: $CLT_LABEL"
+  echo -n "Install it now? Requires sudo. (y/n) "
+  REPLY="n"
+  read -r REPLY </dev/tty || true
+  if [ "$REPLY" = "y" ] || [ "$REPLY" = "Y" ]; then
+    sudo softwareupdate --install "$CLT_LABEL" \
+      || echo "CLT update failed; install it from System Settings > Software Update."
+  else
+    echo "Skipped. Homebrew will refuse source builds until the CLT is updated."
+  fi
+else
+  echo "Command Line Tools are up to date"
+fi
+
+# Xcode.app updates come from the App Store, not softwareupdate, but Homebrew
+# blocks source builds on an outdated one too. Since the year-based versions
+# (macOS 26 / Xcode 26) a current Xcode's major is at least macOS's major.
+if [ -d /Applications/Xcode.app ]; then
+  XCODE_MAJOR=$(defaults read /Applications/Xcode.app/Contents/Info CFBundleShortVersionString 2>/dev/null | cut -d. -f1 || true)
+  MACOS_MAJOR=$(sw_vers -productVersion | cut -d. -f1)
+  if [ -n "$XCODE_MAJOR" ] && [ "$XCODE_MAJOR" -lt "$MACOS_MAJOR" ]; then
+    echo "Warning: Xcode $XCODE_MAJOR is older than macOS $MACOS_MAJOR; Homebrew will refuse source builds."
+    echo "Update it from the App Store, or delete /Applications/Xcode.app if you don't use it."
+  fi
+fi
+
 # Create directories
 echo "Setting up workspace directory..."
 WORKSPACE_DIR="$HOME/workspace"
@@ -138,7 +170,10 @@ brew trust --tap github/gh oven-sh/bun shopify/shopify
 # Install programs from Brewfile
 echo "Installing programs from Brewfile..."
 if [ -f "$SYSTEM_FILES_DIR/Brewfile" ]; then
-  brew bundle --file="$SYSTEM_FILES_DIR/Brewfile"
+  # Fail-soft: under `set -e` one failed package would otherwise skip every
+  # later phase (runtimes, symlinks, Vim plugins). brew prints what failed.
+  brew bundle --file="$SYSTEM_FILES_DIR/Brewfile" \
+    || echo "brew bundle: some Brewfile packages failed (see above); continuing setup."
 else
   echo "Warning: Brewfile not found in $SYSTEM_FILES_DIR"
 fi
@@ -150,7 +185,8 @@ fi
 # Sign into the App Store first.
 if [ -f "$SYSTEM_FILES_DIR/Brewfile.mas" ]; then
   echo "Installing Mac App Store apps (requires App Store sign-in)..."
-  brew bundle --file="$SYSTEM_FILES_DIR/Brewfile.mas"
+  brew bundle --file="$SYSTEM_FILES_DIR/Brewfile.mas" \
+    || echo "brew bundle: some App Store apps failed (signed in?); continuing setup."
 fi
 
 
@@ -295,14 +331,6 @@ mkdir -p "$GLOBAL_GIT_HOOKS_DIR"
 # Add prepare-commit-msg hook
 create_symlink "$SYSTEM_FILES_DIR/git_hooks/prepare-commit-msg" "$GLOBAL_GIT_HOOKS_DIR/prepare-commit-msg"
 chmod +x "$GLOBAL_GIT_HOOKS_DIR/prepare-commit-msg"
-
-# Create program specific completions
-echo "Setting up bespoke commandline completions"
-if command -v ngrok &>/dev/null; then
-  echo "Setting up ngrok completions..."
-  ngrok completion > /opt/homebrew/share/zsh/site-functions/_ngrok
-  chmod 644 /opt/homebrew/share/zsh/site-functions/_ngrok
-fi
 
 # Precompile all copmletions
 echo "Pre-compiling zsh completions..."
