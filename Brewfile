@@ -22,7 +22,6 @@
 # Core application library for C
 # Cross-platform make
 # Cross-shell prompt for astronauts
-# Cryptography and SSL/TLS Toolkit
 # Database of common MIME types
 # Desktop client for Ente Auth
 # Development kit for the Java programming language
@@ -191,7 +190,6 @@ brew "node"
 brew "open-mpi"
 brew "openjdk@11"
 brew "openslide"
-brew "openssl@1.1"
 brew "oven-sh/bun/bun"
 brew "overmind"
 brew "pipx"
@@ -261,7 +259,6 @@ tap "oven-sh/bun", trusted: true
 tap "shopify/shopify", trusted: true
 vscode "akiramiyakoda.cppincludeguard"
 vscode "aliariff.vscode-erb-beautify"
-vscode "aquilalabs.superflex"
 vscode "bierner.github-markdown-preview"
 vscode "bierner.markdown-checkbox"
 vscode "bierner.markdown-emoji"
@@ -278,12 +275,10 @@ vscode "dotjoshjohnson.xml"
 vscode "eamodio.gitlens"
 vscode "esbenp.prettier-vscode"
 vscode "espressif.esp-idf-extension"
-vscode "fabianlauer.vs-code-xml-format"
 vscode "fnando.linter"
 vscode "gamunu.vscode-yarn"
 vscode "github.codespaces"
 vscode "github.copilot"
-vscode "github.copilot-chat"
 vscode "github.vscode-pull-request-github"
 vscode "grimmer.vscode-back-forward-button"
 vscode "josetr.cmake-language-support-vscode"
