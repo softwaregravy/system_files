@@ -38,7 +38,7 @@ NEXT_TELEMETRY_DISABLED=1
 typeset -U path
 path=(
   /opt/homebrew/bin
-  $HOME/.poetry/bin
+  /opt/homebrew/sbin
   $HOME/.local/bin
   /usr/local/sbin
   /usr/local/bin
