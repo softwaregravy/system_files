@@ -38,7 +38,7 @@ NEXT_TELEMETRY_DISABLED=1
 typeset -U path
 path=(
   /opt/homebrew/bin
-  $HOME/.poetry/bin
+  /opt/homebrew/sbin
   $HOME/.local/bin
   /usr/local/sbin
   /usr/local/bin
@@ -194,8 +194,10 @@ update_brewfile() {
     # Main Brewfile: everything EXCEPT Mac App Store apps. --no-mas keeps them
     # out so routine `brew bundle` against this file stays non-interactive.
     brew bundle dump --file="$SYSTEM_FILES_DIR/Brewfile" --force --no-mas
-    # Sort the Brewfile by type (tap, brew, cask, vscode) and then alphabetically
-    sed '/^$\|^#/d' "$SYSTEM_FILES_DIR/Brewfile" | sort -t '"' -k1,1 -k2,2 > "$SYSTEM_FILES_DIR/Brewfile.tmp"
+    # Strip blank lines and the dump's description comments, then sort by type
+    # (tap, brew, cask, vscode) and alphabetically. -E (ERE) so the alternation
+    # works on macOS's BSD sed; the old `\|` form was GNU-only and did nothing here.
+    sed -E '/^(#|$)/d' "$SYSTEM_FILES_DIR/Brewfile" | sort -t '"' -k1,1 -k2,2 > "$SYSTEM_FILES_DIR/Brewfile.tmp"
     mv "$SYSTEM_FILES_DIR/Brewfile.tmp" "$SYSTEM_FILES_DIR/Brewfile"
 
     # Brewfile.mas: Mac App Store apps only. Separate because mas installs need
