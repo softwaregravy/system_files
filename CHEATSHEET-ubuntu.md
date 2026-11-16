@@ -55,28 +55,6 @@ scp/rsync/sftp, panes already inside tmux, or Claude Code's Bash tool.
 
 ---
 
-## `newrc` — Claude Code remote-control sessions
-
-Linux-only. Creates a project directory, marks it trusted in `~/.claude.json`,
-and enables a systemd user unit that runs `claude remote-control` in a detached
-tmux server.
-
-```bash
-newrc myproject                              # empty directory
-newrc myproject git@github.com:me/repo.git   # clone first
-
-systemctl --user status  claude-rc@myproject
-systemctl --user restart claude-rc@myproject
-systemctl --user disable --now claude-rc@myproject
-
-tmux -L cc-myproject attach                  # look inside the session
-```
-
-Projects live in `~/workspaces/claude-rc-projects/<name>`. Lingering is enabled,
-so the units survive logout.
-
----
-
 ## Browser on the virtual display
 
 Linux-only. Headed Chrome runs on display `:99`, which you can see over VNC at

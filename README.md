@@ -69,7 +69,6 @@ macOS original is never modified.
 | `gitconfig-ubuntu` | No `core.hooksPath` — the AI `prepare-commit-msg` hook is not installed here |
 | `claude/managed-settings-ubuntu.json` | Linux-only; Claude Code managed policy (start in `auto`, bypass mode disabled), installed as a root-owned copy at `/etc/claude-code/managed-settings.json` so nothing running as you can loosen it |
 | `aptfile-ubuntu` | The `Brewfile` equivalent — one apt package per line |
-| `bin/newrc`, `systemd/claude-rc@.service` | Linux-only; spin up a `claude remote-control` session under systemd |
 | `systemd/browser-*.service` | Linux-only; headed Chrome on virtual display `:99`, with VNC over the tailnet only |
 
 Shared unchanged: `screenrc`, `inputrc`, `irbrc`, `gemrc`, `npmrc`,

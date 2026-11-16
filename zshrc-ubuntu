@@ -48,7 +48,7 @@ export NEXT_TELEMETRY_DISABLED=1
 
 # Path Configuration (consolidated)
 # ~/.local/bin is where the user-level tools live here: starship, bat, fd,
-# newrc, claude. typeset -U keeps the array deduplicated.
+# claude. typeset -U keeps the array deduplicated.
 typeset -U path
 path=(
   $HOME/.local/bin
@@ -286,8 +286,8 @@ path=(
 # Every guard has to hold:
 #   [[ -o interactive ]] — never touch scripts, `ssh host cmd`, scp/rsync/sftp
 #   -n $SSH_TTY          — only real SSH logins with a tty (not local/console)
-#   -z $TMUX             — already inside tmux; this also covers the claude-rc@
-#                          systemd tmux sessions, whose panes set $TMUX
+#   -z $TMUX             — already inside tmux; this also covers tmux sessions
+#                          that systemd units start, whose panes set $TMUX
 #   -z $CLAUDECODE       — Claude Code's Bash tool must never be exec'd away
 #   -z $NO_TMUX          — manual escape hatch
 #   command -v tmux      — never exec a binary that isn't installed
