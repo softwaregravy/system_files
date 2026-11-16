@@ -189,8 +189,8 @@ docker-buildx
 # A virtual display so Chrome can run headed on this box, with VNC onto it for
 # clearing challenges from the phone. Not a desktop: Xvfb is the display and
 # openbox only places the windows. Together these pull about 130 packages, X11
-# and GTK libraries included. The units are systemd/browser-*.service; Chrome
-# itself comes from Google's repo (see the last section).
+# and GTK libraries included. Chrome itself comes from Google's repo (see the
+# last section).
 xvfb
 openbox
 x11vnc
