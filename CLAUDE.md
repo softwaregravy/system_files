@@ -8,7 +8,7 @@ Personal macOS dotfiles and system configuration for a developer machine. All co
 
 There is also an **Ubuntu port** for headless servers, driven by `setup-ubuntu.sh` + `aptfile-ubuntu`. It is strictly additive: files that needed changing have a `-ubuntu` sibling, and the macOS originals are never modified. See "Ubuntu Port" below before touching anything with a `-ubuntu` suffix.
 
-The Ubuntu box is **Ghost**, the headless machine Claude Code works from. This repo holds config files that tools read and the scripts that install them. Services that run unattended on Ghost don't belong here; the `browser-*` units predate that rule and stay for now. Personal Claude Code config (a user `CLAUDE.md`, Claude settings, plugins, MCP servers) doesn't belong here either: this repo is also cloned on a work computer, where none of it should land. Ghost's Claude Code managed policy stays, since only `setup-ubuntu.sh` installs it.
+The Ubuntu box is **Ghost**, the headless machine Claude Code works from. This repo holds config files that tools read and the scripts that install them. Services that run unattended on Ghost don't belong here. Personal Claude Code config (a user `CLAUDE.md`, Claude settings, plugins, MCP servers) doesn't belong here either: this repo is also cloned on a work computer, where none of it should land. Ghost's Claude Code managed policy stays, since only `setup-ubuntu.sh` installs it.
 
 **Nothing depends outward.** Other repos may build on this one and assume it's installed. Nothing here may name them, link their files or call their scripts. The one exception is softwaregravy-sdlc, the plugin marketplace that holds the development process: this repo may name it and register it.
 
@@ -50,7 +50,6 @@ Tested on Ubuntu 24.04 "noble", x86_64, headless. Entrypoint is `setup-ubuntu.sh
 | `tmux.conf-ubuntu` | `pbcopy` → OSC 52. `set -g set-clipboard on` is load-bearing: tmux only forwards an application's OSC 52 when the value is exactly `on`, not `external` |
 | `gitconfig-ubuntu` | Identical minus `core.hooksPath` — the AI `prepare-commit-msg` hook is deliberately not installed on the server |
 | `claude/managed-settings-ubuntu.json` | Ghost's Claude Code managed policy: starting permission mode `auto`, bypass-permissions mode disabled. Managed settings outrank `~/.claude/settings.json`, so the permission mode belongs here, not in the user settings. Installed as a root-owned **copy** in `/etc/claude-code/`, never a symlink: a link into this user-owned repo would let anything running as the user, unattended Claude workers included, loosen it. A differing existing file is copied into the run's backup directory first |
-| `systemd/browser-*.service` | Linux-only. Headed Chrome on virtual display `:99`: `browser-xvfb` → `browser-openbox` → `browser-chrome` and `browser-vnc`. VNC listens on the Tailscale address only and stays off until `~/.vnc/passwd` exists; the password is never committed. Keep Chrome's default profile: a custom `--user-data-dir` hides the Claude in Chrome native-messaging manifest |
 | `CHEATSHEET-ubuntu.md` | Ubuntu deltas to `CHEATSHEET.md` |
 
 Not ported: `Brewfile`, `Brewfile.mas`, `iterm2/`, `iTerm2 State.itermexport`, `git_hooks/prepare-commit-msg`, `init.vim` (vestigial — `setup.sh` never linked it).

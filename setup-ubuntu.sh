@@ -599,10 +599,6 @@ phase_links() {
     "bin/protect-main:$HOME/.local/bin/protect-main"
     # Linux-only. ngrok's config lives here, not in ~/Library/Application Support.
     "ngrok.yml:$HOME/.config/ngrok/ngrok.yml"
-    "systemd/browser-xvfb.service:$HOME/.config/systemd/user/browser-xvfb.service"
-    "systemd/browser-openbox.service:$HOME/.config/systemd/user/browser-openbox.service"
-    "systemd/browser-chrome.service:$HOME/.config/systemd/user/browser-chrome.service"
-    "systemd/browser-vnc.service:$HOME/.config/systemd/user/browser-vnc.service"
   )
   local link source target
   for link in "${links[@]}"; do
@@ -772,17 +768,6 @@ phase_systemd() {
   else
     require_sudo
     sudo loginctl enable-linger "$USER" || warn "could not enable lingering"
-  fi
-
-  # enable --now leaves running units alone, so a re-run never restarts Chrome.
-  # browser-vnc is skipped, not failed, until ~/.vnc/passwd exists.
-  if command -v Xvfb >/dev/null 2>&1 && command -v google-chrome-stable >/dev/null 2>&1; then
-    systemctl --user enable --now \
-      browser-xvfb.service browser-openbox.service browser-chrome.service browser-vnc.service \
-      || warn "could not enable the browser units"
-    say "  browser units enabled"
-  else
-    warn "Xvfb or Chrome is missing — browser units not enabled"
   fi
   return 0
 }
@@ -976,18 +961,6 @@ Next steps
 EOF
 
   local n=7
-  if [[ ! -s "$HOME/.vnc/passwd" ]]; then
-    cat <<EOF
-
-$n. Set the VNC password, from your password manager. Only its first 8 characters
-   count. VNC stays off until this file exists:
-
-       install -dm 700 ~/.vnc && x11vnc -storepasswd ~/.vnc/passwd
-       systemctl --user start browser-vnc
-EOF
-    n=$((n + 1))
-  fi
-
   if (( SSH_KEY_CREATED )); then
     cat <<EOF
 
