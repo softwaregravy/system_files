@@ -229,16 +229,6 @@ backup_path() {
   BACKED_UP+=("$target")
 }
 
-# Files we know are in the way and that the user has already decided to adopt
-# from the repo. Replacing these silently (after backing them up) beats asking.
-AUTO_REPLACE=()
-
-is_auto_replace() {
-  local t=$1 x
-  for x in "${AUTO_REPLACE[@]}"; do [[ "$x" == "$t" ]] && return 0; done
-  return 1
-}
-
 create_symlink() {
   local source=$1 target=$2 current
 
@@ -266,7 +256,7 @@ create_symlink() {
   fi
 
   if [[ -e "$target" ]]; then
-    if is_auto_replace "$target" || confirm "  $target exists and is not a symlink. Back it up and replace?"; then
+    if confirm "  $target exists and is not a symlink. Back it up and replace?"; then
       backup_path "$target"
       ln -sfn "$source" "$target"
       say "  replaced  $target -> $source"
@@ -750,29 +740,6 @@ phase_docker() {
 }
 
 # -----------------------------------------------------------------------------
-# | P12 — systemd user units                                                   |
-# -----------------------------------------------------------------------------
-
-phase_systemd() {
-  step "systemd user units"
-  if [[ -z "${XDG_RUNTIME_DIR:-}" ]] || ! systemctl --user show-environment >/dev/null 2>&1; then
-    warn "no systemd user bus in this environment — skipping daemon-reload"
-    return 0
-  fi
-  systemctl --user daemon-reload || warn "systemctl --user daemon-reload failed"
-  say "  daemon-reload done"
-
-  # Keep user units alive across logout.
-  if [[ "$(loginctl show-user "$USER" --property=Linger --value 2>/dev/null || echo no)" == "yes" ]]; then
-    say "  ok        lingering already enabled"
-  else
-    require_sudo
-    sudo loginctl enable-linger "$USER" || warn "could not enable lingering"
-  fi
-  return 0
-}
-
-# -----------------------------------------------------------------------------
 # | P13 — login shell                                                          |
 # -----------------------------------------------------------------------------
 
@@ -1001,7 +968,6 @@ soft "claude policy" phase_claude_policy
 soft "vim plugins"  phase_vim
 soft "ssh key"      phase_ssh
 soft "docker group" phase_docker
-soft "systemd"      phase_systemd
 soft "login shell"  phase_chsh
 soft "completions"  phase_completions
 
