@@ -186,7 +186,7 @@ say "  backups: $BACKUP_DIR"
 say "  log:     $LOG_FILE"
 say "  user:    $USER ($(id -u))  host: $(hostname)"
 
-# ~/.local/bin holds starship, bat, fd, newrc and (already) claude. It must
+# ~/.local/bin holds starship, bat, fd and (already) claude. It must
 # exist and be on PATH *in this process* — ~/.profile only adds it at login,
 # which already happened.
 mkdir -p "$HOME/.local/bin"
@@ -231,10 +231,7 @@ backup_path() {
 
 # Files we know are in the way and that the user has already decided to adopt
 # from the repo. Replacing these silently (after backing them up) beats asking.
-AUTO_REPLACE=(
-  "$HOME/.local/bin/newrc"
-  "$HOME/.config/systemd/user/claude-rc@.service"
-)
+AUTO_REPLACE=()
 
 is_auto_replace() {
   local t=$1 x
@@ -602,8 +599,6 @@ phase_links() {
     "bin/protect-main:$HOME/.local/bin/protect-main"
     # Linux-only. ngrok's config lives here, not in ~/Library/Application Support.
     "ngrok.yml:$HOME/.config/ngrok/ngrok.yml"
-    "bin/newrc:$HOME/.local/bin/newrc"
-    "systemd/claude-rc@.service:$HOME/.config/systemd/user/claude-rc@.service"
     "systemd/browser-xvfb.service:$HOME/.config/systemd/user/browser-xvfb.service"
     "systemd/browser-openbox.service:$HOME/.config/systemd/user/browser-openbox.service"
     "systemd/browser-chrome.service:$HOME/.config/systemd/user/browser-chrome.service"
@@ -770,15 +765,6 @@ phase_systemd() {
   fi
   systemctl --user daemon-reload || warn "systemctl --user daemon-reload failed"
   say "  daemon-reload done"
-  # NOT restarting claude-rc@* on purpose: that would kill any live
-  # `claude remote-control` session, and this script may well be running inside
-  # one of them.
-  local units
-  units="$(systemctl --user list-units --no-legend 'claude-rc@*' 2>/dev/null | awk '{print $1}' || true)"
-  if [[ -n "$units" ]]; then
-    say "  running claude-rc units (restart them yourself when convenient):"
-    printf '    %s\n' $units
-  fi
 
   # Keep user units alive across logout.
   if [[ "$(loginctl show-user "$USER" --property=Linger --value 2>/dev/null || echo no)" == "yes" ]]; then
