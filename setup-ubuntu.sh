@@ -460,14 +460,35 @@ phase_shims() {
 
 phase_starship() {
   step "starship"
+  local current="" latest=""
   if command -v starship >/dev/null 2>&1; then
-    say "  already installed: $(command -v starship)"
-    return 0
+    current="$(starship --version | awk 'NR==1 {print $2}')"
+    # Nothing else ever updates it, so compare against the newest release.
+    # releases/latest redirects to .../tag/vX.Y.Z; reading the tag off the
+    # redirect avoids the GitHub API and its anonymous rate limit.
+    latest="$(curl -fsSI -o /dev/null -w '%{redirect_url}' \
+      https://github.com/starship/starship/releases/latest 2>/dev/null || :)"
+    latest="${latest##*/v}"
+    if [[ ! "$latest" =~ ^[0-9]+(\.[0-9]+)+$ ]]; then
+      warn "could not look up the latest starship release (network?); keeping $current"
+      return 0
+    fi
+    if [[ "$(printf '%s\n' "$latest" "$current" | sort -V | tail -1)" == "$current" ]]; then
+      say "  ok        starship $current is the latest"
+      return 0
+    fi
+    say "  updating starship $current -> $latest"
   fi
   # Not packaged for Ubuntu. Installed into ~/.local/bin so it needs no sudo.
-  curl -fsSL https://starship.rs/install.sh \
-    | sh -s -- --yes --bin-dir "$HOME/.local/bin" \
-    || warn "starship install failed (network?); the prompt will fall back to plain zsh"
+  # install.sh overwrites an existing binary, so the same call updates it.
+  if ! curl -fsSL https://starship.rs/install.sh \
+    | sh -s -- --yes --bin-dir "$HOME/.local/bin"; then
+    if [[ -n "$current" ]]; then
+      warn "starship update failed (network?); still on $current"
+    else
+      warn "starship install failed (network?); the prompt will fall back to plain zsh"
+    fi
+  fi
   return 0
 }
 

@@ -166,7 +166,10 @@ _claude_h() { _claude_ask --model haiku "$*"; }
 alias q='noglob _claude_q'
 alias h='noglob _claude_h'
 
-# for installing Rubies on OSX
+# Only used when mise compiles a Ruby from source. The precompiled Ruby it
+# installs by default carries its own OpenSSL and ignores this, so that Ruby's
+# TLS is patched only when a newer Ruby is installed, not when Homebrew
+# upgrades openssl@3.
 if ! brew list openssl@3 &>/dev/null; then
   echo "openssl@3 not found. Please install it first:"
   echo "brew install openssl@3"

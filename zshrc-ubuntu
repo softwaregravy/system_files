@@ -186,9 +186,12 @@ _claude_h() { _claude_ask --model haiku "$*"; }
 alias q='noglob _claude_q'
 alias h='noglob _claude_h'
 
-# No RUBY_CONFIGURE_OPTS block here: on Ubuntu ruby-build/mise find OpenSSL via
-# pkg-config from libssl-dev, and the macOS version shelled out to brew on every
-# shell start (printing an error when brew is absent).
+# No RUBY_CONFIGURE_OPTS block here. mise installs a precompiled Ruby that
+# carries its own OpenSSL, so Ubuntu's libssl3 security updates never reach it:
+# Ruby's TLS is patched only when a newer Ruby is installed. Check with
+#   ruby -ropenssl -e 'puts OpenSSL::OPENSSL_LIBRARY_VERSION'
+# If mise ever compiles a Ruby instead, ruby-build finds libssl-dev through
+# pkg-config on its own. The macOS block shells out to brew on every shell start.
 
 # Starship prompt (replaces zshrc.cmdprompt)
 command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
