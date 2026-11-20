@@ -607,7 +607,7 @@ phase_links() {
     "starship.toml:$HOME/.config/starship.toml"
     "ir_black.vim:$HOME/.vim/colors/ir_black.vim"
     "vim/after/syntax/sh.vim:$HOME/.vim/after/syntax/sh.vim"
-    "bin/protect-main:$HOME/.local/bin/protect-main"
+    "bin/setup-github-repo:$HOME/.local/bin/setup-github-repo"
     # Linux-only. ngrok's config lives here, not in ~/Library/Application Support.
     "ngrok.yml:$HOME/.config/ngrok/ngrok.yml"
   )

@@ -73,8 +73,10 @@ macOS original is never modified.
 Shared unchanged: `screenrc`, `inputrc`, `irbrc`, `gemrc`, `npmrc`,
 `starship.toml`, `ir_black.vim`, `vim/after/syntax/sh.vim`, `ngrok.yml`
 (linked to `~/.config/ngrok/` rather than `~/Library/Application Support/`),
-`bin/protect-main` (linked to `~/.local/bin`; puts a pull-requests-only
-ruleset with no bypass list on a GitHub repo's default branch).
+`bin/setup-github-repo` (linked to `~/.local/bin`; the standard GitHub repo
+setup: delete the branch on merge, offer "Update branch", allow auto-merge, and
+a ruleset on the default branch with no bypass list that takes changes only
+through a pull request that is up to date with it).
 
 ## Clipboard over SSH
 
