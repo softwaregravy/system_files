@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+# The standard setup for a GitHub repo. Settings: delete the head branch on
+# merge, always offer "Update branch" on a pull request that is behind its base,
+# and allow auto-merge (a pull request auto-merges only when something runs
+# `gh pr merge --auto` on it). The "main: pull requests only" ruleset on the
+# default branch: no deletion, no force push, changes only through a pull
+# request (0 approvals, so you merge your own) whose branch is up to date with
+# the default branch, and an empty bypass list, so it binds admins too,
+# including anything that pushes with your credentials. --check names a status
+# check that must pass, and repeats; without one, a rerun keeps the checks the
+# ruleset already requires. Private repos need a paid plan for rulesets. Safe to
+# rerun: it puts the repo back to this setup, ruleset included.
+# Usage: setup-github-repo <owner>/<repo> [--check <name>]...
+set -euo pipefail
+
+NAME="main: pull requests only"
+
+say()  { printf '%s\n' "$*"; }
+warn() { printf 'warn: %s\n' "$*" >&2; }
+usage() { warn "usage: setup-github-repo <owner>/<repo> [--check <name>]..."; exit 2; }
+
+[ $# -ge 1 ] && [[ "$1" == */* ]] || usage
+REPO="$1"; shift
+checks=()
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --check) [ $# -ge 2 ] || usage; checks+=("$2"); shift 2 ;;
+    *) usage ;;
+  esac
+done
+
+gh api -X PATCH "repos/$REPO" \
+  -F delete_branch_on_merge=true \
+  -F allow_update_branch=true \
+  -F allow_auto_merge=true >/dev/null
+say "$REPO: settings: delete branch on merge, suggest updating branches, allow auto-merge"
+
+id="$(gh api "repos/$REPO/rulesets" --jq ".[] | select(.name == \"$NAME\") | .id")"
+
+# the status checks to require: the ones named, else the ones already required
+if [ ${#checks[@]} -gt 0 ]; then
+  required="$(printf '%s\n' "${checks[@]}" | jq -R '{context: .}' | jq -cs .)"
+elif [ -n "$id" ]; then
+  required="$(gh api "repos/$REPO/rulesets/$id" \
+    --jq '[.rules[] | select(.type == "required_status_checks") | .parameters.required_status_checks[]]')"
+else
+  required='[]'
+fi
+
+if [ -n "$id" ]; then
+  bypass="$(gh api "repos/$REPO/rulesets/$id" --jq '.bypass_actors | length')"
+  [ "$bypass" = 0 ] || warn "ruleset $id had $bypass bypass actor(s); removing them"
+fi
+
+body="$(cat <<JSON
+{
+  "name": "$NAME",
+  "target": "branch",
+  "enforcement": "active",
+  "bypass_actors": [],
+  "conditions": {"ref_name": {"include": ["~DEFAULT_BRANCH"], "exclude": []}},
+  "rules": [
+    {"type": "deletion"},
+    {"type": "non_fast_forward"},
+    {"type": "pull_request", "parameters": {
+      "required_approving_review_count": 0,
+      "dismiss_stale_reviews_on_push": false,
+      "require_code_owner_review": false,
+      "require_last_push_approval": false,
+      "required_review_thread_resolution": false
+    }},
+    {"type": "required_status_checks", "parameters": {
+      "strict_required_status_checks_policy": true,
+      "required_status_checks": $required
+    }}
+  ]
+}
+JSON
+)"
+
+if [ -n "$id" ]; then
+  gh api -X PUT "repos/$REPO/rulesets/$id" --input - >/dev/null <<<"$body"
+  say "$REPO: updated \"$NAME\" (ruleset $id)"
+else
+  gh api -X POST "repos/$REPO/rulesets" --input - >/dev/null <<<"$body"
+  say "$REPO: created \"$NAME\""
+fi
+
+# the rules that now apply to the default branch
+gh ruleset check --default -R "$REPO"
