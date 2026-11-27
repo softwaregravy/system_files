@@ -13,6 +13,8 @@
 # One file is copied rather than linked: the Claude Code managed policy,
 # claude/managed-settings-ubuntu.json, installed root-owned at
 # /etc/claude-code/managed-settings.json so nothing running as you can loosen it.
+# And one line is written rather than linked: forced_login_method = "chatgpt" in
+# ~/.codex/config.toml, a file Codex also writes.
 #
 # Run it from a detached tmux/screen session, NOT from an agent's shell tool:
 # it takes ~10 minutes and a mid-dpkg kill leaves apt half-configured.
@@ -660,6 +662,49 @@ phase_claude_policy() {
 }
 
 # -----------------------------------------------------------------------------
+# | P8c — Codex login guard                                                    |
+# -----------------------------------------------------------------------------
+
+# zshrc-ubuntu sources every file in ~/.keys, so a key put there would be
+# exported. This line keeps the Codex CLI on its ChatGPT sign-in, so a key in the
+# environment never moves Codex onto API billing. It goes into Codex's own
+# config.toml rather than a link to this repo: Codex writes that file itself (MCP
+# servers, trusted project paths), and through a link those would land here.
+# Codex need not be installed yet.
+CODEX_GUARD='forced_login_method = "chatgpt"'
+
+phase_codex_login() {
+  step "Codex login guard"
+  local cfg="$HOME/.codex/config.toml" tmp
+  if [[ -L "$cfg" ]]; then
+    warn "$cfg is a symlink; left alone. Make it a regular file and re-run"
+    return 0
+  fi
+  # Top-level keys come before the first [table], so only those lines count.
+  if [[ -f "$cfg" ]] && awk -v want="$CODEX_GUARD" '
+      /^[[:space:]]*\[/ { exit }
+      { line = $0; sub(/^[[:space:]]+/, "", line); sub(/[[:space:]]*(#.*)?$/, "", line) }
+      line == want { found = 1; exit }
+      END { exit !found }' "$cfg"; then
+    say "  ok        $cfg"
+    return 0
+  fi
+  mkdir -p "$(dirname "$cfg")"
+  tmp="$(mktemp "$cfg.XXXXXX")" || { warn "could not write $cfg"; return 0; }
+  {
+    printf '%s\n' "$CODEX_GUARD"
+    # a second top-level forced_login_method would make the file invalid TOML
+    if [[ -f "$cfg" ]]; then
+      awk '/^[[:space:]]*\[/ { table = 1 }
+           !table && /^[[:space:]]*forced_login_method[[:space:]]*=/ { next }
+           { print }' "$cfg"
+    fi
+  } > "$tmp" && mv "$tmp" "$cfg" || { rm -f "$tmp"; warn "could not write $cfg"; return 0; }
+  say "  set       $CODEX_GUARD in $cfg"
+  return 0
+}
+
+# -----------------------------------------------------------------------------
 # | P9 — vim plugins                                                           |
 # -----------------------------------------------------------------------------
 
@@ -986,6 +1031,7 @@ soft "pnpm"         phase_pnpm
 soft "key templates" phase_keys
 soft "symlinks"     phase_links
 soft "claude policy" phase_claude_policy
+soft "codex login guard" phase_codex_login
 soft "vim plugins"  phase_vim
 soft "ssh key"      phase_ssh
 soft "docker group" phase_docker
