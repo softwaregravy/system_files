@@ -579,6 +579,32 @@ phase_keys() {
       say "  ok        $target"
     fi
   done
+  retire_openai_key_file "$keys_dir/openai"
+  return 0
+}
+
+# ~/.keys/openai came from a keys/openai template, gone since OpenAI is reached
+# only through Codex on its ChatGPT sign-in (Nov 2026). A copy holding only that
+# template's placeholder, exports commented out or not, is deleted; one with
+# anything else in it is left, with a warning, since it may hold a live key.
+openai_placeholder_only() {
+  awk '
+    { line = $0; sub(/^[#[:space:]]+/, "", line); sub(/[[:space:]]+$/, "", line) }
+    line == "" || line == "OpenAI API Configuration" { next }
+    line == "export OPENAI_API_KEY=\"your_key_here\"" { next }
+    line == "export OPENAI_ORG_ID=\"optional_org_id_here\"  # if you have one" { next }
+    { other = 1; exit }
+    END { exit other }' "$1"
+}
+
+retire_openai_key_file() {
+  local f=$1
+  [[ -f "$f" && ! -L "$f" ]] || return 0
+  if openai_placeholder_only "$f"; then
+    rm "$f" && say "  removed   $f (it held only the old template's placeholder)"
+  else
+    warn "$f holds more than the old placeholder, so it was left. Revoke the key in it, then delete it"
+  fi
   return 0
 }
 
@@ -911,10 +937,12 @@ Next steps
    each shell start, so an unedited placeholder gets exported as if it were a
    real value — keep the export commented out until you paste a real one in.
 
-       ~/.keys/openai     OPENAI_API_KEY     (OPENAI_ORG_ID is optional)
        ~/.keys/ngrok      NGROK_AUTHTOKEN
 
-       \$EDITOR ~/.keys/openai && source ~/.zshrc
+       \$EDITOR ~/.keys/ngrok && source ~/.zshrc
+
+   There is no OpenAI key: OpenAI is reached only through Codex on its
+   ChatGPT sign-in.
 
    Leave ~/.keys/anthropic commented out unless you specifically want API
    billing: setting ANTHROPIC_API_KEY overrides Claude Code's subscription auth.

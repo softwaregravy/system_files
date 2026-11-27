@@ -20,7 +20,6 @@ The Ubuntu box is **Ghost**, the headless machine Claude Code works from. This r
 | `Brewfile` — add or remove packages | Run `brew bundle --file=Brewfile` after editing; `brew bundle cleanup --no-mas` to uninstall removed packages (`--no-mas` so it ignores App Store apps, which live in `Brewfile.mas`) |
 | `Brewfile.mas` — Mac App Store apps | Installed by `setup.sh` (interactive — App Store requires sign-in/authorization, can't run unattended). Routine `brew bundle` against the main `Brewfile` never touches these |
 | `setup.sh` Vim plugin list (`VIM_PACKAGES` array) | Run `setup.sh` again, or manually: `git clone <url> ~/.vim/pack/vendor/start/<name>` |
-| `git_hooks/prepare-commit-msg` | Immediately via symlink at `~/.git-hooks/` |
 | `*-ubuntu` files (`zshrc-ubuntu`, `vimrc-ubuntu`, …) | Immediately via symlink on an Ubuntu box; `source ~/.zshrc` to reload. **macOS never reads these.** |
 | `claude/managed-settings-ubuntu.json` | **Not** symlinked: `setup-ubuntu.sh` installs a root-owned copy at `/etc/claude-code/managed-settings.json`. Re-run `./setup-ubuntu.sh --skip-apt` to apply an edit, then restart Claude Code |
 | `aptfile-ubuntu` — add or remove packages | Run `./setup-ubuntu.sh` again (it re-runs apt), or just `sudo apt install <pkg>`. Removal is manual — there is no `brew bundle cleanup` equivalent |
@@ -30,9 +29,8 @@ The Ubuntu box is **Ghost**, the headless machine Claude Code works from. This r
 
 - **pnpm over npm**: `npm` is aliased to warn and redirect. Use `p` (alias) or `pnpm` directly. Never suggest `npm install`.
 - **Brewfile sync**: The `update_brewfile()` function (in `zshrc`) dumps current Homebrew state to two files — `Brewfile` (taps/brews/casks/vscode, dumped with `--no-mas`) and `Brewfile.mas` (Mac App Store apps only). Run it to capture new installs before committing. Or use the `/brew-sync` skill. The split exists because App Store (`mas`) installs require interactive authorization and would otherwise break the non-interactive `brew bundle` flow.
-- **API keys**: Loaded at shell startup from `~/.keys/` (not in this repo — gitignored). Key name templates are in `keys/`. Never commit real keys.
+- **API keys**: Loaded at shell startup from `~/.keys/` (not in this repo — gitignored). Key name templates are in `keys/`. Never commit real keys. There is no OpenAI key: OpenAI is reached only through Codex on its ChatGPT sign-in, never an API key.
 - **Vim plugins**: Managed in the `VIM_PACKAGES` array in `setup.sh`. Plugins are cloned to `~/.vim/pack/vendor/start/<name>` during setup. Use the `/add-vim-plugin` skill to add new ones.
-- **Global git hooks**: Configured via `gitconfig` (`hooksPath = ~/.git-hooks`). The `prepare-commit-msg` hook uses `OPENAI_API_KEY` (from `~/.keys/openai`) to auto-generate conventional commit messages.
 - **iTerm2 config**: Profiles, keybindings, hotkey-window bindings, and color schemes live in `iterm2/com.googlecode.iterm2.plist`, loaded via iTerm2's own "custom preferences folder" feature rather than a symlink. `setup.sh` points iTerm2 at that folder (skipped if iTerm2 is currently running, since it caches prefs in memory). To edit: quit iTerm2 if it's running, make the change, relaunch — never edit the plist while iTerm2 is open.
 
 ## Ubuntu Port
@@ -48,11 +46,11 @@ Tested on Ubuntu 24.04 "noble", x86_64, headless. Entrypoint is `setup-ubuntu.sh
 | `zshrc-ubuntu` | GNU vs BSD commands (`ls --color=auto`, `top -o %CPU`, `date +%s`, basename-only `--exclude-dir`); no `/opt/homebrew` or `/Applications` on PATH; every `eval "$(x init …)"` is guarded with `command -v` because this file is the login shell; tmux auto-attach on SSH |
 | `vimrc-ubuntu` | Headless vim has no `+clipboard`, so copy goes over **OSC 52** via the `vim-oscyank` plugin. Vim 9.1 in noble has no native OSC 52 and never will (LTS doesn't rebase vim) |
 | `tmux.conf-ubuntu` | `pbcopy` → OSC 52. `set -g set-clipboard on` is load-bearing: tmux only forwards an application's OSC 52 when the value is exactly `on`, not `external` |
-| `gitconfig-ubuntu` | Identical minus `core.hooksPath` — the AI `prepare-commit-msg` hook is deliberately not installed on the server |
+| `gitconfig-ubuntu` | The same as `gitconfig` apart from its header comment, since the AI commit hook it left out was retired |
 | `claude/managed-settings-ubuntu.json` | Ghost's Claude Code managed policy: starting permission mode `auto`, bypass-permissions mode disabled. Managed settings outrank `~/.claude/settings.json`, so the permission mode belongs here, not in the user settings. Installed as a root-owned **copy** in `/etc/claude-code/`, never a symlink: a link into this user-owned repo would let anything running as the user, unattended Claude workers included, loosen it. A differing existing file is copied into the run's backup directory first |
 | `CHEATSHEET-ubuntu.md` | Ubuntu deltas to `CHEATSHEET.md` |
 
-Not ported: `Brewfile`, `Brewfile.mas`, `iterm2/`, `iTerm2 State.itermexport`, `git_hooks/prepare-commit-msg`, `init.vim` (vestigial — `setup.sh` never linked it).
+Not ported: `Brewfile`, `Brewfile.mas`, `iterm2/`, `iTerm2 State.itermexport`, `init.vim` (vestigial — `setup.sh` never linked it).
 
 **Path convention differs:** macOS uses `~/workspace/system_files` (singular), the Ubuntu box uses `~/workspaces/system_files` (**plural**). `zshrc-ubuntu` sets `SYSTEM_FILES_DIR` accordingly.
 

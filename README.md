@@ -66,7 +66,7 @@ macOS original is never modified.
 | `zshrc-ubuntu` | No Homebrew; GNU instead of BSD `ls`/`top`/`date`/`grep`; Linux paths; guarded `eval`s; tmux auto-attach on SSH |
 | `vimrc-ubuntu` | OSC 52 clipboard (headless vim has no `+clipboard`) via the vim-oscyank plugin |
 | `tmux.conf-ubuntu` | Copy goes over OSC 52 instead of `pbcopy` |
-| `gitconfig-ubuntu` | No `core.hooksPath` — the AI `prepare-commit-msg` hook is not installed here |
+| `gitconfig-ubuntu` | The same as `gitconfig` apart from its header comment, since the AI commit hook it left out was retired |
 | `claude/managed-settings-ubuntu.json` | Linux-only; Claude Code managed policy (start in `auto`, bypass mode disabled), installed as a root-owned copy at `/etc/claude-code/managed-settings.json` so nothing running as you can loosen it |
 | `aptfile-ubuntu` | The `Brewfile` equivalent — one apt package per line |
 

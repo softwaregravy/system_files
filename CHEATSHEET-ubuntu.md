@@ -95,10 +95,6 @@ For Ruby projects, `PATH_add bin` in a project's `.envrc` puts its binstubs on
 
 ## Things that are intentionally absent
 
-- **AI commit messages.** `core.hooksPath` is not set in `gitconfig-ubuntu`, so
-  `git commit` opens a plain editor. To enable it: add `hooksPath = ~/.git-hooks`
-  to `gitconfig-ubuntu`, then symlink `git_hooks/prepare-commit-msg` into
-  `~/.git-hooks/` and put a real key in `~/.keys/openai`.
 - **Neovim.** `init.vim` is in the repo but has never been linked by either
   setup script.
 - **Everything GUI** — iTerm2 prefs, casks, Mac App Store apps.
