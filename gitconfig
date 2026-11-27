@@ -84,7 +84,6 @@
 	autocrlf = input
 	whitespace = cr-at-eol
 	pager = less -r
-	hooksPath = ~/.git-hooks
 
 [diff]
   tool = less -r

@@ -1,11 +1,8 @@
 # Ubuntu variant of the sibling `gitconfig`.
 #
-# The ONLY difference from `gitconfig` is that the `hooksPath = ~/.git-hooks` line has
-# been removed from the [core] section: the AI-generated `prepare-commit-msg` hook calls
-# the OpenAI API on every `git commit`, and that is explicitly opted out of on this server.
-#
-# To enable it later: add `hooksPath = ~/.git-hooks` back under [core], and symlink
-# `git_hooks/prepare-commit-msg` into `~/.git-hooks/`.
+# It used to differ from `gitconfig` only by leaving out `hooksPath = ~/.git-hooks`, the
+# AI `prepare-commit-msg` hook that called the OpenAI API. That hook is retired
+# (Nov 2026), so the two are now the same apart from this comment.
 
 # -- START TIDBITS --
 ############################################################

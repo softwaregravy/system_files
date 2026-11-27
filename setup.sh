@@ -145,6 +145,30 @@ for template in "$KEYS_TEMPLATE_DIR"/*; do
   fi
 done
 
+# ~/.keys/openai came from a keys/openai template, gone since OpenAI is reached
+# only through Codex on its ChatGPT sign-in (Nov 2026). A copy holding only that
+# template's placeholder, exports commented out or not, is deleted; one with
+# anything else in it is left, with a warning, since it may hold a live key.
+openai_placeholder_only() {
+  awk '
+    { line = $0; sub(/^[#[:space:]]+/, "", line); sub(/[[:space:]]+$/, "", line) }
+    line == "" || line == "OpenAI API Configuration" { next }
+    line == "export OPENAI_API_KEY=\"your_key_here\"" { next }
+    line == "export OPENAI_ORG_ID=\"optional_org_id_here\"  # if you have one" { next }
+    { other = 1; exit }
+    END { exit other }' "$1"
+}
+retire_openai_key_file() {
+  local f="$KEYS_DIR/openai"
+  if [ ! -f "$f" ] || [ -L "$f" ]; then return 0; fi
+  if openai_placeholder_only "$f"; then
+    rm "$f" && echo "Removed $f: it held only the old template's placeholder"
+  else
+    echo "Warning: $f holds more than the old placeholder, so it was left. Revoke the key in it, then delete it." >&2
+  fi
+}
+retire_openai_key_file
+
 # Check for Homebrew and install if not present
 echo "Checking for Homebrew..."
 if ! command -v brew &>/dev/null; then
@@ -323,14 +347,33 @@ else
   echo "yek already installed"
 fi
 
-# Create symbolic links for global Git hooks
-echo "Setting up global Git hooks..."
-GLOBAL_GIT_HOOKS_DIR="$HOME/.git-hooks"
-mkdir -p "$GLOBAL_GIT_HOOKS_DIR"
-
-# Add prepare-commit-msg hook
-create_symlink "$SYSTEM_FILES_DIR/git_hooks/prepare-commit-msg" "$GLOBAL_GIT_HOOKS_DIR/prepare-commit-msg"
-chmod +x "$GLOBAL_GIT_HOOKS_DIR/prepare-commit-msg"
+# The AI prepare-commit-msg hook is retired (Nov 2026). Take out what earlier
+# runs set up: its link in ~/.git-hooks, the directory once nothing else is in
+# it, and then a global core.hooksPath that still points there. Any other hook
+# in ~/.git-hooks keeps the directory and the hooksPath, and a hooksPath
+# pointing anywhere else is left alone.
+retire_commit_hook() {
+  local dir="$HOME/.git-hooks" hooks_path
+  if [ -L "$dir" ]; then
+    rm "$dir" && echo "Removed the $dir link"
+  elif [ -d "$dir" ]; then
+    if [ -L "$dir/prepare-commit-msg" ]; then
+      rm "$dir/prepare-commit-msg" && echo "Removed the retired $dir/prepare-commit-msg link"
+    fi
+    rmdir "$dir" 2>/dev/null && echo "Removed the empty $dir"
+  fi
+  hooks_path="$(git config --global --get core.hooksPath || true)"
+  case "$hooks_path" in
+    "~/.git-hooks" | "~/.git-hooks/" | "$HOME/.git-hooks" | "$HOME/.git-hooks/")
+      if [ -e "$dir" ]; then
+        echo "Kept core.hooksPath: $dir still holds other hooks"
+      else
+        git config --global --unset core.hooksPath && echo "Unset core.hooksPath ($hooks_path)"
+      fi ;;
+  esac
+  return 0
+}
+retire_commit_hook
 
 # Precompile all copmletions
 echo "Pre-compiling zsh completions..."
